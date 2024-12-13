@@ -13,12 +13,14 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 
+export type ShopPlatform = 'shopify' | 'etsy' | 'gumroad' | 'bigcartel' | 'other'
+
 export interface ShopItem {
   id: string
   title: string
   storeUrl: string
   image: string
-  platform: 'shopify' | 'etsy' | 'gumroad' | 'bigcartel' | 'other'
+  platform: ShopPlatform
   description?: string
 }
 
@@ -28,6 +30,42 @@ interface ShopSectionProps {
   onAddShopItem: () => void
   onRemoveShopItem: (index: number) => void
   onImageChange: (index: number, file: File | null) => void
+  isEditing?: boolean
+}
+
+const defaultProductImage = "/images/shop-placeholder.jpg"
+
+export const ShopItemCard = ({ item, isEditing = false }: { item: ShopItem, isEditing?: boolean }) => {
+  return (
+    <Card className={`w-full overflow-hidden group ${isEditing ? 'max-w-sm' : ''}`}>
+      <CardContent className="p-0">
+        <a
+          href={item.storeUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block"
+        >
+          <div className={`relative ${isEditing ? 'aspect-[3/2]' : 'aspect-[4/3]'} w-full bg-gray-800`}>
+            <Image
+              src={item.image || defaultProductImage}
+              alt={item.title || 'Product image'}
+              fill
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              unoptimized
+            />
+          </div>
+          <div className="p-4">
+            <div className="font-semibold mb-2 text-lg">
+              {item.title || 'Untitled Product'}
+            </div>
+            <div className="text-sm text-gray-400">
+              Visit Store
+            </div>
+          </div>
+        </a>
+      </CardContent>
+    </Card>
+  )
 }
 
 export function ShopSection({
@@ -35,8 +73,19 @@ export function ShopSection({
   onShopItemChange,
   onAddShopItem,
   onRemoveShopItem,
-  onImageChange
+  onImageChange,
+  isEditing = true
 }: ShopSectionProps) {
+  if (!isEditing) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {shopItems.map((item) => (
+          <ShopItemCard key={item.id} item={item} />
+        ))}
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-8 pt-8 border-t border-gray-700">
       <div>

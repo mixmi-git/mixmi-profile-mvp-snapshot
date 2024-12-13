@@ -1,3 +1,4 @@
+/** @jsxImportSource react */
 'use client'
 
 import Image from "next/image"
@@ -26,6 +27,7 @@ import { exampleProjects, exampleMediaItems, exampleShopItems } from '@/lib/exam
 import { SocialLinks } from "@/components/profile/SocialLinks"
 import { SpotlightSection } from "@/components/profile/SpotlightSection"
 import { MediaSection } from "@/components/profile/MediaSection"
+import { ShopSection, ShopItem, ShopPlatform } from "@/components/profile/ShopSection"
 
 // Add custom TikTok icon component
 const TikTokIcon = () => (
@@ -197,53 +199,6 @@ const MediaEmbed = memo(({ item }: { item: MediaItem }) => {
       return null
   }
 })
-
-// Update the ShopItem interface and related types
-export type ShopPlatform = 'shopify' | 'etsy' | 'gumroad' | 'bigcartel' | 'other';
-export type ShopItemType = 'shopify-product' | 'etsy-listing' | 'gumroad-product' | 'bigcartel-product' | 'other';
-
-export interface ShopItem {
-  id: string;
-  title: string;
-  storeUrl: string;
-  image: string;
-  platform: ShopPlatform;
-  description?: string;
-}
-
-// Simplified shop card
-const ShopItemCard = ({ item, isEditing = false }: { item: ShopItem, isEditing?: boolean }) => {
-  return (
-    <Card className={`w-full overflow-hidden group ${isEditing ? 'max-w-sm' : ''}`}>
-      <CardContent className="p-0">
-        <a
-          href={item.storeUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block"
-        >
-          <div className={`relative ${isEditing ? 'aspect-[3/2]' : 'aspect-[4/3]'} w-full bg-gray-800`}>
-            <Image
-              src={item.image || defaultProductImage}
-              alt={item.title || 'Product image'}
-              fill
-              className="object-cover transition-transform duration-300 group-hover:scale-105"
-              unoptimized
-            />
-          </div>
-          <div className="p-4">
-            <div className="font-semibold mb-2 text-lg">
-              {item.title || 'Untitled Product'}
-            </div>
-            <div className="text-sm text-gray-400">
-              Visit Store
-            </div>
-          </div>
-        </a>
-      </CardContent>
-    </Card>
-  )
-}
 
 function Navbar({ isAuthenticated, onLoginToggle }: NavbarProps) {
   return (
@@ -1331,93 +1286,14 @@ export default function Component(): JSX.Element {
                     </div>
 
                     <div className="space-y-8 pt-8 border-t border-gray-700">
-                      <div>
-                        <h3 className="text-xl font-semibold">Shop</h3>
-                        <p className="text-sm text-gray-400 mt-2">
-                          Connect your online store from Shopify, Etsy, or other platforms to showcase your products, merchandise, and token-gated content
-                        </p>
-                      </div>
-                      <Accordion type="single" collapsible>
-                        {shopItems.map((item, index) => (
-                          <AccordionItem key={item.id} value={`shop-${index}`}>
-                            <AccordionTrigger className="flex justify-start gap-4 hover:no-underline">
-                              <div className="flex items-center gap-2">
-                                <span className="font-semibold">
-                                  {item.title || `Store ${index + 1}`}
-                                </span>
-                              </div>
-                            </AccordionTrigger>
-                            <AccordionContent>
-                              <Card className="mb-4 p-4 bg-gray-700">
-                                <CardContent className="space-y-4">
-                                  <div>
-                                    <Label htmlFor={`store-title-${index}`}>Store Title</Label>
-                                    <Input
-                                      id={`store-title-${index}`}
-                                      value={item.title}
-                                      onChange={(e) => handleShopItemChange(index, 'title', e.target.value)}
-                                      className="mt-1"
-                                      placeholder="e.g., My Etsy Shop"
-                                    />
-                                  </div>
-
-                                  <div>
-                                    <Label htmlFor={`store-url-${index}`}>Store URL</Label>
-                                    <Input
-                                      id={`store-url-${index}`}
-                                      value={item.storeUrl}
-                                      onChange={(e) => handleShopItemChange(index, 'storeUrl', e.target.value)}
-                                      className="mt-1"
-                                      placeholder="https://..."
-                                    />
-                                    <p className="text-xs text-gray-400 mt-1">
-                                      Supports Shopify, Etsy, Gumroad, and BigCartel stores
-                                    </p>
-                                  </div>
-
-                                  <div>
-                                    <Label htmlFor={`store-image-${index}`}>Store Image</Label>
-                                    <div className="mt-2 flex items-center space-x-4">
-                                      {item.image && (
-                                        <div className="relative w-24 h-24 rounded-lg overflow-hidden">
-                                          <Image
-                                            src={item.image}
-                                            alt={item.title || 'Store image'}
-                                            fill
-                                            className="object-cover"
-                                          />
-                                        </div>
-                                      )}
-                                      <Input
-                                        id={`store-image-${index}`}
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={(e) => {
-                                          const files = e.target.files
-                                          if (files && files.length > 0) {
-                                            handleShopImageChange(index, files[0])
-                                          }
-                                        }}
-                                      />
-                                    </div>
-                                  </div>
-
-                                  <Button
-                                    type="button"
-                                    variant="destructive"
-                                    onClick={() => removeShopItem(index)}
-                                  >
-                                    <Trash2 className="w-4 h-4 mr-2" /> Remove Store
-                                  </Button>
-                                </CardContent>
-                              </Card>
-                            </AccordionContent>
-                          </AccordionItem>
-                        ))}
-                      </Accordion>
-                      <Button type="button" onClick={addShopItem} className="mt-2">
-                        <Plus className="w-4 h-4 mr-2" /> Add Store
-                      </Button>
+                      <ShopSection
+                        shopItems={displayShop}
+                        onShopItemChange={handleShopItemChange}
+                        onAddShopItem={addShopItem}
+                        onRemoveShopItem={removeShopItem}
+                        onImageChange={handleShopImageChange}
+                        isEditing={true}
+                      />
                     </div>
 
                     <div className="space-y-8 pt-8 border-t border-gray-700">
@@ -1724,11 +1600,14 @@ export default function Component(): JSX.Element {
                           Connect your store to showcase your products, merchandise, and token-gated content
                         </p>
                       )}
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {displayShop.map((item) => (
-                          <ShopItemCard key={item.id} item={item} />
-                        ))}
-                      </div>
+                      <ShopSection
+                        shopItems={displayShop}
+                        onShopItemChange={handleShopItemChange}
+                        onAddShopItem={addShopItem}
+                        onRemoveShopItem={removeShopItem}
+                        onImageChange={handleShopImageChange}
+                        isEditing={false}
+                      />
                     </div>
                   )}
                   {sticker.enabled && (
