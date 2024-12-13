@@ -1,0 +1,23 @@
+{
+  "edit": {
+    "title": "Editar tu Perfil",
+    "sections": {
+      "projects": {
+        "title": "Proyectos y Personas",
+        "description": "Muestra tus colaboraciones, eventos y proyectos creativos. Añade imágenes y enlaces para compartir tu trabajo."
+      },
+      "media": {
+        "title": "Medios",
+        "description": "Comparte tu música, videos y listas de reproducción de YouTube, SoundCloud, Spotify y Apple Music."
+      },
+      "shop": {
+        "title": "Tienda",
+        "description": "Conecta tu tienda online de Shopify, Etsy u otras plataformas para mostrar tus productos."
+      }
+    },
+    "buttons": {
+      "save": "Guardar Cambios",
+      "cancel": "Cancelar"
+    }
+  }
+} 

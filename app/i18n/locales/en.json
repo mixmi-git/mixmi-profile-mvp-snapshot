@@ -1,0 +1,23 @@
+{
+  "edit": {
+    "title": "Edit Your Profile",
+    "sections": {
+      "projects": {
+        "title": "Projects and People",
+        "description": "Showcase your collaborations, events, and creative projects. Add images and links to share your work."
+      },
+      "media": {
+        "title": "Media",
+        "description": "Share your music, videos, and playlists from YouTube, SoundCloud, Spotify, and Apple Music."
+      },
+      "shop": {
+        "title": "Shop",
+        "description": "Connect your online store from Shopify, Etsy, or other platforms to showcase your products."
+      }
+    },
+    "buttons": {
+      "save": "Save Changes",
+      "cancel": "Cancel"
+    }
+  }
+} 
