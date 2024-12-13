@@ -1,61 +1,25 @@
-# Mixmi Profile Project
+# Mixmi Profile Phoenix
 
-A Next.js-based profile page system with Web3 authentication and rich media features.
+A Next.js-based profile platform with Web3 wallet integration, featuring customizable sections for projects, media, and shop items.
 
-## Core Features
+## Key Components
 
-- Stacks wallet authentication
-- Profile editing with image cropping
-- Media embeds (YouTube, SoundCloud, Apple Music)
-- Project showcase with consistent square image cards
-- Enhanced placeholder content
-- Shop/Store management with image uploads
+- **UserProfile**: Main profile component with edit/view modes
+- **SpotlightSection**: Projects and collaborations showcase
+- **ShopSection**: Integrated e-commerce section
+- **MediaSection**: Embedded media content from various platforms
 
-## Project Structure
+## Tech Stack
 
-newer-profile-test/
-├── app/
-│ ├── page.tsx                    # Main entry point
-│ └── components/
-│     ├── profile/               # Profile-specific components
-│     │   ├── SocialLinks.tsx    # Social media links management
-│     │   ├── SpotlightSection.tsx # Projects/spotlight section
-│     │   └── MediaSection.tsx   # Media embeds management
-│     ├── media/
-│     │   └── MediaEmbed.tsx     # Media embedding component
-│     └── ui/                    # Shared UI components
-├── types/
-│ └── media.ts                   # Media-related type definitions
-└── public/
-    └── images/                  # Static assets
+- Next.js
+- TypeScript
+- Tailwind CSS
+- shadcn/ui components
+- Web3 wallet integration
 
-## Recent Updates
+## Setup
 
-### Component Refactoring
-- ✅ Extracted SocialLinks into standalone component
-- ✅ Created SpotlightSection component for projects
-- ✅ Separated MediaSection and MediaEmbed components
-- ✅ Improved code organization and maintainability
-- ✅ Added proper TypeScript types for all components
-
-### Next Steps
-- [ ] Extract Shop section into component
-- [ ] Create shared ImageUpload component
-- [ ] Add error boundaries
-- [ ] Improve loading states
-
-## Development Guidelines
-
-1. Make minimal, incremental changes
-2. Test thoroughly after each change
-3. Document any modifications
-4. Maintain working version commits
-
-### Important Notes
-- All core features functioning
-- Components properly separated
-- Media embeds working correctly
-- Project structure improved
+1. Clone the repository:
 
 
 
