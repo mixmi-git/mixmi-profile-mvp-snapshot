@@ -12,8 +12,9 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
+import ImageUpload from '../ui/ImageUpload';
 
-export interface Project {
+export interface SpotlightItem {
   id: number
   title: string
   description: string
@@ -22,18 +23,18 @@ export interface Project {
 }
 
 interface SpotlightSectionProps {
-  projects: Project[]
-  onProjectChange: (index: number, field: keyof Project, value: string) => void
-  onAddProject: () => void
-  onRemoveProject: (index: number) => void
+  items: SpotlightItem[]
+  onItemChange: (index: number, field: keyof SpotlightItem, value: string) => void
+  onAddItem: () => void
+  onRemoveItem: (index: number) => void
   onImageChange: (index: number, file: File | null) => void
 }
 
 export function SpotlightSection({
-  projects,
-  onProjectChange,
-  onAddProject,
-  onRemoveProject,
+  items,
+  onItemChange,
+  onAddItem,
+  onRemoveItem,
   onImageChange
 }: SpotlightSectionProps) {
   return (
@@ -41,16 +42,16 @@ export function SpotlightSection({
       <div>
         <h3 className="text-xl font-semibold">Spotlight</h3>
         <p className="text-sm text-gray-400 mt-2">
-          Share your projects, profiles, and collaborations
+          Share your work, collaborations, and featured content
         </p>
       </div>
       <Accordion type="single" collapsible>
-        {projects.map((project, index) => (
-          <AccordionItem key={project.id} value={`project-${index}`}>
+        {items.map((item, index) => (
+          <AccordionItem key={item.id} value={`spotlight-${index}`}>
             <AccordionTrigger className="flex justify-start gap-4 hover:no-underline">
               <div className="flex items-center gap-2">
                 <span className="font-semibold">
-                  {project.title || `Project ${index + 1}`}
+                  {item.title || `Spotlight ${index + 1}`}
                 </span>
               </div>
             </AccordionTrigger>
@@ -58,60 +59,45 @@ export function SpotlightSection({
               <Card className="mb-4 p-4 bg-gray-700">
                 <CardContent className="space-y-4">
                   <div>
-                    <Label htmlFor={`project-title-${index}`}>Title</Label>
+                    <Label htmlFor={`item-title-${index}`}>Title</Label>
                     <Input
-                      id={`project-title-${index}`}
-                      value={project.title}
-                      onChange={(e) => onProjectChange(index, 'title', e.target.value)}
+                      id={`item-title-${index}`}
+                      value={item.title}
+                      onChange={(e) => onItemChange(index, 'title', e.target.value)}
                       className="mt-1"
-                      placeholder="Project title"
+                      placeholder="Enter title"
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor={`project-description-${index}`}>Description</Label>
+                    <Label htmlFor={`item-description-${index}`}>Description</Label>
                     <Input
-                      id={`project-description-${index}`}
-                      value={project.description}
-                      onChange={(e) => onProjectChange(index, 'description', e.target.value)}
+                      id={`item-description-${index}`}
+                      value={item.description}
+                      onChange={(e) => onItemChange(index, 'description', e.target.value)}
                       className="mt-1"
-                      placeholder="Project description"
+                      placeholder="Add a description"
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor={`project-image-${index}`}>Image</Label>
-                    <div className="mt-2 flex items-center space-x-4">
-                      {project.image && (
-                        <div className="relative w-24 h-24 rounded-lg overflow-hidden">
-                          <Image 
-                            src={project.image} 
-                            alt={project.title || 'Project image'} 
-                            fill 
-                            className="object-cover"
-                          />
-                        </div>
-                      )}
-                      <Input
-                        id={`project-image-${index}`}
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => {
-                          const files = e.target.files
-                          if (files && files.length > 0) {
-                            onImageChange(index, files[0])
-                          }
+                    <Label htmlFor={`item-image-${index}`}>Image</Label>
+                    <div className="mt-2">
+                      <ImageUpload 
+                        onImageUploaded={(file) => {
+                          onImageChange(index, file)
                         }}
+                        currentImage={item.image}
                       />
                     </div>
                   </div>
 
                   <div>
-                    <Label htmlFor={`project-link-${index}`}>Link</Label>
+                    <Label htmlFor={`item-link-${index}`}>Link</Label>
                     <Input
-                      id={`project-link-${index}`}
-                      value={project.link}
-                      onChange={(e) => onProjectChange(index, 'link', e.target.value)}
+                      id={`item-link-${index}`}
+                      value={item.link}
+                      onChange={(e) => onItemChange(index, 'link', e.target.value)}
                       className="mt-1"
                       placeholder="https://..."
                     />
@@ -120,9 +106,9 @@ export function SpotlightSection({
                   <Button 
                     type="button" 
                     variant="destructive" 
-                    onClick={() => onRemoveProject(index)}
+                    onClick={() => onRemoveItem(index)}
                   >
-                    <Trash2 className="w-4 h-4 mr-2" /> Remove Project
+                    <Trash2 className="w-4 h-4 mr-2" /> Remove Item
                   </Button>
                 </CardContent>
               </Card>
@@ -130,8 +116,8 @@ export function SpotlightSection({
           </AccordionItem>
         ))}
       </Accordion>
-      <Button type="button" onClick={onAddProject} className="mt-2">
-        <Plus className="w-4 h-4 mr-2" /> Add Project
+      <Button type="button" onClick={onAddItem} className="mt-2">
+        <Plus className="w-4 h-4 mr-2" /> Add Item
       </Button>
     </div>
   )

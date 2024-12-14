@@ -12,6 +12,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
+import ImageUpload from '../ui/ImageUpload';
 
 export type ShopPlatform = 'shopify' | 'etsy' | 'gumroad' | 'bigcartel' | 'other'
 
@@ -145,15 +146,9 @@ export function ShopSection({
                           />
                         </div>
                       )}
-                      <Input
-                        id={`store-image-${index}`}
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => {
-                          const files = e.target.files
-                          if (files && files.length > 0) {
-                            onImageChange(index, files[0])
-                          }
+                      <ImageUpload 
+                        onImageUploaded={(file) => {
+                          onImageChange(index, file)
                         }}
                       />
                     </div>

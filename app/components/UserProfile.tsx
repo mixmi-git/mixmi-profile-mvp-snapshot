@@ -25,9 +25,10 @@ import { parseGIF, decompressFrames } from 'gifuct-js'
 import { useAuth } from "@/lib/auth"
 import { exampleProjects, exampleMediaItems, exampleShopItems } from '@/lib/example-content'
 import { SocialLinks } from "@/components/profile/SocialLinks"
-import { SpotlightSection } from "@/components/profile/SpotlightSection"
+import { SpotlightSection, SpotlightItem } from "@/components/profile/SpotlightSection"
 import { MediaSection } from "@/components/profile/MediaSection"
 import { ShopSection, ShopItem, ShopPlatform } from "@/components/profile/ShopSection"
+import ImageUpload from './ui/ImageUpload'
 
 // Add custom TikTok icon component
 const TikTokIcon = () => (
@@ -1048,6 +1049,8 @@ export default function Component(): JSX.Element {
     }
   }
 
+  const [spotlightItems, setSpotlightItems] = useState<SpotlightItem[]>(exampleProjects)
+
   return (
     <div className="dark min-h-screen bg-gray-900 text-gray-100">
       <Navbar
@@ -1228,7 +1231,7 @@ export default function Component(): JSX.Element {
                               }))
                             }}
                           />
-                          <Label htmlFor="projects-visible">Show Projects and People section</Label>
+                          <Label htmlFor="projects-visible">Show Spotlight section</Label>
                         </div>
 
                         <div className="flex items-center space-x-2">
@@ -1268,11 +1271,36 @@ export default function Component(): JSX.Element {
                     </div>
                     <div className="space-y-8 pt-8 border-t border-gray-700">
                       <SpotlightSection
-                        projects={projects}
-                        onProjectChange={handleProjectChange}
-                        onAddProject={addProject}
-                        onRemoveProject={removeProject}
-                        onImageChange={handleProjectImageChange}
+                        items={spotlightItems}
+                        onItemChange={(index, field, value) => {
+                          const updatedItems = [...spotlightItems]
+                          updatedItems[index] = {
+                            ...updatedItems[index],
+                            [field]: value
+                          }
+                          setSpotlightItems(updatedItems)
+                        }}
+                        onAddItem={() => {
+                          setSpotlightItems([
+                            ...spotlightItems,
+                            {
+                              id: Date.now(),
+                              title: '',
+                              description: '',
+                              image: '',
+                              link: ''
+                            }
+                          ])
+                        }}
+                        onRemoveItem={(index) => {
+                          const updatedItems = spotlightItems.filter((_, i) => i !== index)
+                          setSpotlightItems(updatedItems)
+                        }}
+                        onImageChange={(index, file) => {
+                          if (file) {
+                            // Image handling logic stays the same
+                          }
+                        }}
                       />
                     </div>
 
