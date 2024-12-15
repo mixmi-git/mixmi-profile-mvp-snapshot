@@ -122,7 +122,7 @@ export function ShopSection({
   // Example content view (editing but with example content)
   if (isUsingExampleContent) {
     return (
-      <div className="space-y-8 pt-8 border-t border-gray-700">
+      <div className="space-y-8">
         <div>
           <h3 className="text-xl font-semibold">Shop</h3>
           <p className="text-sm text-gray-400 mt-2">

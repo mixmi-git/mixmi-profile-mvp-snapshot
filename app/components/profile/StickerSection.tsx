@@ -66,12 +66,12 @@ export function StickerSection({
                         <div className="w-8 h-8 mr-2 relative">
                           <Image 
                             src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/daisy-purple-zuy0TjRXzDx6hnayJ249A4Mgp8ktLy.png" 
-                            alt="Purple Daisy" 
+                            alt="Yellow Daisy" 
                             fill 
                             className="object-contain" 
                           />
                         </div>
-                        Purple Daisy
+                        Yellow Daisy
                       </div>
                     </SelectItem>
                     <SelectItem value="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/daisy-white-sWezY97Qz4q7W6zenHPvu3ns9egGwH.png">

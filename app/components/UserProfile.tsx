@@ -1486,6 +1486,7 @@ export default function Component(): JSX.Element {
                           onRemoveShopItem={removeShopItem}
                           onImageChange={handleShopImageChange}
                           isEditing={true}
+                          isUsingExampleContent={isUsingExampleContent}
                         />
                       </ErrorBoundary>
                     </div>
@@ -1748,6 +1749,7 @@ export default function Component(): JSX.Element {
                         onRemoveShopItem={removeShopItem}
                         onImageChange={handleShopImageChange}
                         isEditing={false}
+                        isUsingExampleContent={isUsingExampleContent}
                       />
                     </div>
                   )}
