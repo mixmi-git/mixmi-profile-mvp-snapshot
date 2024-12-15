@@ -5,13 +5,13 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Plus, Trash2 } from "lucide-react"
+import { getMediaDisplayName } from "@/lib/utils"
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import { getMediaDisplayName } from "@/lib/utils"
 import { MediaEmbed } from "@/components/media/MediaEmbed"
 
 interface MediaItem {

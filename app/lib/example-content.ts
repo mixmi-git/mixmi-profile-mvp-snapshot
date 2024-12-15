@@ -1,24 +1,26 @@
-import { Project, MediaItem, ShopItem } from '@/components/UserProfile'
+import { Project } from '@/components/UserProfile'
+import { MediaItem } from '@/components/UserProfile'
+import { ShopItem } from '@/components/profile/ShopSection'
 
 export const exampleProjects: Project[] = [
   {
     id: 1,
-    title: "Your Next Event",
-    description: "Share details about your upcoming shows, releases, or collaborations",
-    image: "/images/next-event-placeholder.jpg",
-    link: "#"
-  },
-  {
-    id: 2,
-    title: "Featured Artist",
-    description: "Highlight creators and collaborators you want to support",
+    title: "Latest Release",
+    description: "Check out my new track on all platforms",
     image: "/images/featured-artist-placeholder.jpg",
     link: "#"
   },
   {
+    id: 2,
+    title: "Upcoming Show",
+    description: "Join me for a live performance",
+    image: "/images/next-event-placeholder.jpg",
+    link: "#"
+  },
+  {
     id: 3,
-    title: "Latest Project",
-    description: "Showcase your work, ideas, or upcoming releases",
+    title: "Featured Collaboration",
+    description: "A special project with amazing artists",
     image: "/images/latest-project-placeholder.jpg",
     link: "#"
   }

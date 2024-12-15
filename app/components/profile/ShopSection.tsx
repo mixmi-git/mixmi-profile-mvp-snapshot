@@ -13,6 +13,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import ImageUpload from '../ui/ImageUpload';
+import ErrorBoundary from '../ui/ErrorBoundary';
 
 export type ShopPlatform = 'shopify' | 'etsy' | 'gumroad' | 'bigcartel' | 'other'
 
@@ -135,22 +136,15 @@ export function ShopSection({
 
                   <div>
                     <Label htmlFor={`store-image-${index}`}>Store Image</Label>
-                    <div className="mt-2 flex items-center space-x-4">
-                      {item.image && (
-                        <div className="relative w-24 h-24 rounded-lg overflow-hidden">
-                          <Image 
-                            src={item.image} 
-                            alt={item.title || 'Store image'} 
-                            fill 
-                            className="object-cover"
-                          />
-                        </div>
-                      )}
-                      <ImageUpload 
-                        onImageUploaded={(file) => {
-                          onImageChange(index, file)
-                        }}
-                      />
+                    <div className="mt-2">
+                      <ErrorBoundary>
+                        <ImageUpload 
+                          onImageUploaded={(file) => {
+                            onImageChange(index, file)
+                          }}
+                          currentImage={item.image}
+                        />
+                      </ErrorBoundary>
                     </div>
                   </div>
 

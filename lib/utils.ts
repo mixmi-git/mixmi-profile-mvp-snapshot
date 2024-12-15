@@ -1,4 +1,4 @@
-export const getMediaDisplayName = (url: string): string => {
+export const getMediaDisplayName = (url: string, type?: string): string => {
   try {
     const urlObj = new URL(url);
     const hostname = urlObj.hostname;

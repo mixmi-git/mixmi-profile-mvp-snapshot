@@ -20,29 +20,43 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
-    const file = acceptedFiles[0];
-    if (file) {
-      if (file.size > maxSize) {
-        alert('File is too large');
-        return;
+    try {
+      const file = acceptedFiles[0];
+      if (file) {
+        console.log('Attempting to upload file:', {
+          size: `${(file.size / (1024 * 1024)).toFixed(1)}MB`,
+          type: file.type,
+          maxAllowedSize: `${maxSize / (1024 * 1024)}MB`
+        });
+        
+        if (file.size > maxSize) {
+          const error = new Error(`File is too large. Maximum size is ${maxSize / (1024 * 1024)}MB. Your file is ${(file.size / (1024 * 1024)).toFixed(1)}MB`);
+          console.error('Size error:', error);
+          throw error;
+        }
+
+        if (!allowedTypes.includes(file.type)) {
+          const error = new Error(`File type ${file.type} is not supported. Supported types: ${allowedTypes.join(', ')}`);
+          console.error('Type error:', error);
+          throw error;
+        }
+
+        setSelectedFile(file);
+        setPreview(URL.createObjectURL(file));
+        onImageUploaded(file);
       }
-      if (!allowedTypes.includes(file.type)) {
-        alert('File type not supported');
-        return;
-      }
-      setSelectedFile(file);
-      setPreview(URL.createObjectURL(file));
-      onImageUploaded(file); // Automatically upload when file is dropped
+    } catch (error) {
+      console.error('Error in onDrop:', error);
+      throw error;
     }
   }, [maxSize, allowedTypes, onImageUploaded]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: {
-      'image/*': allowedTypes
-    },
-    maxSize,
-    multiple: false
+    // Remove the accept and maxSize from here to handle in onDrop
+    multiple: false,
+    noClick: false,
+    noKeyboard: false
   });
 
   const removeImage = () => {

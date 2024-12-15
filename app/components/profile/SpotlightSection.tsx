@@ -13,6 +13,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import ImageUpload from '../ui/ImageUpload';
+import ErrorBoundary from '../ui/ErrorBoundary';
 
 export interface SpotlightItem {
   id: number
@@ -37,6 +38,37 @@ export function SpotlightSection({
   onRemoveItem,
   onImageChange
 }: SpotlightSectionProps) {
+  const handleImageChange = async (index: number, file: File | null) => {
+    if (!file) return
+    
+    try {
+      if (!file.type.startsWith('image/')) {
+        throw new Error('Please upload an image file')
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        throw new Error('Image must be less than 5MB')
+      }
+
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        const updatedItems = [...items]
+        updatedItems[index] = {
+          ...updatedItems[index],
+          image: reader.result as string
+        }
+        onImageChange(index, file)
+      }
+      reader.onerror = () => {
+        throw new Error('Failed to read image file')
+      }
+      reader.readAsDataURL(file)
+    } catch (error) {
+      console.error('Error handling image:', error)
+      // You can add error state handling here if needed
+    }
+  }
+
   return (
     <div className="space-y-8">
       <div>
@@ -83,12 +115,14 @@ export function SpotlightSection({
                   <div>
                     <Label htmlFor={`item-image-${index}`}>Image</Label>
                     <div className="mt-2">
-                      <ImageUpload 
-                        onImageUploaded={(file) => {
-                          onImageChange(index, file)
-                        }}
-                        currentImage={item.image}
-                      />
+                      <ErrorBoundary>
+                        <ImageUpload 
+                          onImageUploaded={(file) => {
+                            handleImageChange(index, file)
+                          }}
+                          currentImage={item.image}
+                        />
+                      </ErrorBoundary>
                     </div>
                   </div>
 

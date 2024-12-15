@@ -29,6 +29,7 @@ import { SpotlightSection, SpotlightItem } from "@/components/profile/SpotlightS
 import { MediaSection } from "@/components/profile/MediaSection"
 import { ShopSection, ShopItem, ShopPlatform } from "@/components/profile/ShopSection"
 import ImageUpload from './ui/ImageUpload'
+import ErrorBoundary from './ui/ErrorBoundary'
 
 // Add custom TikTok icon component
 const TikTokIcon = () => (
@@ -455,6 +456,7 @@ export default function Component(): JSX.Element {
     mediaItems: MediaItem[];
     sticker: Sticker;
     shopItems: ShopItem[];
+    spotlightItems: SpotlightItem[];
   }) => {
     try {
       const storageKey = `userProfile_${userAddress}`
@@ -470,6 +472,17 @@ export default function Component(): JSX.Element {
       const saved = localStorage.getItem(storageKey)
       if (saved) {
         const data = JSON.parse(saved)
+        const hasUserSpotlightContent = Array.isArray(data.spotlightItems) && data.spotlightItems.length > 0
+        
+        // Only set user content if it exists, otherwise keep example content
+        if (hasUserSpotlightContent) {
+          setSpotlightItems(data.spotlightItems)
+          setIsUsingExampleContent(false)
+        } else {
+          setSpotlightItems(exampleProjects)
+          setIsUsingExampleContent(true)
+        }
+
         return {
           profile: data.profile || {
             name: "Your Name",
@@ -492,7 +505,8 @@ export default function Component(): JSX.Element {
           projects: data.projects || [],
           mediaItems: data.mediaItems || [],
           sticker: data.sticker || { enabled: true, image: defaultStickerImage },
-          shopItems: Array.isArray(data.shopItems) ? data.shopItems : []
+          shopItems: Array.isArray(data.shopItems) ? data.shopItems : [],
+          spotlightItems: hasUserSpotlightContent ? data.spotlightItems : exampleProjects,
         }
       }
       return {
@@ -517,7 +531,8 @@ export default function Component(): JSX.Element {
         projects: [],
         mediaItems: [],
         sticker: { enabled: true, image: defaultStickerImage },
-        shopItems: []
+        shopItems: [],
+        spotlightItems: exampleProjects,
       }
     } catch (error) {
       console.error('Failed to load from localStorage:', error)
@@ -567,8 +582,9 @@ export default function Component(): JSX.Element {
   useEffect(() => {
     const saved = loadFromLocalStorage()
     if (saved) {
-      console.log('Loading shop items:', saved.shopItems)
+      console.log('Loading saved data:', saved)
       setShopItems(saved.shopItems)
+      setSpotlightItems(saved.spotlightItems)
     }
     setIsLoading(false)
   }, [])
@@ -576,6 +592,8 @@ export default function Component(): JSX.Element {
   const [projects, setProjects] = useState<Project[]>([])
 
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([])
+  const [spotlightItems, setSpotlightItems] = useState<SpotlightItem[]>(exampleProjects)
+  const [shopItems, setShopItems] = useState<ShopItem[]>([])
 
   const handleLoginToggle = () => {
     setIsTransitioning(true)
@@ -604,6 +622,9 @@ export default function Component(): JSX.Element {
           setProjects([])
           setMediaItems([])
           setSticker({ enabled: true, image: defaultStickerImage })
+          setSpotlightItems(exampleProjects)
+          setIsUsingExampleContent(true)
+          setShopItems([])
           setIsEditing(false)
           setShowCropDialog(false)
           setTempImage('')
@@ -627,6 +648,7 @@ export default function Component(): JSX.Element {
       mediaItems: MediaItem[];
       sticker: Sticker;
       shopItems: ShopItem[];
+      spotlightItems: SpotlightItem[];
     }) => {
       saveToLocalStorage(data)
     }, 1000),
@@ -721,7 +743,8 @@ export default function Component(): JSX.Element {
       projects,
       mediaItems,
       sticker,
-      shopItems: []
+      shopItems: [],
+      spotlightItems: []
     })
   }
 
@@ -905,13 +928,14 @@ export default function Component(): JSX.Element {
 
   const handleSave = async () => {
     try {
-      console.log('Saving profile with shop items:', shopItems)
+      console.log('Saving profile with shop items and spotlight:', shopItems, spotlightItems)
       saveToLocalStorage({
         profile,
         projects,
         mediaItems,
         sticker,
-        shopItems
+        shopItems,
+        spotlightItems
       })
       setIsEditing(false)
     } catch (error) {
@@ -968,8 +992,6 @@ export default function Component(): JSX.Element {
     setAuthLoading(false)
   }, [isAuthenticated])
 
-  const [shopItems, setShopItems] = useState<ShopItem[]>([])
-
   const handleShopItemChange = (index: number, field: string, value: string) => {
     const updatedItems = shopItems.map((item, i) =>
       i === index ? {
@@ -990,7 +1012,8 @@ export default function Component(): JSX.Element {
       projects,
       mediaItems,
       sticker,
-      shopItems: updatedItems
+      shopItems: updatedItems,
+      spotlightItems: []
     })
   }
 
@@ -1026,7 +1049,7 @@ export default function Component(): JSX.Element {
     history: []
   });
 
-  const displayProjects = projects.length > 0 ? projects : exampleProjects;
+  const displayProjects = spotlightItems === exampleProjects || spotlightItems.length === 0 ? exampleProjects : spotlightItems;
   const displayMedia = mediaItems.length > 0 ? mediaItems : exampleMediaItems;
   const displayShop = shopItems.length > 0 ? shopItems : exampleShopItems;
 
@@ -1049,7 +1072,7 @@ export default function Component(): JSX.Element {
     }
   }
 
-  const [spotlightItems, setSpotlightItems] = useState<SpotlightItem[]>(exampleProjects)
+  const [isUsingExampleContent, setIsUsingExampleContent] = useState(true)
 
   return (
     <div className="dark min-h-screen bg-gray-900 text-gray-100">
@@ -1270,58 +1293,107 @@ export default function Component(): JSX.Element {
                       </div>
                     </div>
                     <div className="space-y-8 pt-8 border-t border-gray-700">
-                      <SpotlightSection
-                        items={spotlightItems}
-                        onItemChange={(index, field, value) => {
-                          const updatedItems = [...spotlightItems]
-                          updatedItems[index] = {
-                            ...updatedItems[index],
-                            [field]: value
-                          }
-                          setSpotlightItems(updatedItems)
-                        }}
-                        onAddItem={() => {
-                          setSpotlightItems([
-                            ...spotlightItems,
-                            {
-                              id: Date.now(),
-                              title: '',
-                              description: '',
-                              image: '',
-                              link: ''
+                      <ErrorBoundary>
+                        <SpotlightSection
+                          items={spotlightItems}
+                          onItemChange={(index, field, value) => {
+                            const updatedItems = [...spotlightItems]
+                            updatedItems[index] = {
+                              ...updatedItems[index],
+                              [field]: value
                             }
-                          ])
-                        }}
-                        onRemoveItem={(index) => {
-                          const updatedItems = spotlightItems.filter((_, i) => i !== index)
-                          setSpotlightItems(updatedItems)
-                        }}
-                        onImageChange={(index, file) => {
-                          if (file) {
-                            // Image handling logic stays the same
-                          }
-                        }}
-                      />
+                            setSpotlightItems(updatedItems)
+                            debouncedSave({
+                              profile,
+                              projects,
+                              mediaItems,
+                              sticker,
+                              shopItems,
+                              spotlightItems: updatedItems
+                            })
+                          }}
+                          onAddItem={() => {
+                            const newItems = [
+                              ...(isUsingExampleContent ? [] : spotlightItems),
+                              {
+                                id: Date.now(),
+                                title: '',
+                                description: '',
+                                image: '',
+                                link: ''
+                              }
+                            ]
+                            setSpotlightItems(newItems)
+                            setIsUsingExampleContent(false)
+                            debouncedSave({
+                              profile,
+                              projects,
+                              mediaItems,
+                              sticker,
+                              shopItems,
+                              spotlightItems: newItems
+                            })
+                          }}
+                          onRemoveItem={(index) => {
+                            const updatedItems = spotlightItems.filter((_, i) => i !== index)
+                            setSpotlightItems(updatedItems)
+                            debouncedSave({
+                              profile,
+                              projects,
+                              mediaItems,
+                              sticker,
+                              shopItems,
+                              spotlightItems: updatedItems
+                            })
+                          }}
+                          onImageChange={(index, file) => {
+                            if (file) {
+                              const reader = new FileReader()
+                              reader.onloadend = () => {
+                                const updatedItems = [...spotlightItems]
+                                updatedItems[index] = {
+                                  ...updatedItems[index],
+                                  image: reader.result as string
+                                }
+                                setSpotlightItems(updatedItems)
+                                debouncedSave({
+                                  profile,
+                                  projects,
+                                  mediaItems,
+                                  sticker,
+                                  shopItems,
+                                  spotlightItems: updatedItems
+                                })
+                              }
+                              reader.readAsDataURL(file)
+                            }
+                          }}
+                        />
+                      </ErrorBoundary>
                     </div>
 
                     <div className="space-y-8 pt-8 border-t border-gray-700">
-                      <MediaSection 
-                        mediaItems={mediaItems}
-                        onMediaChange={handleMediaChange}
-                        onAddMedia={addMedia}
-                        onRemoveMedia={removeMedia}
-                      />
+                      <ErrorBoundary>
+                        <MediaSection 
+                          mediaItems={mediaItems}
+                          onMediaChange={handleMediaChange}
+                          onAddMedia={addMedia}
+                          onRemoveMedia={removeMedia}
+                        />
+                      </ErrorBoundary>
                     </div>
 
                     <div className="space-y-8 pt-8 border-t border-gray-700">
-                      <ShopSection
-                        shopItems={displayShop}
-                        onShopItemChange={handleShopItemChange}
-                        onAddShopItem={addShopItem}
-                        onRemoveShopItem={removeShopItem}
-                        onImageChange={handleShopImageChange}
-                        isEditing={true}
-                      />
+                      <ErrorBoundary>
+                        <ShopSection
+                          shopItems={displayShop}
+                          onShopItemChange={handleShopItemChange}
+                          onAddShopItem={addShopItem}
+                          onRemoveShopItem={removeShopItem}
+                          onImageChange={handleShopImageChange}
+                          isEditing={true}
+                        />
+                      </ErrorBoundary>
                     </div>
 
                     <div className="space-y-8 pt-8 border-t border-gray-700">
@@ -1564,7 +1636,7 @@ export default function Component(): JSX.Element {
                       <h2 className="text-3xl font-semibold text-white text-center mb-4">
                         SPOTLIGHT
                       </h2>
-                      {projects.length === 0 && (
+                      {isUsingExampleContent && (
                         <p className="text-sm text-gray-400 text-center mb-12">
                           Share projects, profiles, and collaborations
                         </p>
@@ -1581,7 +1653,7 @@ export default function Component(): JSX.Element {
                             </Card>
                           ))
                         ) : (
-                          displayProjects.map((project) => (
+                          (isUsingExampleContent ? exampleProjects : spotlightItems).map((project) => (
                             <ProjectCard key={project.id} project={project} />
                           ))
                         )}
