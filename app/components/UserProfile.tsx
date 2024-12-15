@@ -30,6 +30,7 @@ import { MediaSection } from "@/components/profile/MediaSection"
 import { ShopSection, ShopItem, ShopPlatform } from "@/components/profile/ShopSection"
 import ImageUpload from './ui/ImageUpload'
 import ErrorBoundary from './ui/ErrorBoundary'
+import { getMediaDisplayName } from '@/lib/mediaUtils'
 
 // Add custom TikTok icon component
 const TikTokIcon = () => (
@@ -349,27 +350,6 @@ const fetchMediaTitle = async (url: string, type: MediaItem['type']): Promise<st
   } catch (error) {
     console.error('Error fetching media title:', error)
     return 'Media'
-  }
-}
-
-const getMediaDisplayName = (url: string, type: MediaItem['type']): string => {
-  switch (type) {
-    case 'youtube':
-      return 'YouTube Video'
-    case 'spotify':
-      return 'Spotify Track'
-    case 'spotify-playlist':
-      return 'Spotify Playlist'
-    case 'apple-music-album':
-      return 'Apple Music Album'
-    case 'apple-music-playlist':
-      return 'Apple Music Playlist'
-    case 'soundcloud':
-      return 'SoundCloud Track'
-    case 'soundcloud-playlist':
-      return 'SoundCloud Playlist'
-    default:
-      return 'Media'
   }
 }
 
