@@ -31,6 +31,7 @@ import { ShopSection, ShopItem, ShopPlatform } from "@/components/profile/ShopSe
 import ImageUpload from './ui/ImageUpload'
 import ErrorBoundary from './ui/ErrorBoundary'
 import { getMediaDisplayName } from '@/lib/mediaUtils'
+import { StickerSection } from "@/components/profile/StickerSection"
 
 // Add custom TikTok icon component
 const TikTokIcon = () => (
@@ -1377,73 +1378,14 @@ export default function Component(): JSX.Element {
                     </div>
 
                     <div className="space-y-8 pt-8 border-t border-gray-700">
-                      <div>
-                        <h3 className="text-xl font-semibold">Profile Sticker</h3>
-                        <div className="space-y-4">
-                          <div className="flex items-center space-x-2">
-                            <Checkbox
-                              id="sticker-enabled"
-                              checked={sticker.enabled}
-                              onCheckedChange={handleStickerChange}
-                            />
-                            <Label htmlFor="sticker-enabled">Enable profile sticker</Label>
-                          </div>
-                          {sticker.enabled && (
-                            <div className="space-y-4">
-                              <Select
-                                value={sticker.image}
-                                onValueChange={(value) => setSticker(prev => ({ ...prev, image: value }))}
-                              >
-                                <SelectTrigger className="w-[200px]">
-                                  <SelectValue placeholder="Select a sticker" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/daisy-blue-1sqZRfemKwLyREL0Eo89EfmQUT5wst.png">
-                                    <div className="flex items-center">
-                                      <div className="w-8 h-8 mr-2 relative">
-                                        <Image
-                                          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/daisy-blue-1sqZRfemKwLyREL0Eo89EfmQUT5wst.png"
-                                          alt="Blue Daisy"
-                                          fill
-                                          className="object-contain"
-                                          unoptimized
-                                        />
-                                      </div>
-                                      Blue Daisy
-                                    </div>
-                                  </SelectItem>
-                                  <SelectItem value="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/daisy-purple-zuy0TjRXzDx6hnayJ249A4Mgp8ktLy.png">
-                                    <div className="flex items-center">
-                                      <div className="w-8 h-8 mr-2 relative">
-                                        <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/daisy-purple-zuy0TjRXzDx6hnayJ249A4Mgp8ktLy.png" alt="Purple Daisy" fill className="object-contain" />
-                                      </div>
-                                      Purple Daisy
-                                    </div>
-                                  </SelectItem>
-                                  <SelectItem value="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/daisy-white-sWezY97Qz4q7W6zenHPvu3ns9egGwH.png">
-                                    <div className="flex items-center">
-                                      <div className="w-8 h-8 mr-2 relative">
-                                        <Image src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/daisy-white-sWezY97Qz4q7W6zenHPvu3ns9egGwH.png" alt="White Daisy" fill className="object-contain" />
-                                      </div>
-                                      White Daisy
-                                    </div>
-                                  </SelectItem>
-                                </SelectContent>
-                              </Select>
-
-                              <div className="w-20 h-20 relative mx-auto sticker-rotate">
-                                <Image
-                                  src={sticker.image}
-                                  alt="Selected sticker preview"
-                                  fill
-                                  className="object-contain"
-                                  unoptimized
-                                />
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
+                      <ErrorBoundary>
+                        <StickerSection
+                          sticker={sticker}
+                          onStickerChange={handleStickerChange}
+                          onImageChange={(value) => setSticker(prev => ({ ...prev, image: value }))}
+                          isEditing={true}
+                        />
+                      </ErrorBoundary>
                     </div>
                     <div className="fixed bottom-0 left-0 right-0 bg-gray-900/95 backdrop-blur-sm border-t border-gray-800">
                       <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
@@ -1691,17 +1633,12 @@ export default function Component(): JSX.Element {
                     </div>
                   )}
                   {sticker.enabled && (
-                    <div className="relative w-[200px] h-[200px] mx-auto mt-auto pt-8 pb-16">
-                      <div className="sticker-rotate">
-                        <Image
-                          src={sticker.image}
-                          alt="Profile sticker"
-                          width={200}
-                          height={200}
-                          className="object-contain"
-                        />
-                      </div>
-                    </div>
+                    <StickerSection
+                      sticker={sticker}
+                      onStickerChange={handleStickerChange}
+                      onImageChange={(value) => setSticker(prev => ({ ...prev, image: value }))}
+                      isEditing={false}
+                    />
                   )}
                   <div className="max-w-2xl mx-auto border-t border-gray-800/50" />
                 </>
