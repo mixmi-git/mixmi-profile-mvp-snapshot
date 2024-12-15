@@ -452,8 +452,10 @@ interface HistoryState {
 
 // Update the ProjectCard component for a more visual layout
 const ProjectCard = ({ project }: { project: Project }) => {
-  return (
-    <Card className="overflow-hidden group hover:border-cyan-300/50 transition-all duration-300">
+  console.log('ProjectCard render:', { title: project.title, link: project.link });
+  
+  const CardContent = (
+    <>
       <div className="relative aspect-[16/9] bg-gray-800/50">
         <Image
           src={project.image || '/images/next-event-placeholder.jpg'}
@@ -463,17 +465,34 @@ const ProjectCard = ({ project }: { project: Project }) => {
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
       </div>
-      <CardContent className="p-4">
-        <h3 className="font-semibold text-lg text-gray-100 mb-2">
+      <div className="p-4">
+        <h3 className="font-semibold text-lg text-gray-100 mb-2 line-clamp-2 whitespace-pre-wrap break-words">
           {project.title}
         </h3>
-        <p className="text-sm text-gray-400">
+        <p className="text-sm text-gray-400 line-clamp-3 whitespace-pre-wrap break-words">
           {project.description}
         </p>
-      </CardContent>
+      </div>
+    </>
+  );
+
+  return (
+    <Card className="overflow-hidden group hover:border-cyan-300/50 transition-all duration-300">
+      {project.link ? (
+        <a
+          href={project.link}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block"
+        >
+          {CardContent}
+        </a>
+      ) : (
+        CardContent
+      )}
     </Card>
-  )
-}
+  );
+};
 
 export default function Component(): JSX.Element {
   const { isAuthenticated, userAddress, connectWallet, disconnectWallet } = useAuth()
@@ -1090,7 +1109,11 @@ export default function Component(): JSX.Element {
     history: []
   });
 
-  const displayProjects = spotlightItems === exampleProjects || spotlightItems.length === 0 ? exampleProjects : spotlightItems;
+  const [isUsingExampleContent, setIsUsingExampleContent] = useState(true);
+
+  const displayProjects = spotlightItems === exampleProjects || spotlightItems.length === 0 
+    ? exampleProjects 
+    : spotlightItems;
   const displayMedia = mediaItems.length > 0 ? mediaItems : exampleMediaItems;
   const displayShop = shopItems.length > 0 ? shopItems : exampleShopItems;
 
@@ -1113,7 +1136,81 @@ export default function Component(): JSX.Element {
     }
   }
 
-  const [isUsingExampleContent, setIsUsingExampleContent] = useState(true)
+  const handleSpotlightChange = (index: number, field: keyof SpotlightItem, value: string) => {
+    const updatedItems = [...spotlightItems];
+    updatedItems[index] = {
+      ...updatedItems[index],
+      [field]: value
+    };
+    setSpotlightItems(updatedItems);
+    debouncedSave({
+      profile,
+      projects,
+      mediaItems,
+      sticker,
+      shopItems,
+      spotlightItems: updatedItems
+    });
+  };
+
+  const handleAddSpotlight = () => {
+    const newItems = [
+      ...(isUsingExampleContent ? [] : spotlightItems),
+      {
+        id: Date.now(),
+        title: '',
+        description: '',
+        image: '',
+        link: ''
+      }
+    ];
+    setSpotlightItems(newItems);
+    setIsUsingExampleContent(false);
+    debouncedSave({
+      profile,
+      projects,
+      mediaItems,
+      sticker,
+      shopItems,
+      spotlightItems: newItems
+    });
+  };
+
+  const handleRemoveSpotlight = (index: number) => {
+    const updatedItems = spotlightItems.filter((_, i) => i !== index);
+    setSpotlightItems(updatedItems);
+    debouncedSave({
+      profile,
+      projects,
+      mediaItems,
+      sticker,
+      shopItems,
+      spotlightItems: updatedItems
+    });
+  };
+
+  const handleSpotlightImageChange = (index: number, file: File | null) => {
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const updatedItems = [...spotlightItems];
+        updatedItems[index] = {
+          ...updatedItems[index],
+          image: reader.result as string
+        };
+        setSpotlightItems(updatedItems);
+        debouncedSave({
+          profile,
+          projects,
+          mediaItems,
+          sticker,
+          shopItems,
+          spotlightItems: updatedItems
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   return (
     <div className="dark min-h-screen bg-gray-900 text-gray-100">
@@ -1355,79 +1452,16 @@ export default function Component(): JSX.Element {
                     <div className="space-y-8 pt-8 border-t border-gray-700">
                       <ErrorBoundary>
                         <SpotlightSection
-                          items={spotlightItems}
-                          onItemChange={(index, field, value) => {
-                            const updatedItems = [...spotlightItems]
-                            updatedItems[index] = {
-                              ...updatedItems[index],
-                              [field]: value
-                            }
-                            setSpotlightItems(updatedItems)
-                            debouncedSave({
-                              profile,
-                              projects,
-                              mediaItems,
-                              sticker,
-                              shopItems,
-                              spotlightItems: updatedItems
-                            })
-                          }}
-                          onAddItem={() => {
-                            const newItems = [
-                              ...(isUsingExampleContent ? [] : spotlightItems),
-                              {
-                                id: Date.now(),
-                                title: '',
-                                description: '',
-                                image: '',
-                                link: ''
-                              }
-                            ]
-                            setSpotlightItems(newItems)
-                            setIsUsingExampleContent(false)
-                            debouncedSave({
-                              profile,
-                              projects,
-                              mediaItems,
-                              sticker,
-                              shopItems,
-                              spotlightItems: newItems
-                            })
-                          }}
-                          onRemoveItem={(index) => {
-                            const updatedItems = spotlightItems.filter((_, i) => i !== index)
-                            setSpotlightItems(updatedItems)
-                            debouncedSave({
-                              profile,
-                              projects,
-                              mediaItems,
-                              sticker,
-                              shopItems,
-                              spotlightItems: updatedItems
-                            })
-                          }}
-                          onImageChange={(index, file) => {
-                            if (file) {
-                              const reader = new FileReader()
-                              reader.onloadend = () => {
-                                const updatedItems = [...spotlightItems]
-                                updatedItems[index] = {
-                                  ...updatedItems[index],
-                                  image: reader.result as string
-                                }
-                                setSpotlightItems(updatedItems)
-                                debouncedSave({
-                                  profile,
-                                  projects,
-                                  mediaItems,
-                                  sticker,
-                                  shopItems,
-                                  spotlightItems: updatedItems
-                                })
-                              }
-                              reader.readAsDataURL(file)
-                            }
-                          }}
+                          items={isEditing 
+                            ? (isUsingExampleContent ? [] : spotlightItems)
+                            : displayProjects
+                          }
+                          onItemChange={handleSpotlightChange}
+                          onAddItem={handleAddSpotlight}
+                          onRemoveItem={handleRemoveSpotlight}
+                          onImageChange={handleSpotlightImageChange}
+                          isEditing={isEditing}
+                          isUsingExampleContent={isUsingExampleContent}
                         />
                       </ErrorBoundary>
                     </div>
@@ -1660,7 +1694,7 @@ export default function Component(): JSX.Element {
                             </Card>
                           ))
                         ) : (
-                          (isUsingExampleContent ? exampleProjects : spotlightItems).map((project) => (
+                          displayProjects.map((project) => (
                             <ProjectCard key={project.id} project={project} />
                           ))
                         )}

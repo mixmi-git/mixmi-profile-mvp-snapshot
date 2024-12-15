@@ -8,21 +8,21 @@ export const exampleProjects: Project[] = [
     title: "Latest Release",
     description: "Check out my new track on all platforms",
     image: "/images/featured-artist-placeholder.jpg",
-    link: "#"
+    link: "https://example.com/latest-release"
   },
   {
     id: 2,
     title: "Upcoming Show",
     description: "Join me for a live performance",
     image: "/images/next-event-placeholder.jpg",
-    link: "#"
+    link: "https://example.com/upcoming-show"
   },
   {
     id: 3,
     title: "Featured Collaboration",
     description: "A special project with amazing artists",
     image: "/images/latest-project-placeholder.jpg",
-    link: "#"
+    link: "https://example.com/collaboration"
   }
 ]
 

@@ -1,111 +1,94 @@
-# MIXMI Profile Phoenix 03
+# Mixmi Profile Editor
 
-## Current Working Version (March 2024)
+A dynamic profile editor for creators and artists, featuring customizable sections for content, media, and e-commerce integration.
 
-A Next.js-based profile page with dynamic content sections and wallet authentication.
+## Features
 
-### ✨ Working Features
+### 🎯 Spotlight Section
+- Showcase projects, collaborations, and featured content
+- Image upload support with preview
+- Optional external links
+- Character-limited titles and descriptions
+- Smooth transition from example to user content
 
-- **Profile Display**
-  - Public view with clean, responsive design
-  - Profile image with crop functionality
-  - Social media links
-  - Customizable sections visibility
+### 🎵 Media Section
+- Embed support for multiple platforms:
+  - YouTube videos
+  - SoundCloud (tracks and playlists)
+  - Spotify (tracks and playlists)
+  - Apple Music (albums and playlists)
+- Responsive embed layouts
+- Auto-detection of media types
 
-- **Spotlight Section**
-  - Example content display (3 cards)
-  - Proper transition from example to user content
-  - Image upload functionality
-  - Add/Remove items
-  - Persistent storage
+### 🛍️ Shop Section
+- Connect multiple online stores:
+  - Shopify
+  - Etsy
+  - Gumroad
+  - BigCartel
+- Store image and description management
+- URL validation and error handling
+- Platform auto-detection
 
-- **Media Section**
-  - YouTube, Spotify, SoundCloud integration
-  - Playlist and single track support
-  - Responsive embeds
+### 🎨 Sticker Section
+- Customizable floating sticker/badge
+- Toggle visibility
+- Image upload support
+- Smooth 360° rotation animation
+- Position customization
 
-- **Shop Section**
-  - Multiple platform support
-  - Image upload
-  - Dynamic platform detection
+### 🔗 Social Links
+- Support for major platforms:
+  - YouTube
+  - Spotify
+  - SoundCloud
+  - Twitter/X
+  - Instagram
+  - LinkedIn
+  - TikTok
+- URL validation per platform
+- Optional links with graceful fallbacks
 
-- **UI Components**
-  - Error boundaries
-  - Loading states
-  - Responsive design
-  - Dark mode
-
-### 🔧 Technical Details
-
-- Built with Next.js
-- TypeScript implementation
+## Technical Features
+- Next.js 14 with App Router
+- TypeScript for type safety
+- Tailwind CSS for styling
+- Shadcn UI components
+- Form validation with error handling
+- Image upload and cropping
+- Responsive design
 - Wallet authentication
-- Local storage persistence
-- Image handling with crop functionality
+- Local storage for data persistence
+- Error boundaries for stability
+- Loading states and animations
 
-### 📁 File Structure
+## Getting Started
 
-```
-app/
-├── components/
-│   ├── media/
-│   │   └── MediaEmbed.tsx
-│   ├── profile/
-│   │   ├── MediaSection.tsx
-│   │   ├── ShopSection.tsx
-│   │   ├── SocialLinks.tsx
-│   │   └── SpotlightSection.tsx
-│   └── ui/
-│       ├── accordion.tsx
-│       ├── avatar.tsx
-│       ├── button.tsx
-│       ├── card.tsx
-│       ├── checkbox.tsx
-│       ├── ErrorBoundary.tsx
-│       ├── ImageUpload.tsx
-│       ├── input.tsx
-│       ├── label.tsx
-│       ├── select.tsx
-│       └── textarea.tsx
-├── fonts/
-├── i18n/
-├── lib/                  # App-level utilities
-│   ├── auth.ts
-│   ├── example-content.ts
-│   ├── mediaUtils.ts
-│   └── utils.ts
-├── public/
-│   └── images/
-│       ├── featured-artist-placeholder.jpg
-│       ├── latest-project-placeholder.jpg
-│       ├── next-event-placeholder.jpg
-│       ├── placeholder.png
-│       └── shop-placeholder.jpg
-├── types/
-├── UserProfile.tsx
-├── favicon.ico
-├── globals.css
-├── layout.tsx
-├── page.tsx
-└── providers.tsx
+```bash
+# Install dependencies
+npm install
 
-# Configuration Files
-├── .eslintrc.json
-├── .gitignore
-├── components.json
-├── next-env.d.ts
-├── next.config.js
-├── next.config.mjs
-├── package-lock.json
-├── package.json
-├── postcss.config.mjs
-├── tailwind.config.js
-├── tailwind.config.ts
-└── tsconfig.json
+# Run development server
+npm run dev
 ```
 
-### 🔑 Key Implementation Details
-[rest of README remains the same...]
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+## Development
+
+The project uses:
+- TypeScript for type safety
+- ESLint for code quality
+- Prettier for code formatting
+- Shadcn UI for component library
+- Next.js App Router for routing
+- Client-side wallet authentication
+- Local storage for data persistence
+
+## License
+
+MIT License - feel free to use this code for your own projects!
+```
 
 
 

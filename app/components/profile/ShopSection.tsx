@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/accordion"
 import ImageUpload from '../ui/ImageUpload';
 import ErrorBoundary from '../ui/ErrorBoundary';
+import { useState } from 'react';
+import { validateShopItem, validateShopImage } from '@/lib/validation';
 
 export type ShopPlatform = 'shopify' | 'etsy' | 'gumroad' | 'bigcartel' | 'other'
 
@@ -33,6 +35,7 @@ interface ShopSectionProps {
   onRemoveShopItem: (index: number) => void
   onImageChange: (index: number, file: File | null) => void
   isEditing?: boolean
+  isUsingExampleContent?: boolean
 }
 
 const defaultProductImage = "/images/shop-placeholder.jpg"
@@ -57,11 +60,11 @@ export const ShopItemCard = ({ item, isEditing = false }: { item: ShopItem, isEd
             />
           </div>
           <div className="p-4">
-            <div className="font-semibold mb-2 text-lg">
+            <div className="font-semibold mb-2 text-lg line-clamp-2 whitespace-pre-wrap break-words">
               {item.title || 'Untitled Product'}
             </div>
-            <div className="text-sm text-gray-400">
-              Visit Store
+            <div className="text-sm text-gray-400 line-clamp-3 whitespace-pre-wrap break-words">
+              {item.description || 'Visit Store'}
             </div>
           </div>
         </a>
@@ -70,14 +73,42 @@ export const ShopItemCard = ({ item, isEditing = false }: { item: ShopItem, isEd
   )
 }
 
+interface ShopError {
+  title: string;
+  description: string;
+  storeUrl: string;
+  image: string;
+}
+
 export function ShopSection({
   shopItems,
   onShopItemChange,
   onAddShopItem,
   onRemoveShopItem,
   onImageChange,
-  isEditing = true
+  isEditing = true,
+  isUsingExampleContent = false
 }: ShopSectionProps) {
+  const [errors, setErrors] = useState<ShopError[]>([]);
+
+  const handleFieldChange = (index: number, field: string, value: string) => {
+    const validation = validateShopItem(field, value);
+    
+    setErrors(prev => {
+      const newErrors = [...prev];
+      newErrors[index] = { 
+        ...newErrors[index] || {},
+        [field]: validation.message 
+      };
+      return newErrors;
+    });
+
+    if (validation.isValid) {
+      onShopItemChange(index, field, value);
+    }
+  };
+
+  // Display view (non-editing)
   if (!isEditing) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -85,9 +116,27 @@ export function ShopSection({
           <ShopItemCard key={item.id} item={item} />
         ))}
       </div>
-    )
+    );
   }
 
+  // Example content view (editing but with example content)
+  if (isUsingExampleContent) {
+    return (
+      <div className="space-y-8 pt-8 border-t border-gray-700">
+        <div>
+          <h3 className="text-xl font-semibold">Shop</h3>
+          <p className="text-sm text-gray-400 mt-2">
+            Connect your online store from Shopify, Etsy, or other platforms to showcase your products, merchandise, and token-gated content
+          </p>
+        </div>
+        <Button type="button" onClick={onAddShopItem} className="mt-2">
+          <Plus className="w-4 h-4 mr-2" /> Add Store
+        </Button>
+      </div>
+    );
+  }
+
+  // Edit view (with user's content)
   return (
     <div className="space-y-8 pt-8 border-t border-gray-700">
       <div>
@@ -114,10 +163,35 @@ export function ShopSection({
                     <Input
                       id={`store-title-${index}`}
                       value={item.title}
-                      onChange={(e) => onShopItemChange(index, 'title', e.target.value)}
-                      className="mt-1"
+                      onChange={(e) => handleFieldChange(index, 'title', e.target.value)}
+                      className={`mt-1 ${errors[index]?.title ? 'border-red-500 focus:ring-red-500' : ''}`}
                       placeholder="e.g., My Etsy Shop"
+                      aria-invalid={!!errors[index]?.title}
+                      aria-describedby={errors[index]?.title ? `title-error-${index}` : undefined}
                     />
+                    {errors[index]?.title && (
+                      <p className="text-sm text-red-500 mt-1" id={`title-error-${index}`}>
+                        {errors[index].title}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <Label htmlFor={`store-description-${index}`}>Description (Optional)</Label>
+                    <Input
+                      id={`store-description-${index}`}
+                      value={item.description}
+                      onChange={(e) => handleFieldChange(index, 'description', e.target.value)}
+                      className={`mt-1 ${errors[index]?.description ? 'border-red-500 focus:ring-red-500' : ''}`}
+                      placeholder="Describe what you sell..."
+                      aria-invalid={!!errors[index]?.description}
+                      aria-describedby={errors[index]?.description ? `description-error-${index}` : undefined}
+                    />
+                    {errors[index]?.description && (
+                      <p className="text-sm text-red-500 mt-1" id={`description-error-${index}`}>
+                        {errors[index].description}
+                      </p>
+                    )}
                   </div>
 
                   <div>
@@ -125,10 +199,17 @@ export function ShopSection({
                     <Input
                       id={`store-url-${index}`}
                       value={item.storeUrl}
-                      onChange={(e) => onShopItemChange(index, 'storeUrl', e.target.value)}
-                      className="mt-1"
+                      onChange={(e) => handleFieldChange(index, 'storeUrl', e.target.value)}
+                      className={`mt-1 ${errors[index]?.storeUrl ? 'border-red-500 focus:ring-red-500' : ''}`}
                       placeholder="https://..."
+                      aria-invalid={!!errors[index]?.storeUrl}
+                      aria-describedby={errors[index]?.storeUrl ? `url-error-${index}` : undefined}
                     />
+                    {errors[index]?.storeUrl && (
+                      <p className="text-sm text-red-500 mt-1" id={`url-error-${index}`}>
+                        {errors[index].storeUrl}
+                      </p>
+                    )}
                     <p className="text-xs text-gray-400 mt-1">
                       Supports Shopify, Etsy, Gumroad, and BigCartel stores
                     </p>

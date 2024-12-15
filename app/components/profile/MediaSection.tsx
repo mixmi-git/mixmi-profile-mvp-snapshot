@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Plus, Trash2 } from "lucide-react"
-import { getMediaDisplayName } from "@/lib/utils"
+import { getMediaDisplayName } from "@/lib/mediaUtils"
 import {
   Accordion,
   AccordionContent,
