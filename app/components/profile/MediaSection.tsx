@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Plus, Trash2 } from "lucide-react"
-import { getMediaDisplayName } from "@/lib/mediaUtils"
+import { getMediaDisplayName, isValidAppleMusicUrl, transformAppleMusicUrl } from '@/lib/mediaUtils'
 import {
   Accordion,
   AccordionContent,
@@ -17,7 +17,7 @@ import { MediaEmbed } from "@/components/media/MediaEmbed"
 interface MediaItem {
   id: string
   title?: string
-  type: 'youtube' | 'soundcloud' | 'soundcloud-playlist' | 'spotify' | 'spotify-playlist' | 'apple-music-playlist' | 'apple-music-album'
+  type: 'youtube' | 'soundcloud' | 'soundcloud-playlist' | 'spotify' | 'spotify-playlist' | 'apple-music-playlist' | 'apple-music-album' | 'apple-music-station'
   embedUrl?: string
   rawUrl?: string
 }
@@ -35,6 +35,23 @@ export function MediaSection({
   onAddMedia,
   onRemoveMedia
 }: MediaSectionProps) {
+  const handleMediaChange = (index: number, field: string, value: string) => {
+    console.log('Handling media change:', { field, value });
+    if (field === 'id') {
+      const cleanValue = value.trim().replace(/^h+ttps:\/\//, 'https://');
+      console.log('Cleaned value:', cleanValue);
+      
+      if (cleanValue.includes('music.apple.com')) {
+        console.log('Detected Apple Music URL');
+        const transformedUrl = transformAppleMusicUrl(cleanValue);
+        console.log('Transformed URL:', transformedUrl);
+        onMediaChange(index, field, transformedUrl);
+      } else {
+        onMediaChange(index, field, cleanValue);
+      }
+    }
+  };
+
   return (
     <div className="space-y-8 pt-8 border-t border-gray-700">
       <div>
@@ -57,9 +74,16 @@ export function MediaSection({
                     <div className="space-y-2">
                       <Input
                         id={`media-url-${index}`}
-                        value={media.rawUrl || media.id}
-                        onChange={(e) => onMediaChange(index, 'id', e.target.value)}
+                        defaultValue=""
+                        onChange={(e) => {
+                          const inputValue = e.target.value;
+                          const cleanValue = inputValue.replace(/^h+/, '');
+                          handleMediaChange(index, 'id', cleanValue);
+                        }}
                         placeholder="Paste URL from YouTube, SoundCloud, Spotify, or Apple Music"
+                        onFocus={(e) => {
+                          e.target.value = '';
+                        }}
                       />
                       <p className="text-xs text-gray-400">
                         Supports: YouTube videos, SoundCloud tracks & playlists, Spotify tracks & playlists, Apple Music playlists

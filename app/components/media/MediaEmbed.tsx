@@ -82,10 +82,10 @@ export const MediaEmbed = memo(({ item }: { item: MediaItem }) => {
             className="absolute top-0 left-0 w-full h-full"
             allow="autoplay *; encrypted-media *; fullscreen *"
             frameBorder="0"
-            style={{ 
-              width: '100%', 
-              maxWidth: '660px', 
-              overflow: 'hidden', 
+            style={{
+              width: '100%',
+              maxWidth: '660px',
+              overflow: 'hidden',
               background: 'transparent',
               borderRadius: '10px'
             }}

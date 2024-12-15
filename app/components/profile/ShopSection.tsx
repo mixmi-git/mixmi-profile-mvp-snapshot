@@ -90,6 +90,7 @@ export function ShopSection({
   isUsingExampleContent = false
 }: ShopSectionProps) {
   const [errors, setErrors] = useState<ShopError[]>([]);
+  const [isFormLoading, setIsFormLoading] = useState(false);
 
   const handleFieldChange = (index: number, field: string, value: string) => {
     const validation = validateShopItem(field, value);
@@ -106,6 +107,13 @@ export function ShopSection({
     if (validation.isValid) {
       onShopItemChange(index, field, value);
     }
+  };
+
+  const handleAddItem = () => {
+    setIsFormLoading(true);
+    onAddShopItem();
+    // Reset loading after a short delay
+    setTimeout(() => setIsFormLoading(false), 100);
   };
 
   // Display view (non-editing)
@@ -129,8 +137,19 @@ export function ShopSection({
             Connect your online store from Shopify, Etsy, or other platforms to showcase your products, merchandise, and token-gated content
           </p>
         </div>
-        <Button type="button" onClick={onAddShopItem} className="mt-2">
-          <Plus className="w-4 h-4 mr-2" /> Add Store
+        <Button 
+          type="button" 
+          onClick={handleAddItem} 
+          className="mt-2"
+          disabled={isFormLoading}
+        >
+          {isFormLoading ? (
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+          ) : (
+            <>
+              <Plus className="w-4 h-4 mr-2" /> Add Store
+            </>
+          )}
         </Button>
       </div>
     );
@@ -242,8 +261,19 @@ export function ShopSection({
           </AccordionItem>
         ))}
       </Accordion>
-      <Button type="button" onClick={onAddShopItem} className="mt-2">
-        <Plus className="w-4 h-4 mr-2" /> Add Store
+      <Button 
+        type="button" 
+        onClick={handleAddItem} 
+        className="mt-2"
+        disabled={isFormLoading}
+      >
+        {isFormLoading ? (
+          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+        ) : (
+          <>
+            <Plus className="w-4 h-4 mr-2" /> Add Store
+          </>
+        )}
       </Button>
     </div>
   )

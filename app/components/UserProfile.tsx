@@ -9,26 +9,17 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Youtube, Music2, CloudRain, Twitter, Edit2, Plus, Trash2, Upload, User, Linkedin, Instagram, ShoppingBag, Store, Gift } from "lucide-react"
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion"
+import { Youtube, Music2, CloudRain, Twitter, Edit2, Upload, User, Linkedin, Instagram, ShoppingBag, Store, Gift } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 import { debounce } from "lodash"
 import ReactCrop, { Crop as CropType } from 'react-image-crop'
 import 'react-image-crop/dist/ReactCrop.css'
-import { parseGIF, decompressFrames } from 'gifuct-js'
 import { useAuth } from "@/lib/auth"
 import { exampleProjects, exampleMediaItems, exampleShopItems } from '@/lib/example-content'
 import { SocialLinks } from "@/components/profile/SocialLinks"
 import { SpotlightSection, SpotlightItem } from "@/components/profile/SpotlightSection"
 import { MediaSection } from "@/components/profile/MediaSection"
-import { ShopSection, ShopItem, ShopPlatform } from "@/components/profile/ShopSection"
-import ImageUpload from './ui/ImageUpload'
+import { ShopSection, ShopItem } from "@/components/profile/ShopSection"
 import ErrorBoundary from './ui/ErrorBoundary'
 import { getMediaDisplayName } from '@/lib/mediaUtils'
 import { StickerSection } from "@/components/profile/StickerSection"
@@ -336,13 +327,6 @@ const extractMediaId = (url: string, type: MediaItem['type']): string => {
   }
 }
 
-// Add this validation function
-const isValidAppleMusicUrl = (url: string): boolean => {
-  // Check for basic Apple Music URL structure
-  const validUrlPattern = /^https:\/\/music\.apple\.com\/[a-z]{2}\/(album|playlist)\/[^\/]+\/[0-9]+(\?.*)?$/i
-  return validUrlPattern.test(url)
-}
-
 // Add this helper function to detect media type from URL
 const detectMediaType = (url: string): MediaItem['type'] => {
   if (url.includes('youtube.com') || url.includes('youtu.be')) {
@@ -513,7 +497,7 @@ export default function Component(): JSX.Element {
     }
   }
 
-  const loadFromLocalStorage = () => {
+  const loadFromLocalStorage = useCallback(() => {
     try {
       const storageKey = `userProfile_${userAddress}`
       const saved = localStorage.getItem(storageKey)
@@ -521,7 +505,6 @@ export default function Component(): JSX.Element {
         const data = JSON.parse(saved)
         const hasUserSpotlightContent = Array.isArray(data.spotlightItems) && data.spotlightItems.length > 0
         
-        // Only set user content if it exists, otherwise keep example content
         if (hasUserSpotlightContent) {
           setSpotlightItems(data.spotlightItems)
           setIsUsingExampleContent(false)
@@ -531,24 +514,7 @@ export default function Component(): JSX.Element {
         }
 
         return {
-          profile: data.profile || {
-            name: "Your Name",
-            title: "Your Role / Title",
-            bio: "Tell your story here...",
-            image: "/images/placeholder.png",
-            socialLinks: [
-              { platform: "youtube", url: "" },
-              { platform: "spotify", url: "" },
-              { platform: "soundcloud", url: "" },
-              { platform: "instagram", url: "" }
-            ],
-            sectionVisibility: {
-              projects: true,
-              media: true,
-              shop: true
-            },
-            spotlightDescription: ""
-          },
+          profile: data.profile || defaultProfile,
           projects: data.projects || [],
           mediaItems: data.mediaItems || [],
           sticker: data.sticker || { enabled: true, image: defaultStickerImage },
@@ -556,36 +522,12 @@ export default function Component(): JSX.Element {
           spotlightItems: hasUserSpotlightContent ? data.spotlightItems : exampleProjects,
         }
       }
-      return {
-        profile: {
-          name: "Your Name",
-          title: "Your Role / Title",
-          bio: "Tell your story here...",
-          image: "/images/placeholder.png",
-          socialLinks: [
-            { platform: "youtube", url: "" },
-            { platform: "spotify", url: "" },
-            { platform: "soundcloud", url: "" },
-            { platform: "instagram", url: "" }
-          ],
-          sectionVisibility: {
-            projects: true,
-            media: true,
-            shop: true
-          },
-          spotlightDescription: ""
-        },
-        projects: [],
-        mediaItems: [],
-        sticker: { enabled: true, image: defaultStickerImage },
-        shopItems: [],
-        spotlightItems: exampleProjects,
-      }
+      return null
     } catch (error) {
       console.error('Failed to load from localStorage:', error)
       return null
     }
-  }
+  }, [userAddress])
 
   const [isEditing, setIsEditing] = useState(false)
   const [formErrors, setFormErrors] = useState<FormErrors>({
@@ -629,12 +571,11 @@ export default function Component(): JSX.Element {
   useEffect(() => {
     const saved = loadFromLocalStorage()
     if (saved) {
-      console.log('Loading saved data:', saved)
       setShopItems(saved.shopItems)
       setSpotlightItems(saved.spotlightItems)
     }
     setIsLoading(false)
-  }, [])
+  }, [loadFromLocalStorage])
 
   const [projects, setProjects] = useState<Project[]>([])
 
@@ -1034,8 +975,6 @@ export default function Component(): JSX.Element {
 
   const [projectsLoading, setProjectsLoading] = useState(true)
   const [videosLoading, setVideosLoading] = useState(true)
-  const [visibleProjects, setVisibleProjects] = useState(3)
-  const [visibleVideos, setVisibleVideos] = useState(6)
 
   useEffect(() => {
     setTimeout(() => setProjectsLoading(false), 800)
@@ -1045,69 +984,6 @@ export default function Component(): JSX.Element {
   const loadMoreProjects = () => {
     setVisibleProjects(prev => Math.min(prev + 3, projects.length))
   }
-
-  const [authLoading, setAuthLoading] = useState(true)
-
-  useEffect(() => {
-    setAuthLoading(false)
-  }, [isAuthenticated])
-
-  const handleShopItemChange = (index: number, field: string, value: string) => {
-    const updatedItems = shopItems.map((item, i) =>
-      i === index ? {
-        ...item,
-        [field]: value,
-        ...(field === 'storeUrl' ? {
-          platform: (value.includes('shopify.com') ? 'shopify' :
-            value.includes('etsy.com') ? 'etsy' :
-              value.includes('gumroad.com') ? 'gumroad' :
-                value.includes('bigcartel.com') ? 'bigcartel' : 'other') as ShopItem['platform']
-        } : {})
-      } : item
-    )
-
-    setShopItems(updatedItems)
-    debouncedSave({
-      profile,
-      projects,
-      mediaItems,
-      sticker,
-      shopItems: updatedItems,
-      spotlightItems: []
-    })
-  }
-
-  const addShopItem = () => {
-    setShopItems(prev => [...prev, {
-      id: Date.now().toString(),
-      title: '',
-      storeUrl: '',
-      image: '',
-      platform: 'other'
-    }])
-  }
-
-  const removeShopItem = (index: number) => {
-    setShopItems(prev => prev.filter((_, i) => i !== index))
-  }
-
-  const [previewMode, setPreviewMode] = useState(true);
-
-  const [shopLoading, setShopLoading] = useState(true)
-
-  useEffect(() => {
-    setTimeout(() => setProjectsLoading(false), 800)
-    setTimeout(() => setVideosLoading(false), 1200)
-    setTimeout(() => setShopLoading(false), 1000)
-  }, [])
-
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
-
-  const [history, setHistory] = useState<HistoryState>({
-    shopItems: [],
-    currentIndex: -1,
-    history: []
-  });
 
   const [isUsingExampleContent, setIsUsingExampleContent] = useState(true);
 
@@ -1211,6 +1087,48 @@ export default function Component(): JSX.Element {
       reader.readAsDataURL(file);
     }
   };
+
+  // Add back the shop handling functions
+  const handleShopItemChange = (index: number, field: string, value: string) => {
+    const updatedItems = shopItems.map((item, i) =>
+      i === index ? {
+        ...item,
+        [field]: value,
+        ...(field === 'storeUrl' ? {
+          platform: (value.includes('shopify.com') ? 'shopify' :
+            value.includes('etsy.com') ? 'etsy' :
+              value.includes('gumroad.com') ? 'gumroad' :
+                value.includes('bigcartel.com') ? 'bigcartel' : 'other') as ShopItem['platform']
+        } : {})
+      } : item
+    )
+
+    setShopItems(updatedItems)
+    debouncedSave({
+      profile,
+      projects,
+      mediaItems,
+      sticker,
+      shopItems: updatedItems,
+      spotlightItems
+    })
+  }
+
+  const addShopItem = useCallback(() => {
+    setShopItems(prev => [...prev, {
+      id: Date.now().toString(),
+      title: '',
+      storeUrl: '',
+      image: '',
+      platform: 'other'
+    }])
+  }, []);
+
+  const removeShopItem = (index: number) => {
+    setShopItems(prev => prev.filter((_, i) => i !== index))
+  }
+
+  const [previewMode, setPreviewMode] = useState(true);
 
   return (
     <div className="dark min-h-screen bg-gray-900 text-gray-100">
