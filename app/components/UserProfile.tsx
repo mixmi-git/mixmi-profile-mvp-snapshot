@@ -85,13 +85,60 @@ export interface Profile {
   spotlightDescription: string;
 }
 
-// Add interface for form errors
+// Update the FormErrors interface to be more specific
 interface FormErrors {
-  name: string;
-  title: string;
-  bio: string;
-  socialLinks: string[];
+  name: {
+    message: string;
+    isValid: boolean;
+  };
+  title: {
+    message: string;
+    isValid: boolean;
+  };
+  bio: {
+    message: string;
+    isValid: boolean;
+  };
+  socialLinks: {
+    message: string;
+    isValid: boolean;
+  }[];
 }
+
+// Add validation rules
+const validateProfile = (field: string, value: string): { isValid: boolean; message: string } => {
+  switch (field) {
+    case 'name':
+      if (!value.trim()) {
+        return { isValid: false, message: 'Name is required' };
+      }
+      if (value.length > 50) {
+        return { isValid: false, message: 'Name must be less than 50 characters' };
+      }
+      return { isValid: true, message: '' };
+
+    case 'title':
+      if (!value.trim()) {
+        return { isValid: false, message: 'Title is required' };
+      }
+      if (value.length > 100) {
+        return { isValid: false, message: 'Title must be less than 100 characters' };
+      }
+      return { isValid: true, message: '' };
+
+    case 'bio':
+      if (!value.trim()) {
+        return { isValid: false, message: 'Bio is required' };
+      }
+      if (value.length > 500) {
+        return { isValid: false, message: 'Bio must be less than 500 characters' };
+      }
+      return { isValid: true, message: '' };
+
+    default:
+      return { isValid: true, message: '' };
+  }
+};
 
 interface Sticker {
   enabled: boolean;
@@ -523,9 +570,9 @@ export default function Component(): JSX.Element {
 
   const [isEditing, setIsEditing] = useState(false)
   const [formErrors, setFormErrors] = useState<FormErrors>({
-    name: '',
-    title: '',
-    bio: '',
+    name: { message: '', isValid: true },
+    title: { message: '', isValid: true },
+    bio: { message: '', isValid: true },
     socialLinks: []
   })
 
@@ -716,17 +763,30 @@ export default function Component(): JSX.Element {
   }
 
   const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    const newProfile = { ...profile, [name]: value }
-    setProfile(newProfile)
-    debouncedSave({
-      profile: newProfile,
-      projects,
-      mediaItems,
-      sticker,
-      shopItems: [],
-      spotlightItems: []
-    })
+    const { name, value } = e.target;
+    const validation = validateProfile(name, value);
+    
+    // Update form errors
+    setFormErrors(prev => ({
+      ...prev,
+      [name]: { message: validation.message, isValid: validation.isValid }
+    }));
+
+    // Update profile if valid or allow typing but show error
+    const newProfile = { ...profile, [name]: value };
+    setProfile(newProfile);
+
+    // Only save if valid
+    if (validation.isValid) {
+      debouncedSave({
+        profile: newProfile,
+        projects,
+        mediaItems,
+        sticker,
+        shopItems: [],
+        spotlightItems: []
+      });
+    }
   }
 
   const handleSocialLinkChange = (index: number, field: string, value: string) => {
@@ -1168,9 +1228,15 @@ export default function Component(): JSX.Element {
                           name="name"
                           value={profile.name}
                           onChange={handleProfileChange}
-                          className={`mt-1 ${formErrors.name ? 'border-red-500' : ''}`}
+                          className={`mt-1 whitespace-pre-wrap break-words ${!formErrors.name.isValid ? 'border-red-500 focus:ring-red-500' : ''}`}
+                          aria-invalid={!formErrors.name.isValid}
+                          aria-describedby={!formErrors.name.isValid ? "name-error" : undefined}
                         />
-                        {formErrors.name && <p className="text-red-500 text-sm mt-1">{formErrors.name}</p>}
+                        {!formErrors.name.isValid && (
+                          <p className="text-sm text-red-500 mt-1" id="name-error">
+                            {formErrors.name.message}
+                          </p>
+                        )}
                       </div>
 
                       <div className="space-y-2">
@@ -1180,8 +1246,15 @@ export default function Component(): JSX.Element {
                           name="title"
                           value={profile.title}
                           onChange={handleProfileChange}
-                          className={`mt-1 ${formErrors.title ? 'border-red-500' : ''}`}
+                          className={`mt-1 whitespace-pre-wrap break-words ${!formErrors.title.isValid ? 'border-red-500 focus:ring-red-500' : ''}`}
+                          aria-invalid={!formErrors.title.isValid}
+                          aria-describedby={!formErrors.title.isValid ? "title-error" : undefined}
                         />
+                        {!formErrors.title.isValid && (
+                          <p className="text-sm text-red-500 mt-1" id="title-error">
+                            {formErrors.title.message}
+                          </p>
+                        )}
                         <p className="text-sm text-gray-400">
                           Your role or profession (e.g., "Music Producer" or "Digital Artist")
                         </p>
@@ -1195,9 +1268,15 @@ export default function Component(): JSX.Element {
                           value={profile.bio}
                           onChange={handleProfileChange}
                           rows={4}
-                          className={`mt-1 ${formErrors.bio ? 'border-red-500' : ''}`}
+                          className={`mt-1 whitespace-pre-wrap break-words ${!formErrors.bio.isValid ? 'border-red-500 focus:ring-red-500' : ''}`}
+                          aria-invalid={!formErrors.bio.isValid}
+                          aria-describedby={!formErrors.bio.isValid ? "bio-error" : undefined}
                         />
-                        {formErrors.bio && <p className="text-red-500 text-sm mt-1">{formErrors.bio}</p>}
+                        {!formErrors.bio.isValid && (
+                          <p className="text-sm text-red-500 mt-1" id="bio-error">
+                            {formErrors.bio.message}
+                          </p>
+                        )}
                       </div>
                     </div>
 
@@ -1474,12 +1553,18 @@ export default function Component(): JSX.Element {
                     <div className="w-full lg:w-1/2 flex flex-col items-center lg:items-center text-center">
                       <div className="space-y-6 lg:space-y-8 max-w-sm">
                         <div>
-                          <h1 className="text-3xl sm:text-4xl font-bold text-cyan-300">{profile.name}</h1>
-                          <h2 className="text-lg sm:text-xl text-gray-200">{profile.title}</h2>
+                          <h1 className="text-3xl sm:text-4xl font-bold text-cyan-300 whitespace-pre-wrap break-words line-clamp-2">
+                            {profile.name}
+                          </h1>
+                          <h2 className="text-lg sm:text-xl text-gray-200 whitespace-pre-wrap break-words line-clamp-2">
+                            {profile.title}
+                          </h2>
                         </div>
 
                         <div>
-                          <p className="text-sm sm:text-base text-gray-300">{profile.bio}</p>
+                          <p className="text-sm sm:text-base text-gray-300 whitespace-pre-wrap break-words">
+                            {profile.bio}
+                          </p>
                         </div>
 
                         <div className="flex justify-center gap-4">
