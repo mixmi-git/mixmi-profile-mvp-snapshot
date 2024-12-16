@@ -21,8 +21,9 @@ import { SpotlightSection, SpotlightItem } from "@/components/profile/SpotlightS
 import { MediaSection } from "@/components/profile/MediaSection"
 import { ShopSection, ShopItem } from "@/components/profile/ShopSection"
 import ErrorBoundary from './ui/ErrorBoundary'
-import { getMediaDisplayName } from '@/lib/mediaUtils'
 import { StickerSection } from "@/components/profile/StickerSection"
+
+/* eslint-disable react-hooks/exhaustive-deps */
 
 // Add custom TikTok icon component
 const TikTokIcon = () => (
@@ -311,7 +312,7 @@ const extractMediaId = (url: string, type: MediaItem['type']): string => {
           const cleanUrl = url.replace(/^@/, '').trim()
           const match = cleanUrl.match(/music\.apple\.com\/([^\/]+)\/(album|playlist)\/([^\/]+)\/([^\/\?]+)/)
           if (match) {
-            const [_match, country, mediaType, _name, id] = match
+            const [, country, mediaType, , id] = match
             return `https://embed.music.apple.com/${country}/${mediaType}/${id}`
           }
           return url
@@ -703,28 +704,6 @@ export default function Component(): JSX.Element {
     e.preventDefault()
   }, [])
 
-  const handleMediaChange = async (index: number, field: string, value: string) => {
-    if (field === 'id' && value) {
-      const detectedType = detectMediaType(value)
-
-      setMediaItems(prev => prev.map((item, i) => {
-        if (i === index) {
-          const extractedId = extractMediaId(value, detectedType)
-          return {
-            ...item,
-            type: detectedType,
-            id: extractedId,
-            rawUrl: value
-          }
-        }
-        return item
-      }))
-    } else {
-      setMediaItems(prev => prev.map((item, i) =>
-        i === index ? { ...item, [field]: value } : item
-      ))
-    }
-  }
 
   const addMedia = () => {
     setMediaItems(prev => [...prev, {
@@ -1003,6 +982,29 @@ export default function Component(): JSX.Element {
   }
 
   const [previewMode, setPreviewMode] = useState(true);
+
+  const handleMediaChange = async (index: number, field: string, value: string) => {
+    if (field === 'id' && value) {
+      const detectedType = detectMediaType(value)
+
+      setMediaItems(prev => prev.map((item, i) => {
+        if (i === index) {
+          const extractedId = extractMediaId(value, detectedType)
+          return {
+            ...item,
+            type: detectedType,
+            id: extractedId,
+            rawUrl: value
+          }
+        }
+        return item
+      }))
+    } else {
+      setMediaItems(prev => prev.map((item, i) =>
+        i === index ? { ...item, [field]: value } : item
+      ))
+    }
+  }
 
   return (
     <div className="dark min-h-screen bg-gray-900 text-gray-100">
