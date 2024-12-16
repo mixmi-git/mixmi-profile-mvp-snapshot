@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -16,7 +16,6 @@ import {
 import { validateSpotlightItem, validateSpotlightImage } from '@/lib/validation'
 import ImageUpload from '../ui/ImageUpload'
 import ErrorBoundary from '../ui/ErrorBoundary'
-import Link from 'next/link'
 
 export interface SpotlightItem {
   id: number
@@ -33,7 +32,6 @@ interface SpotlightSectionProps {
   onRemoveItem: (index: number) => void
   onImageChange: (index: number, file: File | null) => void
   isEditing?: boolean
-  isUsingExampleContent?: boolean
 }
 
 interface SpotlightError {
@@ -184,7 +182,6 @@ export function SpotlightSection({
   onRemoveItem,
   onImageChange,
   isEditing = false,
-  isUsingExampleContent = false
 }: SpotlightSectionProps) {
   const [errors, setErrors] = useState<SpotlightError[]>([]);
 
@@ -226,9 +223,9 @@ export function SpotlightSection({
 
   if (!isEditing) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative border-[8px] border-red-500 p-4 bg-purple-500/20">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {items.map((item) => (
-          <div key={item.id} className="relative border-[8px] border-blue-500 p-2 bg-green-500/20">
+          <div key={item.id}>
             <SpotlightCard item={item} />
           </div>
         ))}

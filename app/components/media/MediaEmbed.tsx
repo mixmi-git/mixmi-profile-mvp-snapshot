@@ -97,4 +97,6 @@ export const MediaEmbed = memo(({ item }: { item: MediaItem }) => {
     default:
       return null
   }
-}) 
+})
+
+MediaEmbed.displayName = 'MediaEmbed';

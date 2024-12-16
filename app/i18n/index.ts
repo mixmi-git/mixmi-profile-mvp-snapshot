@@ -1,5 +1,3 @@
-import { use } from 'react'
-
 const dictionaries = {
   en: () => import('./locales/en.json').then((module) => module.default),
   es: () => import('./locales/es.json').then((module) => module.default)

@@ -9,7 +9,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { Youtube, Music2, CloudRain, Twitter, Edit2, Upload, User, Linkedin, Instagram, ShoppingBag, Store, Gift } from "lucide-react"
+import { Youtube, Music2, CloudRain, Twitter, Edit2, Upload, User, Linkedin, Instagram } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 import { debounce } from "lodash"
 import ReactCrop, { Crop as CropType } from 'react-image-crop'
@@ -242,6 +242,8 @@ const MediaEmbed = memo(({ item }: { item: MediaItem }) => {
   }
 })
 
+MediaEmbed.displayName = 'MediaEmbed'
+
 function Navbar({ isAuthenticated, onLoginToggle }: NavbarProps) {
   return (
     <nav className="sticky top-0 z-40 bg-gray-900/95 backdrop-blur-sm py-6 px-8 flex items-center justify-between border-b border-gray-800">
@@ -309,7 +311,7 @@ const extractMediaId = (url: string, type: MediaItem['type']): string => {
           const cleanUrl = url.replace(/^@/, '').trim()
           const match = cleanUrl.match(/music\.apple\.com\/([^\/]+)\/(album|playlist)\/([^\/]+)\/([^\/\?]+)/)
           if (match) {
-            const [_, country, mediaType, name, id] = match
+            const [_match, country, mediaType, _name, id] = match
             return `https://embed.music.apple.com/${country}/${mediaType}/${id}`
           }
           return url
@@ -346,93 +348,8 @@ const detectMediaType = (url: string): MediaItem['type'] => {
 
 const defaultStickerImage = "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/daisy-blue-1sqZRfemKwLyREL0Eo89EfmQUT5wst.png"
 
-// Add these helper functions
-const fetchMediaTitle = async (url: string, type: MediaItem['type']): Promise<string> => {
-  try {
-    switch (type) {
-      case 'youtube':
-        // Extract video ID and fetch title from YouTube oEmbed
-        const videoId = extractMediaId(url, 'youtube')
-        const response = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`)
-        const data = await response.json()
-        return data.title
 
-      case 'spotify':
-      case 'spotify-playlist':
-        // Extract Spotify ID and use Spotify API (requires auth token)
-        const spotifyId = extractMediaId(url, type)
-        const mediaType = type === 'spotify' ? 'track' : 'playlist'
-        return `${mediaType.charAt(0).toUpperCase() + mediaType.slice(1)} - ${spotifyId}`
 
-      case 'apple-music-album':
-      case 'apple-music-playlist':
-        // Extract from URL
-        const match = url.match(/\/(album|playlist)\/([^\/]+)/)
-        return match ? decodeURIComponent(match[2]).replace(/-/g, ' ') : 'Apple Music'
-
-      case 'soundcloud':
-      case 'soundcloud-playlist':
-        // Extract from URL
-        const scMatch = url.match(/soundcloud\.com\/([^\/]+)(?:\/sets)?\/([^\/]+)/)
-        return scMatch ? `${scMatch[1]} - ${decodeURIComponent(scMatch[2])}` : 'SoundCloud'
-
-      default:
-        return 'Media'
-    }
-  } catch (error) {
-    console.error('Error fetching media title:', error)
-    return 'Media'
-  }
-}
-
-// Update the detection function
-const detectShopType = (url: string): ShopItemType => {
-  if (url.includes('shopify.com')) return 'shopify-product'
-  if (url.includes('etsy.com')) return 'etsy-listing'
-  if (url.includes('gumroad.com')) return 'gumroad-product'
-  if (url.includes('bigcartel.com')) return 'bigcartel-product'
-  return 'other'
-}
-
-// Update the embed function
-const generateShopEmbed = (url: string, type: ShopItemType): string => {
-  switch (type) {
-    case 'shopify-product':
-      return url.replace('/products/', '/products/embed/')
-    case 'etsy-listing':
-      const etsyMatch = url.match(/listing\/(\d+)/)
-      return etsyMatch ? `https://www.etsy.com/listing/${etsyMatch[1]}/embed` : url
-    case 'gumroad-product':
-      return url.replace('/l/', '/l/embed/')
-    case 'bigcartel-product':
-      return url + '/embed'
-    default:
-      return url
-  }
-}
-
-// Update the shop icon components
-const ShopifyIcon = ({ className }: { className?: string }) => (
-  <ShoppingBag className={className} />
-)
-
-const EtsyIcon = ({ className }: { className?: string }) => (
-  <Store className={className} />
-)
-
-const GumroadIcon = ({ className }: { className?: string }) => (
-  <Gift className={className} />
-)
-
-// Update this constant
-const defaultProductImage = "/images/shop-placeholder.jpg"
-
-// Add history state
-interface HistoryState {
-  shopItems: ShopItem[];
-  currentIndex: number;
-  history: ShopItem[][];
-}
 
 // Update the ProjectCard component for a more visual layout
 const ProjectCard = ({ project }: { project: Project }) => {
@@ -711,8 +628,9 @@ export default function Component(): JSX.Element {
           setImageLoading(false)
         }
         reader.readAsDataURL(file)
-      } catch (error) {
-        setImageError("Failed to load image")
+      } catch {
+        console.error('Error handling image')
+        setImageError('Failed to process image. Please try again.')
         setImageLoading(false)
       }
     } catch (error) {
@@ -785,49 +703,9 @@ export default function Component(): JSX.Element {
     e.preventDefault()
   }, [])
 
-  const handleProjectChange = (index: number, field: keyof Project, value: string) => {
-    setProjects(prev => prev.map((project, i) =>
-      i === index ? { ...project, [field]: value } : project
-    ))
-  }
-
-  const handleProjectImageChange = (index: number, file: File | null) => {
-    if (file) {
-      const isGif = file.type === 'image/gif'
-      const isValidImage = file.type.startsWith('image/')
-
-      if (!isValidImage) {
-        console.error("Please upload an image file")
-        return
-      }
-
-      if (isGif && file.size > 5 * 1024 * 1024) {
-        console.error("GIF must be less than 5MB")
-        return
-      }
-
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setProjects(prev => prev.map((project, i) =>
-          i === index ? { ...project, image: reader.result as string } : project
-        ))
-      }
-      reader.readAsDataURL(file)
-    }
-  }
-
-  const addProject = () => {
-    setProjects(prev => [...prev, { id: Date.now(), title: "", description: "", image: "", link: "" }])
-  }
-
-  const removeProject = (index: number) => {
-    setProjects(prev => prev.filter((_, i) => i !== index))
-  }
-
   const handleMediaChange = async (index: number, field: string, value: string) => {
     if (field === 'id' && value) {
       const detectedType = detectMediaType(value)
-      const displayName = getMediaDisplayName(value, detectedType)
 
       setMediaItems(prev => prev.map((item, i) => {
         if (i === index) {
@@ -980,10 +858,6 @@ export default function Component(): JSX.Element {
     setTimeout(() => setProjectsLoading(false), 800)
     setTimeout(() => setVideosLoading(false), 1200)
   }, [])
-
-  const loadMoreProjects = () => {
-    setVisibleProjects(prev => Math.min(prev + 3, projects.length))
-  }
 
   const [isUsingExampleContent, setIsUsingExampleContent] = useState(true);
 
@@ -1271,7 +1145,7 @@ export default function Component(): JSX.Element {
                           </p>
                         )}
                         <p className="text-sm text-gray-400">
-                          Your role or profession (e.g., "Music Producer" or "Digital Artist")
+                          Your role or profession (e.g., &quot;Music Producer&quot; or &quot;Digital Artist&quot;)
                         </p>
                       </div>
 

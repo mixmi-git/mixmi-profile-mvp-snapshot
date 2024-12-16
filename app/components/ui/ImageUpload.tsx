@@ -17,7 +17,6 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   currentImage
 }) => {
   const [preview, setPreview] = useState<string | null>(currentImage || null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     try {
@@ -41,7 +40,6 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
           throw error;
         }
 
-        setSelectedFile(file);
         setPreview(URL.createObjectURL(file));
         onImageUploaded(file);
       }
@@ -60,7 +58,6 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   });
 
   const removeImage = () => {
-    setSelectedFile(null);
     setPreview(null);
   };
 

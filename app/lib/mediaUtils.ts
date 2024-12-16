@@ -1,4 +1,4 @@
-export const getMediaDisplayName = (url: string, type?: string): string => {
+export const getMediaDisplayName = (url: string): string => {
   try {
     const urlObj = new URL(url);
     const hostname = urlObj.hostname;
@@ -35,7 +35,7 @@ export const transformAppleMusicUrl = (url: string): string => {
     
     const match = cleanUrl.match(/music\.apple\.com\/([^\/]+)\/(album|playlist|station)\/([^\/]+)\/([^\/\?]+)/)
     if (match) {
-      const [_, country, mediaType, name, id] = match
+      const [, country, mediaType, , id] = match
       const transformedUrl = `https://embed.music.apple.com/${country}/${mediaType}/${id}`;
       console.log('Transformed URL:', transformedUrl);
       return transformedUrl;

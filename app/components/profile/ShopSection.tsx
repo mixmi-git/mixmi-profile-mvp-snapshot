@@ -15,7 +15,7 @@ import {
 import ImageUpload from '../ui/ImageUpload';
 import ErrorBoundary from '../ui/ErrorBoundary';
 import { useState } from 'react';
-import { validateShopItem, validateShopImage } from '@/lib/validation';
+import { validateShopItem } from '@/lib/validation';
 
 export type ShopPlatform = 'shopify' | 'etsy' | 'gumroad' | 'bigcartel' | 'other'
 
