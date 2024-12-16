@@ -591,7 +591,7 @@ export default function Component(): JSX.Element {
             setImageLoading(false)
           }
           reader.readAsDataURL(file)
-        } catch (error) {
+        } catch {
           setImageError("Failed to process GIF. Please try again.")
           setImageLoading(false)
         }
@@ -634,8 +634,8 @@ export default function Component(): JSX.Element {
         setImageError('Failed to process image. Please try again.')
         setImageLoading(false)
       }
-    } catch (error) {
-      console.error('Error handling image:', error)
+    } catch {
+      console.error('Error handling image')
       setImageError('Failed to process image. Please try again.')
       setImageLoading(false)
     }
@@ -1331,6 +1331,7 @@ export default function Component(): JSX.Element {
                             onComplete={(c: CropType) => setCropState(prev => ({ ...prev, completedCrop: c }))}
                             aspect={cropState.aspect}
                           >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               src={tempImage}
                               onLoad={e => setCropState(prev => ({ ...prev, imageRef: e.currentTarget }))}
