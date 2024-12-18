@@ -118,7 +118,8 @@ export function StickerSection({
           alt="Profile sticker"
           width={200}
           height={200}
-          className="object-contain"
+          className="w-auto h-auto"
+          priority
         />
       </div>
     </div>

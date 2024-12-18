@@ -1,95 +1,43 @@
-# Mixmi Profile Editor
+# Mixmi Profile Media
 
-A dynamic profile editor for creators and artists, featuring customizable sections for content, media, and e-commerce integration.
+A Next.js + TypeScript implementation for embedding and displaying media content from multiple platforms in a customizable profile page.
 
 ## Features
 
-### 🎯 Spotlight Section
-- Showcase projects, collaborations, and featured content
-- Image upload support with preview
-- Optional external links
-- Character-limited titles and descriptions
-- Smooth transition from example to user content
+### Media Platform Support
+- ✅ YouTube videos
+- ✅ SoundCloud tracks and playlists
+- ✅ Apple Music playlists and albums
+- ✅ Instagram Reels (link out)
+- ✅ Mixcloud shows
+- ✅ Spotify tracks and playlists
 
-### 🎵 Media Section
-- Embed support for multiple platforms:
-  - YouTube videos
-  - SoundCloud (tracks and playlists)
-  - Spotify (tracks and playlists)
-  - Apple Music (albums and playlists)
-- Responsive embed layouts
-- Auto-detection of media types
+### Profile Features
+- 🎨 Customizable profile sections
+- 🖼️ Spotlight projects showcase
+- 🛍️ Shop integration
+- 🎯 Section visibility controls
+- 🌟 Custom profile stickers
 
-### 🛍️ Shop Section
-- Connect multiple online stores:
-  - Shopify
-  - Etsy
-  - Gumroad
-  - BigCartel
-- Store image and description management
-- URL validation and error handling
-- Platform auto-detection
-
-### 🎨 Sticker Section
-- Customizable floating sticker/badge
-- Toggle visibility
-- Image upload support
-- Smooth 360° rotation animation
-- Position customization
-
-### 🔗 Social Links
-- Support for major platforms:
-  - YouTube
-  - Spotify
-  - SoundCloud
-  - Twitter/X
-  - Instagram
-  - LinkedIn
-  - TikTok
-- URL validation per platform
-- Optional links with graceful fallbacks
-
-## Technical Features
-- Next.js 14 with App Router
-- TypeScript for type safety
-- Tailwind CSS for styling
-- Shadcn UI components
-- Form validation with error handling
-- Image upload and cropping
-- Responsive design
-- Wallet authentication
-- Local storage for data persistence
-- Error boundaries for stability
-- Loading states and animations
-
-## Getting Started
-
-```bash
-# Install dependencies
-npm install
-
-# Run development server
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Technical Features
+- 🔒 Wallet connection support
+- 📱 Responsive design
+- 🎯 TypeScript implementation
+- ⚡ Next.js for optimal performance
+- 💾 Local storage for profile data
 
 ## Development
 
-The project uses:
-- TypeScript for type safety
-- ESLint for code quality
-- Prettier for code formatting
-- Shadcn UI for component library
-- Next.js App Router for routing
-- Client-side wallet authentication
-- Local storage for data persistence
+This is a Next.js project bootstrapped with `create-next-app`.
 
-## License
+### Getting Started
 
-MIT License - feel free to use this code for your own projects!
+First, run the development server:
+
+```bash
+npm run dev
+# or
+yarn dev
 ```
 
-
-
-
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.

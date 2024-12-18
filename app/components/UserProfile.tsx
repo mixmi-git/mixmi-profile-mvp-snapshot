@@ -22,6 +22,14 @@ import { MediaSection } from "@/components/profile/MediaSection"
 import { ShopSection, ShopItem } from "@/components/profile/ShopSection"
 import ErrorBoundary from './ui/ErrorBoundary'
 import { StickerSection } from "@/components/profile/StickerSection"
+import { 
+  getMediaDisplayName, 
+  transformSoundCloudUrl, 
+  transformAppleMusicUrl, 
+  detectMediaType, 
+  transformMixcloudUrl,
+  transformInstagramUrl
+} from '@/lib/mediaUtils'
 
 /* eslint-disable react-hooks/exhaustive-deps */
 
@@ -58,7 +66,7 @@ export interface Project {
 export interface MediaItem {
   id: string;
   title?: string;
-  type: 'youtube' | 'soundcloud' | 'soundcloud-playlist' | 'spotify' | 'spotify-playlist' | 'apple-music-playlist' | 'apple-music-album';
+  type: 'youtube' | 'soundcloud' | 'soundcloud-playlist' | 'spotify' | 'spotify-playlist' | 'apple-music-playlist' | 'apple-music-album' | 'apple-music-station' | 'mixcloud' | 'instagram-reel' | 'tiktok';
   embedUrl?: string;
   rawUrl?: string;
 }
@@ -147,7 +155,6 @@ interface CropState {
 
 // Add this component before the main Component
 const MediaEmbed = memo(({ item }: { item: MediaItem }) => {
-  // Adjust aspect ratios for different media types
   const getAspectRatio = () => {
     switch (item.type) {
       case 'youtube':
@@ -164,6 +171,10 @@ const MediaEmbed = memo(({ item }: { item: MediaItem }) => {
         return 'pb-[175px]'  // Height for album
       case 'apple-music-playlist':
         return 'pb-[450px]'  // Height for playlist
+      case 'mixcloud':
+        return 'pb-[400px]'  // Height for Mixcloud shows
+      case 'instagram-reel':
+        return 'pb-[125%]'  // Instagram's aspect ratio
       default:
         return 'pb-[56.25%]'
     }
@@ -171,15 +182,24 @@ const MediaEmbed = memo(({ item }: { item: MediaItem }) => {
 
   switch (item.type) {
     case 'youtube':
+      // Extract video ID from full embed URL if needed
+      const videoId = item.id.includes('embed/') 
+        ? item.id.split('embed/')[1]
+        : item.id.replace('https://www.youtube.com/embed/', '');
+      
       return (
-        <div className="relative pb-[56.25%] h-0">
-          <iframe
-            className="absolute top-0 left-0 w-full h-full"
-            src={`https://www.youtube.com/embed/${item.id}`}
-            allow="autoplay; encrypted-media"
-            allowFullScreen
-            loading="lazy"
-          />
+        <div className="max-w-2xl mx-auto">
+          <div className="relative pb-[56.25%] h-0">
+            <iframe
+              className="absolute top-0 left-0 w-full h-full"
+              src={`https://www.youtube.com/embed/${videoId}`}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              loading="lazy"
+              title="YouTube video player"
+              frameBorder="0"
+            />
+          </div>
         </div>
       )
     case 'soundcloud':
@@ -235,6 +255,32 @@ const MediaEmbed = memo(({ item }: { item: MediaItem }) => {
             }}
             sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
             src={item.id}
+          />
+        </div>
+      )
+    case 'mixcloud':
+      return (
+        <div className={`relative ${getAspectRatio()} h-0`}>
+          <iframe
+            className="absolute top-0 left-0 w-full h-full"
+            src={item.id}
+            frameBorder="0"
+            allow="autoplay"
+            style={{ background: 'transparent' }}
+          />
+        </div>
+      )
+    case 'instagram-reel':
+      return (
+        <div className={`relative ${getAspectRatio()} h-0`}>
+          <iframe
+            className="absolute top-0 left-0 w-full h-full"
+            src={item.id}
+            frameBorder="0"
+            allowFullScreen
+            scrolling="no"
+            allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+            loading="lazy"
           />
         </div>
       )
@@ -328,23 +374,6 @@ const extractMediaId = (url: string, type: MediaItem['type']): string => {
     console.error('Error parsing URL:', error)
     return url
   }
-}
-
-// Add this helper function to detect media type from URL
-const detectMediaType = (url: string): MediaItem['type'] => {
-  if (url.includes('youtube.com') || url.includes('youtu.be')) {
-    return 'youtube'
-  }
-  if (url.includes('soundcloud.com')) {
-    return url.includes('/sets/') ? 'soundcloud-playlist' : 'soundcloud'
-  }
-  if (url.includes('spotify.com')) {
-    return url.includes('/playlist/') ? 'spotify-playlist' : 'spotify'
-  }
-  if (url.includes('music.apple.com')) {
-    return url.includes('/album/') ? 'apple-music-album' : 'apple-music-playlist'
-  }
-  return 'youtube' // default
 }
 
 const defaultStickerImage = "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/daisy-blue-1sqZRfemKwLyREL0Eo89EfmQUT5wst.png"
@@ -501,50 +530,24 @@ export default function Component(): JSX.Element {
   const [spotlightItems, setSpotlightItems] = useState<SpotlightItem[]>(exampleProjects)
   const [shopItems, setShopItems] = useState<ShopItem[]>([])
 
-  const handleLoginToggle = () => {
+  const handleLoginToggle = async () => {
     setIsTransitioning(true)
-    setTimeout(async () => {
-      try {
-        if (isAuthenticated) {
-          await disconnectWallet()
-          setProfile({
-            name: "Your Name",
-            title: "Your Role / Title",
-            bio: "Tell your story here...",
-            image: "/images/placeholder.png",
-            socialLinks: [
-              { platform: "youtube", url: "" },
-              { platform: "spotify", url: "" },
-              { platform: "soundcloud", url: "" },
-              { platform: "instagram", url: "" }
-            ],
-            sectionVisibility: {
-              projects: true,
-              media: true,
-              shop: true
-            },
-            spotlightDescription: ""
-          })
-          setProjects([])
-          setMediaItems([])
-          setSticker({ enabled: true, image: defaultStickerImage })
-          setSpotlightItems(exampleProjects)
-          setIsUsingExampleContent(true)
-          setShopItems([])
-          setIsEditing(false)
-          setShowCropDialog(false)
-          setTempImage('')
-          setImageError(null)
-        } else {
-          await connectWallet()
+    try {
+      if (isAuthenticated) {
+        await disconnectWallet()
+        resetProfileState()
+      } else {
+        await connectWallet()
+        const saved = loadFromLocalStorage()
+        if (saved) {
+          restoreProfileState(saved)
         }
-      } catch (error) {
-        console.error('Error handling wallet connection:', error)
-      } finally {
-        setImageLoading(false)
-        setIsTransitioning(false)
       }
-    }, 150)
+    } catch (error) {
+      console.error('Error handling wallet connection:', error)
+    } finally {
+      setIsTransitioning(false)
+    }
   }
 
   const debouncedSave = useCallback(
@@ -983,26 +986,96 @@ export default function Component(): JSX.Element {
 
   const [previewMode, setPreviewMode] = useState(true);
 
-  const handleMediaChange = async (index: number, field: string, value: string) => {
+  const handleMediaChange = (index: number, field: string, value: string) => {
     if (field === 'id' && value) {
-      const detectedType = detectMediaType(value)
+      console.log('UserProfile handling media change:', value);
+      
+      // Get the original URL from rawUrl or the value itself
+      const originalUrl = value.includes('embed') ? value.replace('/embed', '') : value;
+      const mediaType = detectMediaType(originalUrl);
+      
+      // Only proceed if we have a valid media type
+      if (mediaType === 'unknown') {
+        console.log('Unknown media type for URL:', originalUrl);
+        return;
+      }
+
+      let transformedUrl = value;
+
+      // Transform URL based on detected type
+      if (mediaType.includes('soundcloud')) {
+        transformedUrl = transformSoundCloudUrl(value);
+      } else if (mediaType.includes('apple-music')) {
+        transformedUrl = transformAppleMusicUrl(value);
+      } else if (mediaType === 'mixcloud') {
+        transformedUrl = transformMixcloudUrl(value);
+      } else if (mediaType === 'instagram-reel') {
+        transformedUrl = transformInstagramUrl(originalUrl);
+      }
+
+      console.log('Setting media type:', mediaType);
+      console.log('Setting transformed URL:', transformedUrl);
 
       setMediaItems(prev => prev.map((item, i) => {
         if (i === index) {
-          const extractedId = extractMediaId(value, detectedType)
           return {
             ...item,
-            type: detectedType,
-            id: extractedId,
-            rawUrl: value
-          }
+            type: mediaType,
+            id: transformedUrl,
+            rawUrl: originalUrl
+          };
         }
-        return item
-      }))
+        return item;
+      }));
     } else {
       setMediaItems(prev => prev.map((item, i) =>
         i === index ? { ...item, [field]: value } : item
-      ))
+      ));
+    }
+  };
+
+  // New helper functions
+  const resetProfileState = () => {
+    setProfile({
+      name: "Your Name",
+      title: "Your Role / Title",
+      bio: "Tell your story here...",
+      image: "/images/placeholder.png",
+      socialLinks: [
+        { platform: "youtube", url: "" },
+        { platform: "spotify", url: "" },
+        { platform: "soundcloud", url: "" },
+        { platform: "instagram", url: "" }
+      ],
+      sectionVisibility: {
+        projects: true,
+        media: true,
+        shop: true
+      },
+      spotlightDescription: ""
+    })
+    setProjects([])
+    setMediaItems([])
+    setSticker({ enabled: true, image: defaultStickerImage })
+    setSpotlightItems(exampleProjects)
+    setIsUsingExampleContent(true)
+    setShopItems([])
+    setIsEditing(false)
+    setShowCropDialog(false)
+    setTempImage('')
+    setImageError(null)
+    setImageLoading(false)
+  }
+
+  const restoreProfileState = (saved: any) => {
+    if (saved.profile) setProfile(saved.profile)
+    if (saved.projects) setProjects(saved.projects)
+    if (saved.mediaItems) setMediaItems(saved.mediaItems)
+    if (saved.sticker) setSticker(saved.sticker)
+    if (saved.shopItems) setShopItems(saved.shopItems)
+    if (saved.spotlightItems) {
+      setSpotlightItems(saved.spotlightItems)
+      setIsUsingExampleContent(false)
     }
   }
 
@@ -1274,10 +1347,63 @@ export default function Component(): JSX.Element {
                     <div className="space-y-8 pt-8 border-t border-gray-700">
                       <ErrorBoundary>
                         <ShopSection
-                          shopItems={displayShop}
-                          onShopItemChange={handleShopItemChange}
-                          onAddShopItem={addShopItem}
-                          onRemoveShopItem={removeShopItem}
+                          items={shopItems}
+                          onItemChange={(index, field, value) => {
+                            const updatedItems = [...shopItems];
+                            updatedItems[index] = {
+                              ...updatedItems[index],
+                              [field]: value,
+                              ...(field === 'storeUrl' ? {
+                                platform: (value.includes('shopify.com') ? 'shopify' :
+                                  value.includes('etsy.com') ? 'etsy' :
+                                  value.includes('gumroad.com') ? 'gumroad' :
+                                  value.includes('bigcartel.com') ? 'bigcartel' : 'other')
+                              } : {})
+                            };
+                            setShopItems(updatedItems);
+                            debouncedSave({
+                              profile,
+                              projects,
+                              mediaItems,
+                              sticker,
+                              shopItems: updatedItems,
+                              spotlightItems
+                            });
+                          }}
+                          onAddItem={() => {
+                            const newItems = [
+                              ...(isUsingExampleContent ? [] : shopItems),
+                              {
+                                id: Date.now(),
+                                title: '',
+                                storeUrl: '',
+                                image: '',
+                                platform: 'other'
+                              }
+                            ];
+                            setShopItems(newItems);
+                            setIsUsingExampleContent(false);
+                            debouncedSave({
+                              profile,
+                              projects,
+                              mediaItems,
+                              sticker,
+                              shopItems: newItems,
+                              spotlightItems
+                            });
+                          }}
+                          onRemoveItem={(index) => {
+                            const updatedItems = shopItems.filter((_, i) => i !== index);
+                            setShopItems(updatedItems);
+                            debouncedSave({
+                              profile,
+                              projects,
+                              mediaItems,
+                              sticker,
+                              shopItems: updatedItems,
+                              spotlightItems
+                            });
+                          }}
                           onImageChange={handleShopImageChange}
                           isEditing={true}
                           isUsingExampleContent={isUsingExampleContent}
@@ -1518,11 +1644,14 @@ export default function Component(): JSX.Element {
                             </Card>
                           ))
                         ) : (
-                          displayMedia.map((video, index) => (
-                            <Card key={index}>
-                              <MediaEmbed item={video} />
-                            </Card>
-                          ))
+                          displayMedia.map((video, index) => {
+                            console.log('Rendering media item:', video);
+                            return (
+                              <Card key={index}>
+                                <MediaEmbed item={video} />
+                              </Card>
+                            );
+                          })
                         )}
                       </div>
                     </div>
@@ -1538,11 +1667,11 @@ export default function Component(): JSX.Element {
                         </p>
                       )}
                       <ShopSection
-                        shopItems={displayShop}
-                        onShopItemChange={handleShopItemChange}
-                        onAddShopItem={addShopItem}
-                        onRemoveShopItem={removeShopItem}
-                        onImageChange={handleShopImageChange}
+                        items={displayShop}
+                        onItemChange={() => {}}
+                        onAddItem={() => {}}
+                        onRemoveItem={() => {}}
+                        onImageChange={() => {}}
                         isEditing={false}
                         isUsingExampleContent={isUsingExampleContent}
                       />

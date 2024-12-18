@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
 import { AppConfig, UserSession, showConnect } from '@stacks/connect'
+import { useCallback, useEffect, useState } from 'react'
 
 // Add interface for Stacks user data
 interface StacksUserData {
@@ -22,7 +22,7 @@ declare module '@stacks/connect' {
   }
 }
 
-const appConfig = new AppConfig(['store_write', 'publish_data'])
+const appConfig = new AppConfig(['store_write'])
 const userSession = new UserSession({ appConfig })
 
 export function useAuth() {
@@ -30,38 +30,34 @@ export function useAuth() {
   const [userAddress, setUserAddress] = useState<string | null>(null)
 
   useEffect(() => {
-    if (userSession.isSignInPending()) {
-      userSession.handlePendingSignIn().then((userData: StacksUserData) => {
-        setIsAuthenticated(true)
-        setUserAddress(userData.profile.stxAddress.mainnet)
-      })
-    } else if (userSession.isUserSignedIn()) {
+    // Check if user is signed in on mount
+    if (userSession.isUserSignedIn()) {
       const userData = userSession.loadUserData()
       setIsAuthenticated(true)
       setUserAddress(userData.profile.stxAddress.mainnet)
     }
   }, [])
 
-  const connectWallet = async () => {
+  const connectWallet = useCallback(async () => {
     showConnect({
       appDetails: {
-        name: 'Mixmi Profile',
+        name: 'Mixmi',
         icon: window.location.origin + '/favicon.ico',
       },
-      redirectTo: '/',
       onFinish: () => {
+        const userData = userSession.loadUserData()
         setIsAuthenticated(true)
-        window.location.reload()
+        setUserAddress(userData.profile.stxAddress.mainnet)
       },
       userSession,
     })
-  }
+  }, [])
 
-  const disconnectWallet = async () => {
-    userSession.signUserOut('/')
+  const disconnectWallet = useCallback(() => {
+    userSession.signUserOut()
     setIsAuthenticated(false)
-    setUserAddress(null)  // Clear the address on disconnect
-  }
+    setUserAddress(null)
+  }, [])
 
   return {
     isAuthenticated,
