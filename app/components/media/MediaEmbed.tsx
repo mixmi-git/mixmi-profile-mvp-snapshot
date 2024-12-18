@@ -93,25 +93,21 @@ export const MediaEmbed = memo(({ item }: { item: MediaItem }) => {
         </div>
       )
     case 'spotify':
-      return (
-        <div className="relative pb-[152px] h-0">
-          <iframe
-            className="absolute top-0 left-0 w-full h-full"
-            src={`https://open.spotify.com/embed/track/${item.id}`}
-            allow="encrypted-media"
-          />
-        </div>
-      )
     case 'spotify-playlist':
+      console.log('Spotify embed URL:', item.id);
       return (
         <div className="max-w-2xl mx-auto">
           <div className={`relative ${getAspectRatio()} h-0`}>
             <iframe
               className="absolute top-0 left-0 w-full h-full"
-              src={`https://open.spotify.com/embed/playlist/${item.id}`}
-              allow="encrypted-media"
+              src={item.id}
+              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
               loading="lazy"
-              style={{ background: 'transparent' }}
+              style={{ 
+                background: 'transparent',
+                borderRadius: '10px'
+              }}
+              frameBorder="0"
             />
           </div>
         </div>
@@ -141,7 +137,6 @@ export const MediaEmbed = memo(({ item }: { item: MediaItem }) => {
         </div>
       )
     case 'mixcloud':
-      console.log('Rendering as Mixcloud');
       return (
         <div className="max-w-2xl mx-auto">
           <div className={`relative ${getAspectRatio()} h-0`}>
@@ -150,7 +145,12 @@ export const MediaEmbed = memo(({ item }: { item: MediaItem }) => {
               src={item.id}
               frameBorder="0"
               allow="autoplay"
-              style={{ background: 'transparent' }}
+              loading="lazy"
+              style={{
+                background: 'transparent',
+                borderRadius: '10px'
+              }}
+              sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
             />
           </div>
         </div>

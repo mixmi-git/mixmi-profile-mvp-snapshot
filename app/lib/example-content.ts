@@ -27,17 +27,17 @@ export const exampleProjects: Project[] = [
 ]
 
 export const exampleMediaItems: MediaItem[] = [
-  { 
+  {
     id: '1HDScCZndSk',
     type: 'youtube',
-    rawUrl: 'https://www.youtube.com/watch?v=1HDScCZndSk',
-    title: 'Share Your Music & Videos'
+    title: 'Share Your Music & Videos',
+    rawUrl: 'https://www.youtube.com/watch?v=1HDScCZndSk'
   },
   {
-    id: '37i9dQZF1DXcBWIGoYBM5M',
+    id: 'https://open.spotify.com/embed/playlist/37i9dQZF1DXcBWIGoYBM5M?utm_source=generator',
     type: 'spotify-playlist',
-    rawUrl: 'https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M',
-    title: 'Add Your Playlists'
+    title: 'Add Your Playlists',
+    rawUrl: 'https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M'
   }
 ]
 

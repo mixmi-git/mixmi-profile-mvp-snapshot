@@ -95,9 +95,15 @@ export function MediaSection({
     <div className="space-y-8 pt-8 border-t border-gray-700">
       <div>
         <h3 className="text-xl font-semibold">Media</h3>
-        <p className="text-sm text-gray-400 mt-2">
-          Share your music, videos, and playlists from YouTube, SoundCloud, Spotify, and Apple Music.
-        </p>
+        {mediaItems.length === 0 ? (
+          <p className="text-sm text-gray-400 mt-2">
+            Share your music, videos, DJ mixes, and playlists from YouTube, SoundCloud, Mixcloud, Spotify and Apple Music. Supports all formats.
+          </p>
+        ) : (
+          <p className="text-sm text-gray-400 mt-2">
+            Share your music, DJ mixes, playlists and videos
+          </p>
+        )}
       </div>
       <Accordion type="single" collapsible className="w-full">
         {mediaItems.map((media, index) => (

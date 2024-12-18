@@ -28,7 +28,8 @@ import {
   transformAppleMusicUrl, 
   detectMediaType, 
   transformMixcloudUrl,
-  transformInstagramUrl
+  transformInstagramUrl,
+  transformSpotifyUrl
 } from '@/lib/mediaUtils'
 
 /* eslint-disable react-hooks/exhaustive-deps */
@@ -171,6 +172,8 @@ const MediaEmbed = memo(({ item }: { item: MediaItem }) => {
         return 'pb-[175px]'  // Height for album
       case 'apple-music-playlist':
         return 'pb-[450px]'  // Height for playlist
+      case 'apple-music-station':
+        return 'pb-[175px]'  // Height for station
       case 'mixcloud':
         return 'pb-[400px]'  // Height for Mixcloud shows
       case 'instagram-reel':
@@ -217,45 +220,46 @@ const MediaEmbed = memo(({ item }: { item: MediaItem }) => {
         </div>
       )
     case 'spotify':
-      return (
-        <div className="relative pb-[152px] h-0">
-          <iframe
-            className="absolute top-0 left-0 w-full h-full"
-            src={`https://open.spotify.com/embed/track/${item.id}`}
-            allow="encrypted-media"
-          />
-        </div>
-      )
     case 'spotify-playlist':
       return (
-        <div className={`relative ${getAspectRatio()} h-0`}>
-          <iframe
-            className="absolute top-0 left-0 w-full h-full"
-            src={`https://open.spotify.com/embed/playlist/${item.id}`}
-            allow="encrypted-media"
-            loading="lazy"
-            style={{ background: 'transparent' }}
-          />
+        <div className="max-w-2xl mx-auto">
+          <div className={`relative ${getAspectRatio()} h-0`}>
+            <iframe
+              className="absolute top-0 left-0 w-full h-full"
+              src={item.id}
+              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+              loading="lazy"
+              style={{ 
+                background: 'transparent',
+                borderRadius: '10px'
+              }}
+              frameBorder="0"
+            />
+          </div>
         </div>
       )
     case 'apple-music-album':
     case 'apple-music-playlist':
+    case 'apple-music-station':
       return (
-        <div className={`relative ${getAspectRatio()} h-0`}>
-          <iframe
-            className="absolute top-0 left-0 w-full h-full"
-            allow="autoplay *; encrypted-media *; fullscreen *"
-            frameBorder="0"
-            style={{
-              width: '100%',
-              maxWidth: '660px',
-              overflow: 'hidden',
-              background: 'transparent',
-              borderRadius: '10px'
-            }}
-            sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
-            src={item.id}
-          />
+        <div className="max-w-2xl mx-auto">
+          <div className={`relative ${getAspectRatio()} h-0`}>
+            <iframe
+              className="absolute top-0 left-0 w-full h-full"
+              allow="autoplay *; encrypted-media *; fullscreen *"
+              frameBorder="0"
+              height="450"
+              style={{
+                width: '100%',
+                maxWidth: '660px',
+                overflow: 'hidden',
+                background: 'transparent',
+                borderRadius: '10px'
+              }}
+              sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
+              src={item.id}
+            />
+          </div>
         </div>
       )
     case 'mixcloud':
@@ -1011,6 +1015,8 @@ export default function Component(): JSX.Element {
         transformedUrl = transformMixcloudUrl(value);
       } else if (mediaType === 'instagram-reel') {
         transformedUrl = transformInstagramUrl(originalUrl);
+      } else if (mediaType.includes('spotify')) {
+        transformedUrl = transformSpotifyUrl(value);
       }
 
       console.log('Setting media type:', mediaType);
@@ -1118,6 +1124,9 @@ export default function Component(): JSX.Element {
                     <h3 className="text-xl font-semibold">Profile Details</h3>
                     <div className="flex-grow border-t border-gray-700" />
                   </div>
+                  <p className="text-sm text-gray-400 mb-8">
+                    Welcome to your creative space! This is your personal corner of the web where you can showcase your work, share your media, and connect with your audience. Think of it as your own customizable mini-site with built-in marketplace features. Make it uniquely yours.
+                  </p>
                   <form
                     onSubmit={(e) => {
                       e.preventDefault()
@@ -1601,7 +1610,7 @@ export default function Component(): JSX.Element {
                       </h2>
                       {isUsingExampleContent && (
                         <p className="text-sm text-gray-400 text-center mb-12">
-                          Share projects, profiles, and collaborations
+                          Share your work and favorite projects
                         </p>
                       )}
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -1630,7 +1639,7 @@ export default function Component(): JSX.Element {
                       </h2>
                       {mediaItems.length === 0 && (
                         <p className="text-sm text-gray-400 text-center mb-12">
-                          Share your music, videos, and playlists from YouTube, Spotify, and more
+                          Share your music, DJ mixes, playlists and videos
                         </p>
                       )}
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -1645,7 +1654,7 @@ export default function Component(): JSX.Element {
                           ))
                         ) : (
                           displayMedia.map((video, index) => {
-                            console.log('Rendering media item:', video);
+                            console.log('Rendering media item in profile:', video);
                             return (
                               <Card key={index}>
                                 <MediaEmbed item={video} />
@@ -1663,7 +1672,7 @@ export default function Component(): JSX.Element {
                       </h2>
                       {shopItems.length === 0 && (
                         <p className="text-sm text-gray-400 text-center mb-12">
-                          Connect your store to showcase your products, merchandise, and token-gated content
+                          Share your products, merch, and token-gated content
                         </p>
                       )}
                       <ShopSection

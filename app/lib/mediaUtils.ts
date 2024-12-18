@@ -65,7 +65,7 @@ export const transformAppleMusicUrl = (url: string): string => {
       if (stationMatch) {
         const [, country, stationName, id] = stationMatch;
         console.log('Station match:', { country, stationName, id });
-        return `https://embed.music.apple.com/${country}/station/${id}?app=music`;
+        return `https://embed.music.apple.com/${country}/station/${stationName}/${id}?app=music`;
       }
     }
 
@@ -87,22 +87,43 @@ export const transformAppleMusicUrl = (url: string): string => {
 
 export const transformMixcloudUrl = (url: string): string => {
   try {
-    // Clean the URL
-    const cleanUrl = url.trim().replace(/^h+ttps:\/\//, 'https://');
+    // Clean the URL and remove trailing slash if present
+    const cleanUrl = url.trim()
+      .replace(/^h+ttps:\/\//, 'https://')
+      .replace(/^@/, '')
+      .replace(/\/$/, '')
+      .trim();
     
-    // If it's already a widget URL, return it
-    if (cleanUrl.includes('player-widget.mixcloud.com')) {
-      const srcMatch = cleanUrl.match(/src="([^"]+)"/);
-      return srcMatch ? srcMatch[1] : cleanUrl;
-    }
+    console.log('Processing Mixcloud URL:', cleanUrl);
 
     // If it's an iframe code, extract the src URL
     if (cleanUrl.includes('<iframe')) {
       const srcMatch = cleanUrl.match(/src="([^"]+)"/);
-      return srcMatch ? srcMatch[1] : url;
+      if (srcMatch) {
+        console.log('Extracted src from iframe:', srcMatch[1]);
+        return srcMatch[1];
+      }
+    }
+
+    // If it's already a widget URL, return it
+    if (cleanUrl.includes('widget/iframe')) {
+      return cleanUrl;
+    }
+
+    // Extract username and show name from URL
+    const match = cleanUrl.match(/mixcloud\.com\/([^\/]+)\/([^\/]+)/);
+    if (match) {
+      const [, username, showname] = match;
+      console.log('Mixcloud match:', { username, showname });
+      
+      // Using www.mixcloud.com with specific parameters
+      const widgetUrl = `https://www.mixcloud.com/widget/iframe/?hide_cover=1&dark=1&feed=${encodeURIComponent(`/${username}/${showname}/`)}`;
+      
+      console.log('Generated Mixcloud widget URL:', widgetUrl);
+      return widgetUrl;
     }
     
-    return cleanUrl;
+    return url;
   } catch (error) {
     console.error('Error transforming Mixcloud URL:', error);
     return url;
@@ -212,6 +233,45 @@ export const transformYouTubeUrl = (url: string): string => {
     return url;
   } catch (error) {
     console.error('Error transforming YouTube URL:', error);
+    return url;
+  }
+};
+
+export const transformSpotifyUrl = (url: string): string => {
+  try {
+    // Clean the URL and remove query parameters
+    const cleanUrl = url.trim()
+      .replace(/^h+ttps:\/\//, 'https://')
+      .replace(/^@/, '')
+      .split('?')[0]  // Remove query parameters
+      .trim();
+    
+    console.log('Processing Spotify URL:', cleanUrl);
+
+    // If it's already an embed URL, return it
+    if (cleanUrl.includes('embed/')) {
+      return cleanUrl;
+    }
+
+    // Extract track ID
+    const trackMatch = cleanUrl.match(/spotify\.com\/track\/([a-zA-Z0-9]+)/);
+    if (trackMatch) {
+      const [, trackId] = trackMatch;
+      console.log('Spotify track ID:', trackId);
+      return `https://open.spotify.com/embed/track/${trackId}?utm_source=generator`;
+    }
+
+    // Extract playlist ID
+    const playlistMatch = cleanUrl.match(/spotify\.com\/playlist\/([a-zA-Z0-9]+)/);
+    if (playlistMatch) {
+      const [, playlistId] = playlistMatch;
+      console.log('Spotify playlist ID:', playlistId);
+      return `https://open.spotify.com/embed/playlist/${playlistId}?utm_source=generator`;
+    }
+
+    return url;
+  } catch (error) {
+    console.error('Error transforming Spotify URL:', error);
     return url;
   }
 };

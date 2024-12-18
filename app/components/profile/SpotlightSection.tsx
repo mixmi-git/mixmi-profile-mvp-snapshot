@@ -238,7 +238,7 @@ export function SpotlightSection({
       <div>
         <h3 className="text-xl font-semibold">Spotlight</h3>
         <p className="text-sm text-gray-400 mt-2">
-          Share your work, collaborations, and featured content
+          Share anything you want to highlight - your work, collaborations, friends' projects, or inspiring content. Supports all image formats including GIFs.
         </p>
       </div>
       

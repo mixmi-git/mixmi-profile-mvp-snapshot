@@ -50,7 +50,7 @@ export function ShopSection({
       <div>
         <h3 className="text-xl font-semibold">Shop</h3>
         <p className="text-sm text-gray-400 mt-2">
-          Connect your online store from Shopify, Etsy, or other platforms to showcase your products, merchandise, and token-gated content
+          Share anything you want to sell - physical products, digital downloads, token-gated content, or Web3 experiences. Supports all major platforms and custom links.
         </p>
       </div>
 
