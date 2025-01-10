@@ -32,8 +32,7 @@ export function ShopSection({
   onAddItem,
   onRemoveItem,
   onImageChange,
-  isEditing,
-  isUsingExampleContent
+  isEditing
 }: ShopSectionProps) {
   if (!isEditing) {
     return (
@@ -46,14 +45,14 @@ export function ShopSection({
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4">
       <div>
         <h3 className="text-xl font-semibold">Shop</h3>
         <p className="text-sm text-gray-400 mt-2">
           Share anything you want to sell - physical products, digital downloads, token-gated content, or Web3 experiences. Supports all major platforms and custom links.
         </p>
       </div>
-
+      
       <div className="space-y-4">
         {items.length === 0 ? (
           <Button

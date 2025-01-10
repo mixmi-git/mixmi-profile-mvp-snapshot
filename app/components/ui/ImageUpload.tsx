@@ -1,108 +1,104 @@
-import React, { useState, useCallback } from 'react';
-import { useDropzone } from 'react-dropzone';
-import { Upload, X } from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import { Upload } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import Image from 'next/image';
 
 interface ImageUploadProps {
-  aspectRatio?: number;
-  maxSize?: number; // in bytes
   onImageUploaded: (file: File) => void;
-  allowedTypes?: string[]; // e.g. ['image/jpeg', 'image/png']
-  currentImage?: string; // Add this prop
+  currentImage?: string;
+  className?: string;
 }
 
-const ImageUpload: React.FC<ImageUploadProps> = ({
-  maxSize = 5 * 1024 * 1024, // 5MB default
-  onImageUploaded,
-  allowedTypes = ['image/jpeg', 'image/png', 'image/gif'],
-  currentImage
-}) => {
-  const [preview, setPreview] = useState<string | null>(currentImage || null);
+export default function ImageUpload({ onImageUploaded, currentImage, className }: ImageUploadProps) {
+  const [isDragActive, setIsDragActive] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    try {
-      const file = acceptedFiles[0];
-      if (file) {
-        console.log('Attempting to upload file:', {
-          size: `${(file.size / (1024 * 1024)).toFixed(1)}MB`,
-          type: file.type,
-          maxAllowedSize: `${maxSize / (1024 * 1024)}MB`
-        });
-        
-        if (file.size > maxSize) {
-          const error = new Error(`File is too large. Maximum size is ${maxSize / (1024 * 1024)}MB. Your file is ${(file.size / (1024 * 1024)).toFixed(1)}MB`);
-          console.error('Size error:', error);
-          throw error;
-        }
-
-        if (!allowedTypes.includes(file.type)) {
-          const error = new Error(`File type ${file.type} is not supported. Supported types: ${allowedTypes.join(', ')}`);
-          console.error('Type error:', error);
-          throw error;
-        }
-
-        setPreview(URL.createObjectURL(file));
-        onImageUploaded(file);
-      }
-    } catch (error) {
-      console.error('Error in onDrop:', error);
-      throw error;
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setIsDragActive(true);
+    } else if (e.type === "dragleave") {
+      setIsDragActive(false);
     }
-  }, [maxSize, allowedTypes, onImageUploaded]);
+  };
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    // Remove the accept and maxSize from here to handle in onDrop
-    multiple: false,
-    noClick: false,
-    noKeyboard: false
-  });
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragActive(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      const file = e.dataTransfer.files[0];
+      handleFile(file);
+    }
+  };
 
-  const removeImage = () => {
-    setPreview(null);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      handleFile(file);
+    }
+  };
+
+  const handleFile = (file: File) => {
+    const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+
+    if (!validTypes.includes(file.type)) {
+      alert('Please upload an image file (JPEG, PNG, GIF, or WebP)');
+      return;
+    }
+
+    if (file.size > maxSize) {
+      alert('File size must be less than 5MB');
+      return;
+    }
+
+    onImageUploaded(file);
   };
 
   return (
-    <div className="w-full">
-      {!preview ? (
-        <div
-          {...getRootProps()}
-          className={`border-2 border-dashed rounded-lg p-6 cursor-pointer transition-colors
-            ${isDragActive 
-              ? 'border-blue-500 bg-blue-50/10' 
-              : 'border-gray-600 hover:border-gray-500'
-            }`}
-        >
-          <input {...getInputProps()} />
-          <div className="flex flex-col items-center justify-center gap-2">
-            <Upload className="w-8 h-8 text-gray-400" />
-            <p className="text-sm text-gray-400 text-center">
-              {isDragActive
-                ? "Drop the image here"
-                : "Drag & drop an image here, or click to select"}
-            </p>
-            <p className="text-xs text-gray-500">
-              Supports JPG, PNG and GIF up to 5MB
-            </p>
-          </div>
-        </div>
+    <div 
+      className={cn(
+        "relative flex items-center justify-center w-full min-h-[200px] border-2 border-dashed rounded-lg cursor-pointer bg-gray-800/50 border-gray-600 hover:border-gray-500",
+        isDragActive && "border-blue-500",
+        className
+      )}
+      onDragEnter={handleDrag}
+      onDragOver={handleDrag}
+      onDragLeave={handleDrag}
+      onDrop={handleDrop}
+      onClick={() => inputRef.current?.click()}
+    >
+      <input
+        ref={inputRef}
+        type="file"
+        className="hidden"
+        onChange={handleChange}
+        accept="image/jpeg,image/png,image/gif,image/webp"
+      />
+      
+      {currentImage ? (
+        <Image
+          src={currentImage}
+          alt="Uploaded preview"
+          className="object-cover rounded-lg"
+          fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        />
       ) : (
-        <div className="relative">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={preview}
-            alt="Preview"
-            className="max-h-48 rounded-lg object-contain"
-          />
-          <button
-            onClick={removeImage}
-            className="absolute top-2 right-2 p-1 bg-red-500 rounded-full text-white hover:bg-red-600"
-          >
-            <X className="w-4 h-4" />
-          </button>
+        <div className="text-center p-6">
+          <Upload className="mx-auto h-8 w-8 text-gray-400" />
+          <p className="mt-2 text-sm text-gray-400">
+            Drop image here or click to upload
+          </p>
+          <p className="mt-1 text-xs text-gray-500">
+            JPEG, PNG, GIF, or WebP up to 5MB
+          </p>
         </div>
       )}
     </div>
   );
-};
-
-export default ImageUpload; 
+} 

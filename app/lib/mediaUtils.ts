@@ -237,41 +237,22 @@ export const transformYouTubeUrl = (url: string): string => {
   }
 };
 
-export const transformSpotifyUrl = (url: string): string => {
-  try {
-    // Clean the URL and remove query parameters
-    const cleanUrl = url.trim()
-      .replace(/^h+ttps:\/\//, 'https://')
-      .replace(/^@/, '')
-      .split('?')[0]  // Remove query parameters
-      .trim();
-    
-    console.log('Processing Spotify URL:', cleanUrl);
-
-    // If it's already an embed URL, return it
-    if (cleanUrl.includes('embed/')) {
-      return cleanUrl;
-    }
-
-    // Extract track ID
-    const trackMatch = cleanUrl.match(/spotify\.com\/track\/([a-zA-Z0-9]+)/);
-    if (trackMatch) {
-      const [, trackId] = trackMatch;
-      console.log('Spotify track ID:', trackId);
-      return `https://open.spotify.com/embed/track/${trackId}?utm_source=generator`;
-    }
-
-    // Extract playlist ID
-    const playlistMatch = cleanUrl.match(/spotify\.com\/playlist\/([a-zA-Z0-9]+)/);
-    if (playlistMatch) {
-      const [, playlistId] = playlistMatch;
-      console.log('Spotify playlist ID:', playlistId);
-      return `https://open.spotify.com/embed/playlist/${playlistId}?utm_source=generator`;
-    }
-
-    return url;
-  } catch (error) {
-    console.error('Error transforming Spotify URL:', error);
-    return url;
+export function transformSpotifyUrl(url: string): string {
+  // Handle iframe code
+  if (url.includes('<iframe')) {
+    const srcMatch = url.match(/src="([^"]+)"/);
+    return srcMatch ? srcMatch[1] : url;
   }
-};
+
+  // Clean and standardize the URL
+  const cleanUrl = url.trim().replace(/\/$/, '');
+
+  // Extract the Spotify ID and type
+  const match = cleanUrl.match(/spotify\.com\/(track|playlist|album)\/([a-zA-Z0-9]+)/);
+  if (!match) return url;
+
+  const [, type, id] = match;
+  
+  // Return the appropriate embed URL
+  return `https://open.spotify.com/embed/${type}/${id}`;
+}

@@ -32,6 +32,7 @@ interface SpotlightSectionProps {
   onRemoveItem: (index: number) => void
   onImageChange: (index: number, file: File | null) => void
   isEditing?: boolean
+  isUsingExampleContent?: boolean
 }
 
 interface SpotlightError {
@@ -42,7 +43,7 @@ interface SpotlightError {
 }
 
 const renderEditForm = (item: SpotlightItem, index: number, errors: SpotlightError[], handlers: {
-  handleFieldChange: (index: number, field: string, value: string) => void
+  handleFieldChange: (index: number, field: keyof SpotlightItem, value: string) => void
   handleImageUpload: (index: number, file: File | null) => void
   onRemoveItem: (index: number) => void
 }) => {
@@ -185,7 +186,7 @@ export function SpotlightSection({
 }: SpotlightSectionProps) {
   const [errors, setErrors] = useState<SpotlightError[]>([]);
 
-  const handleFieldChange = (index: number, field: string, value: string) => {
+  const handleFieldChange = (index: number, field: keyof SpotlightItem, value: string) => {
     const validation = validateSpotlightItem(field, value);
     
     setErrors(prev => {
@@ -234,27 +235,29 @@ export function SpotlightSection({
   }
 
   return (
-    <div className="space-y-8">
-      <div>
+    <div className="space-y-4">
+      <div className="flex flex-col gap-2">
         <h3 className="text-xl font-semibold">Spotlight</h3>
-        <p className="text-sm text-gray-400 mt-2">
-          Share anything you want to highlight - your work, collaborations, friends' projects, or inspiring content. Supports all image formats including GIFs.
+        <p className="text-sm text-gray-400">
+          Share anything you want to highlight - your work, collaborations, friends&apos; projects, or inspiring content. Supports all image formats including GIFs.
         </p>
       </div>
       
-      <Accordion type="single" collapsible>
-        {items.map((item, index) => (
-          <AccordionItem key={item.id} value={`spotlight-${index}`}>
-            {renderEditForm(item, index, errors, {
-              handleFieldChange,
-              handleImageUpload,
-              onRemoveItem
-            })}
-          </AccordionItem>
-        ))}
-      </Accordion>
+      {items.length > 0 && (
+        <Accordion type="single" collapsible className="space-y-2">
+          {items.map((item, index) => (
+            <AccordionItem key={item.id} value={`spotlight-${index}`}>
+              {renderEditForm(item, index, errors, {
+                handleFieldChange,
+                handleImageUpload,
+                onRemoveItem
+              })}
+            </AccordionItem>
+          ))}
+        </Accordion>
+      )}
       
-      <Button type="button" onClick={onAddItem} className="mt-2">
+      <Button type="button" onClick={onAddItem}>
         <Plus className="w-4 h-4 mr-2" /> Add Item
       </Button>
     </div>

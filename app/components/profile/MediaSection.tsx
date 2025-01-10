@@ -7,17 +7,17 @@ import { Label } from "@/components/ui/label"
 import { Plus, Trash2 } from "lucide-react"
 import { getMediaDisplayName, transformSoundCloudUrl, transformAppleMusicUrl, detectMediaType, transformMixcloudUrl, transformInstagramUrl, transformTikTokUrl, transformYouTubeUrl } from '@/lib/mediaUtils'
 import {
-  Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
+  Accordion,
 } from "@/components/ui/accordion"
 import { MediaEmbed } from "@/components/media/MediaEmbed"
 
 interface MediaItem {
   id: string
   title?: string
-  type: 'youtube' | 'soundcloud' | 'soundcloud-playlist' | 'spotify' | 'spotify-playlist' | 'apple-music-playlist' | 'apple-music-album' | 'apple-music-station' | 'mixcloud' | 'instagram-reel' | 'tiktok'
+  type: 'youtube' | 'soundcloud' | 'soundcloud-playlist' | 'spotify' | 'spotify-playlist' | 'apple-music-playlist' | 'apple-music-album' | 'apple-music-station' | 'mixcloud'
   embedUrl?: string
   rawUrl?: string
 }
@@ -92,27 +92,22 @@ export function MediaSection({
   };
 
   return (
-    <div className="space-y-8 pt-8 border-t border-gray-700">
+    <div className="space-y-4">
       <div>
         <h3 className="text-xl font-semibold">Media</h3>
-        {mediaItems.length === 0 ? (
-          <p className="text-sm text-gray-400 mt-2">
-            Share your music, videos, DJ mixes, and playlists from YouTube, SoundCloud, Mixcloud, Spotify and Apple Music. Supports all formats.
-          </p>
-        ) : (
-          <p className="text-sm text-gray-400 mt-2">
-            Share your music, DJ mixes, playlists and videos
-          </p>
-        )}
+        <p className="text-sm text-gray-400 mt-2">
+          Share your music, videos, DJ mixes, and playlists from YouTube, SoundCloud, Mixcloud, Spotify and Apple Music. Supports all formats.
+        </p>
       </div>
-      <Accordion type="single" collapsible className="w-full">
+      
+      <Accordion type="single" collapsible className="space-y-2">
         {mediaItems.map((media, index) => (
           <AccordionItem key={index} value={`media-${index}`}>
             <AccordionTrigger className="text-left">
               {media.id ? getMediaDisplayName(media.rawUrl || '') : `New Media`}
             </AccordionTrigger>
             <AccordionContent>
-              <Card className="mb-4 p-4 bg-gray-700">
+              <Card className="mb-4 p-4">
                 <CardContent className="space-y-4">
                   <div>
                     <Label htmlFor={`media-url-${index}`}>Media URL</Label>
@@ -129,16 +124,11 @@ export function MediaSection({
                       />
                       <p className="text-sm text-gray-400">
                         Supports: 
-                        • YouTube, Spotify, SoundCloud, Apple Music (plays directly on your profile)
-                        • Instagram Reels, TikTok videos (links to original platform)
-                        <br/>
-                        For TikTok: Share > Copy Link
-                        <br/>
-                        For SoundCloud: Click Share > Embed > Copy the entire embed code
+                        • YouTube, Spotify, SoundCloud, Apple Music, and Mixcloud
                       </p>
                     </div>
                     {media.id && (
-                      <div className="mt-4 border border-gray-700 rounded-lg overflow-hidden">
+                      <div className="mt-4 overflow-hidden">
                         <MediaEmbed item={{
                           ...media,
                           id: media.type === 'youtube' ? media.id.replace('https://www.youtube.com/embed/', '') : media.id
@@ -155,7 +145,8 @@ export function MediaSection({
           </AccordionItem>
         ))}
       </Accordion>
-      <Button type="button" onClick={onAddMedia} className="mt-2">
+      
+      <Button type="button" onClick={onAddMedia}>
         <Plus className="w-4 h-4 mr-2" /> Add Media
       </Button>
     </div>

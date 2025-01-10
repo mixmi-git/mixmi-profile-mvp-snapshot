@@ -23,14 +23,13 @@ import { ShopSection, ShopItem } from "@/components/profile/ShopSection"
 import ErrorBoundary from './ui/ErrorBoundary'
 import { StickerSection } from "@/components/profile/StickerSection"
 import { 
-  getMediaDisplayName, 
   transformSoundCloudUrl, 
   transformAppleMusicUrl, 
   detectMediaType, 
   transformMixcloudUrl,
-  transformInstagramUrl,
   transformSpotifyUrl
 } from '@/lib/mediaUtils'
+import { MediaItem, MediaType } from '@/types/media'
 
 /* eslint-disable react-hooks/exhaustive-deps */
 
@@ -152,6 +151,10 @@ interface CropState {
   aspect: number;
   imageRef: HTMLImageElement | null;
   completedCrop: CropType | null;
+}
+
+interface FileWithPreview extends File {
+  preview?: string;
 }
 
 // Add this component before the main Component
@@ -325,7 +328,8 @@ function Navbar({ isAuthenticated, onLoginToggle }: NavbarProps) {
   )
 }
 
-// Add these helper functions
+// Comment out unused functions for future reference
+/*
 const extractMediaId = (url: string, type: MediaItem['type']): string => {
   try {
     switch (type) {
@@ -379,6 +383,7 @@ const extractMediaId = (url: string, type: MediaItem['type']): string => {
     return url
   }
 }
+*/
 
 const defaultStickerImage = "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/daisy-blue-1sqZRfemKwLyREL0Eo89EfmQUT5wst.png"
 
@@ -568,85 +573,36 @@ export default function Component(): JSX.Element {
     []
   )
 
-  const handleImageChange = async (file: File | null) => {
+  const handleImageChange = async (file: FileWithPreview | null) => {
+    if (!file) return;
+    
     try {
-      if (!file) return
-
-      setImageError(null)
-      setImageLoading(true)
-
-      const isGif = file.type === 'image/gif'
-      const isValidImage = file.type.startsWith('image/')
-
-      if (!isValidImage) {
-        setImageError("Please upload an image file")
-        setImageLoading(false)
-        return
-      }
-
-      if (isGif) {
-        try {
-          if (file.size > 5 * 1024 * 1024) {
-            setImageError("GIF must be less than 5MB")
-            setImageLoading(false)
-            return
-          }
-
-          const reader = new FileReader()
-          reader.onloadend = () => {
-            setProfile(prev => ({ ...prev, image: reader.result as string }))
-            setImageLoading(false)
-          }
-          reader.readAsDataURL(file)
-        } catch {
-          setImageError("Failed to process GIF. Please try again.")
-          setImageLoading(false)
-        }
-        return
-      }
-
-      try {
-        const reader = new FileReader()
-        reader.onloadend = () => {
-          const img = document.createElement('img')
-          img.onload = () => {
-            const isSquare = img.width === img.height
-
-            setCropState(prev => ({
-              ...prev,
-              crop: {
-                unit: '%',
-                width: isSquare ? 100 : 90,
-                height: isSquare ? 100 : 90,
-                x: isSquare ? 0 : 5,
-                y: isSquare ? 0 : 5,
-                aspect: 1
-              },
-              imageRef: null
-            }))
-
-            setTempImage(reader.result as string)
-            setShowCropDialog(true)
-            setImageLoading(false)
-          }
-          img.src = reader.result as string
-        }
-        reader.onerror = () => {
-          setImageError("Failed to read file")
-          setImageLoading(false)
-        }
-        reader.readAsDataURL(file)
-      } catch {
-        console.error('Error handling image')
-        setImageError('Failed to process image. Please try again.')
-        setImageLoading(false)
-      }
-    } catch {
-      console.error('Error handling image')
-      setImageError('Failed to process image. Please try again.')
-      setImageLoading(false)
+      // Create a local URL for the file
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const imageUrl = reader.result as string;
+        setProfile(prev => ({
+          ...prev,
+          image: imageUrl
+        }));
+        
+        debouncedSave({
+          profile: {
+            ...profile,
+            image: imageUrl
+          },
+          projects,
+          mediaItems,
+          sticker,
+          shopItems,
+          spotlightItems
+        });
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('Error handling image:', error);
     }
-  }
+  };
 
   const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -948,7 +904,8 @@ export default function Component(): JSX.Element {
     }
   };
 
-  // Add back the shop handling functions
+  // Comment out unused shop functions for future reference
+  /*
   const handleShopItemChange = (index: number, field: string, value: string) => {
     const updatedItems = shopItems.map((item, i) =>
       i === index ? {
@@ -974,7 +931,7 @@ export default function Component(): JSX.Element {
     })
   }
 
-  const addShopItem = useCallback(() => {
+  const addShopItem = () => {
     setShopItems(prev => [...prev, {
       id: Date.now().toString(),
       title: '',
@@ -982,62 +939,31 @@ export default function Component(): JSX.Element {
       image: '',
       platform: 'other'
     }])
-  }, []);
+  }
 
   const removeShopItem = (index: number) => {
     setShopItems(prev => prev.filter((_, i) => i !== index))
   }
+  */
 
   const [previewMode, setPreviewMode] = useState(true);
 
   const handleMediaChange = (index: number, field: string, value: string) => {
-    if (field === 'id' && value) {
-      console.log('UserProfile handling media change:', value);
-      
-      // Get the original URL from rawUrl or the value itself
-      const originalUrl = value.includes('embed') ? value.replace('/embed', '') : value;
-      const mediaType = detectMediaType(originalUrl);
-      
-      // Only proceed if we have a valid media type
-      if (mediaType === 'unknown') {
-        console.log('Unknown media type for URL:', originalUrl);
-        return;
-      }
-
-      let transformedUrl = value;
-
-      // Transform URL based on detected type
-      if (mediaType.includes('soundcloud')) {
-        transformedUrl = transformSoundCloudUrl(value);
-      } else if (mediaType.includes('apple-music')) {
-        transformedUrl = transformAppleMusicUrl(value);
-      } else if (mediaType === 'mixcloud') {
-        transformedUrl = transformMixcloudUrl(value);
-      } else if (mediaType === 'instagram-reel') {
-        transformedUrl = transformInstagramUrl(originalUrl);
-      } else if (mediaType.includes('spotify')) {
-        transformedUrl = transformSpotifyUrl(value);
-      }
-
-      console.log('Setting media type:', mediaType);
-      console.log('Setting transformed URL:', transformedUrl);
-
-      setMediaItems(prev => prev.map((item, i) => {
-        if (i === index) {
-          return {
-            ...item,
-            type: mediaType,
-            id: transformedUrl,
-            rawUrl: originalUrl
-          };
-        }
-        return item;
-      }));
+    const updatedItems = [...mediaItems];
+    if (field === 'type') {
+      (updatedItems[index] as MediaItem).type = value as MediaType;
     } else {
-      setMediaItems(prev => prev.map((item, i) =>
-        i === index ? { ...item, [field]: value } : item
-      ));
+      (updatedItems[index] as any)[field] = value;
     }
+    setMediaItems(updatedItems);
+    debouncedSave({
+      profile,
+      projects,
+      mediaItems: updatedItems,
+      sticker,
+      shopItems,
+      spotlightItems
+    });
   };
 
   // New helper functions
@@ -1121,7 +1047,7 @@ export default function Component(): JSX.Element {
               {isAuthenticated && isEditing ? (
                 <div className="space-y-8 rounded-lg bg-gray-800/50 p-6">
                   <div className="flex items-center gap-4 mb-4">
-                    <h3 className="text-xl font-semibold">Profile Details</h3>
+                    <h3 className="text-2xl font-bold text-cyan-300">Profile Details</h3>
                     <div className="flex-grow border-t border-gray-700" />
                   </div>
                   <p className="text-sm text-gray-400 mb-8">
@@ -1420,7 +1346,7 @@ export default function Component(): JSX.Element {
                       </ErrorBoundary>
                     </div>
 
-                    <div className="space-y-8 pt-8 border-t border-gray-700">
+                    <div className="space-y-8">
                       <ErrorBoundary>
                         <StickerSection
                           sticker={sticker}
