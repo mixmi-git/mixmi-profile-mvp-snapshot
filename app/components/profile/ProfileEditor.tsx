@@ -798,12 +798,12 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
             <div
               onDragOver={handleDragOver}
               onDrop={handleDrop}
-              className="border border-dashed border-gray-600 rounded-lg p-6 flex flex-col items-center justify-center hover:border-gray-500 transition-colors cursor-pointer"
+              className="border border-dashed border-gray-600 rounded-lg p-8 flex flex-col items-center justify-center hover:border-gray-500 transition-colors cursor-pointer h-full"
               onClick={() => fileInputRef.current?.click()}
             >
               {formValues.image && formValues.image !== '/images/placeholder.png' ? (
                 <>
-                  <div className="relative w-32 h-32 overflow-hidden rounded-xl mb-5 border-2 border-cyan-600">
+                  <div className="relative w-32 h-32 overflow-hidden rounded-xl mb-6 border-2 border-cyan-600">
                     <img 
                       src={formValues.image} 
                       alt="Profile" 
@@ -824,13 +824,13 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
                     </div>
                   </div>
                   
-                  <p className="text-xs text-gray-400 mt-1 mb-4">
+                  <p className="text-xs text-gray-400 mt-1 mb-6">
                     Profile images display with rounded corners.
                   </p>
                 </>
               ) : (
                 <>
-                  <div className="relative w-32 h-32 overflow-hidden rounded-xl mb-5 border-2 border-gray-600 bg-gray-800">
+                  <div className="relative w-32 h-32 overflow-hidden rounded-xl mb-6 border-2 border-gray-600 bg-gray-800">
                     <div className="absolute inset-0 flex items-center justify-center">
                       <Upload className="h-8 w-8 text-gray-500" />
                     </div>
@@ -843,8 +843,8 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
                 </>
               )}
               
-              <p className="text-gray-300 text-sm mb-2">Drag and drop an image here or upload</p>
-              <p className="text-gray-400 text-xs mb-4">Supports JPG, PNG, and GIFs under 5MB</p>
+              <p className="text-gray-300 text-sm mb-3">Drag and drop an image here or upload</p>
+              <p className="text-gray-400 text-xs mb-6">Supports JPG, PNG, and GIFs under 5MB</p>
               
               <button
                 type="button"
