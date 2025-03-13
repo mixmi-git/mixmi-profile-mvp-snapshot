@@ -13,14 +13,7 @@ import {
   Accordion,
 } from "@/components/ui/accordion"
 import { MediaEmbed } from "@/components/media/MediaEmbed"
-
-interface MediaItem {
-  id: string
-  title?: string
-  type: 'youtube' | 'soundcloud' | 'soundcloud-playlist' | 'spotify' | 'spotify-playlist' | 'apple-music-playlist' | 'apple-music-album' | 'apple-music-station' | 'mixcloud'
-  embedUrl?: string
-  rawUrl?: string
-}
+import { MediaItem } from '@/types/media'
 
 interface MediaSectionProps {
   mediaItems: MediaItem[]

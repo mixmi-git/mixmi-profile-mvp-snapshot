@@ -14,7 +14,6 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { debounce } from "lodash"
 import ReactCrop, { Crop as CropType } from 'react-image-crop'
 import 'react-image-crop/dist/ReactCrop.css'
-import { useAuthState } from "@/hooks/useAuthState"
 import { exampleProjects, exampleMediaItems, exampleShopItems } from '@/lib/example-content'
 import { SocialLinks } from "@/components/profile/SocialLinks"
 import { SpotlightSection } from "@/components/profile/SpotlightSection"
@@ -29,11 +28,22 @@ import {
   transformMixcloudUrl,
   transformSpotifyUrl
 } from '@/lib/mediaUtils'
-import { MediaType } from '@/types/media'
+import { MediaItem, MediaType } from '@/types/media'
 import { useProfileState } from '@/hooks/useProfileState'
-import { NavbarContainer } from '@/components/profile/NavbarContainer'
-import { useAuth } from '@/lib/auth'
-import { AuthDebug } from './AuthDebug'
+import { useMediaState } from '@/hooks/useMediaState'
+import { useAuthState } from '@/hooks/useAuthState'
+import { Navbar } from '@/components/profile/Navbar'
+import { 
+  Project, 
+  SpotlightItem, 
+  ShopItem, 
+  Profile, 
+  SocialLink, 
+  SectionVisibility, 
+  FormError, 
+  FormErrors,
+  Sticker
+} from '@/types/content'
 
 /* eslint-disable react-hooks/exhaustive-deps */
 
@@ -52,76 +62,6 @@ const TikTokIcon = () => (
 interface NavbarProps {
   isAuthenticated: boolean;
   onLoginToggle: () => void;
-}
-
-interface SocialLink {
-  platform: string;
-  url: string;
-}
-
-export interface Project {
-  id: string;
-  title: string;
-  description: string;
-  image: string;
-}
-
-export interface SpotlightItem {
-  id: number | string;
-  title: string;
-  description: string;
-  image: string;
-  link?: string;
-}
-
-export interface ShopItem {
-  id: string;
-  title: string;
-  storeUrl: string;
-  image: string;
-  platform: 'shopify' | 'etsy' | 'gumroad' | 'bigcartel' | 'other';
-}
-
-export interface MediaItem {
-  id: string;
-  title?: string;
-  type: 'youtube' | 'soundcloud' | 'soundcloud-playlist' | 'spotify' | 'spotify-playlist' | 'apple-music-playlist' | 'apple-music-album' | 'apple-music-station' | 'mixcloud' | 'instagram-reel' | 'tiktok';
-  embedUrl?: string;
-  rawUrl?: string;
-}
-
-export interface Profile {
-  name: string;
-  title: string;
-  bio: string;
-  image: string;
-  socialLinks: SocialLink[];
-  sectionVisibility: {
-    projects: boolean;
-    media: boolean;
-    shop: boolean;
-  };
-  spotlightDescription: string;
-}
-
-// Update the FormErrors interface to be more specific
-interface FormErrors {
-  name: {
-    message: string;
-    isValid: boolean;
-  };
-  title: {
-    message: string;
-    isValid: boolean;
-  };
-  bio: {
-    message: string;
-    isValid: boolean;
-  };
-  socialLinks: {
-    message: string;
-    isValid: boolean;
-  }[];
 }
 
 // Add validation rules
@@ -159,17 +99,12 @@ const validateProfile = (field: string, value: string): { isValid: boolean; mess
   }
 };
 
-interface Sticker {
-  enabled: boolean;
-  image: string;
-}
-
-// Add these interfaces
-interface CropState {
-  crop: CropType;
-  aspect: number;
-  imageRef: HTMLImageElement | null;
-  completedCrop: CropType | null;
+interface Crop {
+  unit: 'px' | '%';
+  width: number;
+  height: number;
+  x: number;
+  y: number;
 }
 
 interface FileWithPreview extends File {
@@ -353,141 +288,76 @@ const ProjectCard = ({ project }: { project: Project }) => {
 };
 
 export default function Component(): JSX.Element {
-  // Get authentication state directly from useAuth
-  const { isAuthenticated, userAddress, connectWallet, disconnectWallet, isInitialized, refreshAuthState } = useAuth()
-  
-  // Add a local state to track the auth state for rendering purposes
-  // TEMPORARY FIX: Always set to true to ensure Edit Profile button is visible
-  const [isAuthenticatedLocal, setIsAuthenticatedLocal] = useState(true)
-  
-  // State for editing mode
-  const [isEditing, setIsEditing] = useState(false)
-  
-  // IMPORTANT: Force check authentication on mount
-  useEffect(() => {
-    console.log('%c AUTH DIRECT CHECK ON MOUNT', 'background-color: #0f172a; color: #f97316; font-size: 14px; padding: 4px;');
-    
-    // Force a refresh of the auth state immediately
-    refreshAuthState();
-    
-    // Then force a direct check from the auth provider
-    setTimeout(() => {
-      // Force update the local state based on the auth state
-      const hasWalletAddress = typeof userAddress === 'string' && userAddress.trim() !== '';
-      const isUserAuthenticated = isAuthenticated === true || hasWalletAddress;
-      
-      console.log('%c FORCE AUTH UPDATE:', 'background-color: #0f172a; color: #f97316; font-size: 14px; padding: 4px;', {
-        isUserAuthenticated,
-        isAuthenticated,
-        hasWalletAddress,
-        userAddress
-      });
-      
-      // Force set the authenticated state
-      setIsAuthenticatedLocal(isUserAuthenticated);
-    }, 500);
-  }, [refreshAuthState, userAddress, isAuthenticated]);
-  
-  // Add enhanced debugging for authentication state
-  useEffect(() => {
-    // More prominent logging to track auth state changes
-    console.log('%c AUTH STATE IN USERPROFILE:', 'background-color: #0f172a; color: #06b6d4; font-size: 14px; padding: 4px;', { 
-      isAuthenticated, 
-      userAddress,
-      isInitialized,
-      isEditing,
-      time: new Date().toISOString()
-    })
-    
-    // Set our local authentication state with more thorough checks
-    // Consider user authenticated if isAuthenticated is true OR we have a non-empty wallet address
-    const hasWalletAddress = typeof userAddress === 'string' && userAddress.trim() !== '';
-    const isUserAuthenticated = isAuthenticated === true || hasWalletAddress;
-    
-    console.log('%c AUTH LOCAL STATE UPDATE:', 'background-color: #0f172a; color: #22c55e; font-size: 12px; padding: 3px;', { 
-      isUserAuthenticated,
-      isAuthenticated,
-      hasWalletAddress,
-      userAddress
-    });
-    
-    setIsAuthenticatedLocal(isUserAuthenticated);
-  }, [isAuthenticated, userAddress, isInitialized, isEditing]);
-  
-  // Add a polling mechanism to regularly check auth state
-  useEffect(() => {
-    const interval = setInterval(() => {
-      // Refresh auth state every 2 seconds
-      refreshAuthState();
-      
-      // Re-evaluate local auth state based on current values
-      const hasWalletAddress = typeof userAddress === 'string' && userAddress.trim() !== '';
-      const isUserAuthenticated = isAuthenticated === true || hasWalletAddress;
-      setIsAuthenticatedLocal(isUserAuthenticated);
-    }, 2000);
-    
-    return () => clearInterval(interval);
-  }, [refreshAuthState, isAuthenticated, userAddress]);
-  
-  // Reset editing mode when user disconnects
-  useEffect(() => {
-    if (!isAuthenticated && isEditing) {
-      console.log('User disconnected, exiting edit mode at', new Date().toISOString())
-      setIsEditing(false)
-    }
-  }, [isAuthenticated, isEditing])
-
-  // Local state for transitions
-  const [isTransitioning, setIsTransitioning] = useState(false)
-  
-  // State for image cropping
-  const [showCropDialog, setShowCropDialog] = useState(false)
-  const [tempImage, setTempImage] = useState<string>('')
-  const [cropState, setCropState] = useState<CropState>({
-    crop: {
-      unit: '%',
-      width: 90,
-      height: 90,
-      x: 5,
-      y: 5
-    },
-    aspect: 1,
-    imageRef: null,
-    completedCrop: null
-  })
-  
-  // Use the new profile state hook
-  const { 
-    profile, 
-    setProfile, 
-    formErrors, 
-    setFormErrors, 
+  // Profile state and methods
+  const {
+    profile,
+    setProfile,
+    formErrors,
+    setFormErrors,
     handleProfileChange,
     handleSectionVisibilityToggle,
     handleSocialLinkChange,
-    resetProfile
+    resetProfile,
+    defaultProfile
   } = useProfileState()
 
+  // Media state and methods
+  const {
+    mediaItems,
+    setMediaItems,
+    videosLoading,
+    addMedia,
+    removeMedia,
+    handleMediaChange
+  } = useMediaState()
+
+  // Local state
+  const [isLoading, setIsLoading] = useState(true)
+  const [isEditing, setIsEditing] = useState(false)
+  const [showImageCropper, setShowImageCropper] = useState(false)
+  const [imageUrl, setImageUrl] = useState('')
+  const [crop, setCrop] = useState<CropType>()
+  const [imageRef, setImageRef] = useState<HTMLImageElement | null>(null)
+  const [croppedImageUrl, setCroppedImageUrl] = useState('')
+  const [imageError, setImageError] = useState<string | null>(null)
+  const [imageLoading, setImageLoading] = useState(false)
   const [sticker, setSticker] = useState<Sticker>({
-    enabled: true,
+    enabled: false,
     image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/daisy-blue-1sqZRfemKwLyREL0Eo89EfmQUT5wst.png"
   })
-
-  const [imageLoading, setImageLoading] = useState(true)
-  const [imageError, setImageError] = useState<string | null>(null)
   
-  const [isLoading, setIsLoading] = useState(true)
-  
-  // Set loading to false after initial render
-  useEffect(() => {
-    // Short timeout to allow for any initial data loading
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 500);
-    
-    return () => clearTimeout(timer);
-  }, []);
+  const [projects, setProjects] = useState<Project[]>([])
+  const [spotlightItems, setSpotlightItems] = useState<SpotlightItem[]>(exampleProjects)
+  const [shopItems, setShopItems] = useState<ShopItem[]>([])
+  const [isUsingExampleContent, setIsUsingExampleContent] = useState(true)
 
+  // Load saved data after successful connection
+  const handleConnect = useCallback(() => {
+    const saved = loadFromLocalStorage()
+    if (saved) {
+      if (saved.profile) {
+        setProfile(saved.profile)
+      }
+      setMediaItems(saved.mediaItems)
+      setShopItems(saved.shopItems)
+      setSpotlightItems(saved.spotlightItems)
+      setSticker(saved.sticker)
+    }
+  }, [setProfile, setMediaItems])
+
+  // Reset state on disconnect
+  const handleDisconnect = useCallback(() => {
+    resetProfile()
+    resetProfileState()
+  }, [resetProfile])
+
+  // Auth state and methods using the new hook
+  const { isAuthenticated, isTransitioning, handleLoginToggle } = useAuthState(
+    handleConnect,
+    handleDisconnect
+  )
+
+  // Save to local storage
   const saveToLocalStorage = (data: {
     profile: typeof profile;
     projects: Project[];
@@ -497,89 +367,72 @@ export default function Component(): JSX.Element {
     spotlightItems: SpotlightItem[];
   }) => {
     try {
-      const storageKey = `userProfile_${userAddress}`
-      localStorage.setItem(storageKey, JSON.stringify(data))
-    } catch (error) {
-      console.error('Failed to save to localStorage:', error)
+      const serializedData = JSON.stringify(data)
+      localStorage.setItem('mixmi-profile-data', serializedData)
+    } catch (err) {
+      console.error('Could not save to localStorage:', err)
     }
   }
 
+  // Reset profile state
+  const resetProfileState = useCallback(() => {
+    setIsEditing(false)
+    setMediaItems([])
+    setShopItems(exampleShopItems)
+    setSpotlightItems(exampleProjects)
+    setSticker({
+      enabled: false,
+      image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/daisy-blue-1sqZRfemKwLyREL0Eo89EfmQUT5wst.png"
+    })
+  }, [setMediaItems])
+
   const loadFromLocalStorage = useCallback(() => {
     try {
-      const storageKey = `userProfile_${userAddress}`
-      const saved = localStorage.getItem(storageKey)
+      const saved = localStorage.getItem('mixmi-profile-data')
       if (saved) {
         const data = JSON.parse(saved)
-        const hasUserSpotlightContent = Array.isArray(data.spotlightItems) && data.spotlightItems.length > 0
-        
-        if (hasUserSpotlightContent) {
-          setSpotlightItems(data.spotlightItems)
-          setIsUsingExampleContent(false)
-        } else {
-          setSpotlightItems(exampleProjects)
-          setIsUsingExampleContent(true)
-        }
-
-        // Update profile using the new setter
-        if (data.profile) {
-          setProfile(data.profile)
-        }
-
-        return {
-          profile: data.profile || profile,
-          projects: data.projects || [],
-          mediaItems: data.mediaItems || [],
-          sticker: data.sticker || { enabled: true, image: defaultStickerImage },
-          shopItems: Array.isArray(data.shopItems) ? data.shopItems : [],
-          spotlightItems: hasUserSpotlightContent ? data.spotlightItems : exampleProjects,
-        }
+        return data
       }
       return null
     } catch (error) {
       console.error('Failed to load from localStorage:', error)
       return null
     }
-  }, [userAddress, setProfile, profile])
+  }, [setProfile, profile, setMediaItems])
 
-  // Load saved data after successful connection
-  useEffect(() => {
-    const saved = loadFromLocalStorage()
-    if (saved) {
-      setShopItems(saved.shopItems)
-      setSpotlightItems(saved.spotlightItems)
-    }
-  }, [loadFromLocalStorage])
-
-  const [projects, setProjects] = useState<Project[]>([])
-
-  const [mediaItems, setMediaItems] = useState<MediaItem[]>([])
-  const [spotlightItems, setSpotlightItems] = useState<SpotlightItem[]>(exampleProjects)
-  const [shopItems, setShopItems] = useState<ShopItem[]>([])
-
-  const [isUsingExampleContent, setIsUsingExampleContent] = useState(true)
+  const [showCropDialog, setShowCropDialog] = useState(false)
+  const [tempImage, setTempImage] = useState<string>('')
+  const [completedCrop, setCompletedCrop] = useState<CropType | null>(null)
 
   const handleCropComplete = async (crop: CropType) => {
-    if (!cropState.imageRef || !crop.width || !crop.height) {
+    if (!tempImage || !crop.width || !crop.height) {
       console.error('Missing required crop data')
       return
     }
 
     try {
+      const imageRef = document.createElement('img');
+      imageRef.src = tempImage;
+      
+      await new Promise(resolve => {
+        imageRef.onload = resolve;
+      });
+      
       const canvas = document.createElement('canvas')
-      const scaleX = cropState.imageRef.naturalWidth / cropState.imageRef.width
-      const scaleY = cropState.imageRef.naturalHeight / cropState.imageRef.height
+      const scaleX = imageRef.naturalWidth / imageRef.width
+      const scaleY = imageRef.naturalHeight / imageRef.height
 
       canvas.width = crop.width
       canvas.height = crop.height
-
       const ctx = canvas.getContext('2d')
+
       if (!ctx) {
-        console.error('Failed to get canvas context')
+        console.error('Could not get canvas context')
         return
       }
 
       ctx.drawImage(
-        cropState.imageRef,
+        imageRef,
         crop.x * scaleX,
         crop.y * scaleY,
         crop.width * scaleX,
@@ -595,377 +448,19 @@ export default function Component(): JSX.Element {
 
       setShowCropDialog(false)
       setTempImage('')
-      setImageLoading(false)
-      setImageError(null)
     } catch (error) {
-      console.error('Failed to complete crop:', error)
-      setImageError('Failed to crop image')
+      console.error('Error cropping image:', error)
     }
   }
-
-  const handleSave = async () => {
-    try {
-      console.log('Saving profile with shop items and spotlight:', shopItems, spotlightItems)
-      saveToLocalStorage({
-        profile,
-        projects,
-        mediaItems,
-        sticker,
-        shopItems,
-        spotlightItems
-      })
-      setIsEditing(false)
-    } catch (error) {
-      console.error('Error saving profile:', error)
-    }
-  }
-
-  const ImageDisplay = () => (
-    <div
-      className="relative w-32 h-32 overflow-hidden rounded-lg"
-      role="img"
-      aria-label={imageError ? "Error loading profile image" : "Profile image"}
-    >
-      {imageLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white" />
-        </div>
-      )}
-      {imageError && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-800 text-red-500">
-          <p className="text-sm text-center px-2">{imageError}</p>
-        </div>
-      )}
-      <Image
-        src={profile.image}
-        alt="Profile"
-        fill
-        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-        className={`rounded-lg object-cover transition-opacity duration-300 ${imageLoading ? 'opacity-0' : 'opacity-100'
-          }`}
-        onLoad={() => setImageLoading(false)}
-        onError={() => setImageError("Failed to load image")}
-      />
-    </div>
-  )
-
-  const [projectsLoading, setProjectsLoading] = useState(true)
-  const [videosLoading, setVideosLoading] = useState(true)
-
-  useEffect(() => {
-    setTimeout(() => setProjectsLoading(false), 800)
-    setTimeout(() => setVideosLoading(false), 1200)
-  }, [])
-
-  const displayProjects = spotlightItems === exampleProjects || spotlightItems.length === 0 
-    ? exampleProjects 
-    : spotlightItems;
-  const displayMedia = mediaItems.length > 0 ? mediaItems : exampleMediaItems;
-  const displayShop = shopItems.length > 0 ? shopItems : exampleShopItems;
-
-  const handleShopImageChange = (index: number, file: File | null) => {
-    if (file) {
-      const isValidImage = file.type.startsWith('image/')
-
-      if (!isValidImage) {
-        console.error("Please upload an image file")
-        return
-      }
-
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setShopItems(prev => prev.map((item, i) =>
-          i === index ? { ...item, image: reader.result as string } : item
-        ))
-      }
-      reader.readAsDataURL(file)
-    }
-  }
-
-  const handleSpotlightChange = (index: number, field: keyof SpotlightItem, value: string) => {
-    const updatedItems = [...spotlightItems];
-    updatedItems[index] = {
-      ...updatedItems[index],
-      [field]: value
-    };
-    setSpotlightItems(updatedItems);
-    debouncedSave({
-      profile,
-      projects,
-      mediaItems,
-      sticker,
-      shopItems,
-      spotlightItems: updatedItems
-    });
-  };
-
-  const handleAddSpotlight = () => {
-    const newItems = [
-      ...(isUsingExampleContent ? [] : spotlightItems),
-      {
-        id: Date.now(),
-        title: '',
-        description: '',
-        image: '',
-        link: ''
-      }
-    ];
-    setSpotlightItems(newItems);
-    setIsUsingExampleContent(false);
-    debouncedSave({
-      profile,
-      projects,
-      mediaItems,
-      sticker,
-      shopItems,
-      spotlightItems: newItems
-    });
-  };
-
-  const handleRemoveSpotlight = (index: number) => {
-    const updatedItems = spotlightItems.filter((_, i) => i !== index);
-    setSpotlightItems(updatedItems);
-    debouncedSave({
-      profile,
-      projects,
-      mediaItems,
-      sticker,
-      shopItems,
-      spotlightItems: updatedItems
-    });
-  };
-
-  const handleSpotlightImageChange = (index: number, file: File | null) => {
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const updatedItems = [...spotlightItems];
-        updatedItems[index] = {
-          ...updatedItems[index],
-          image: reader.result as string
-        };
-        setSpotlightItems(updatedItems);
-        debouncedSave({
-          profile,
-          projects,
-          mediaItems,
-          sticker,
-          shopItems,
-          spotlightItems: updatedItems
-        });
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  // Comment out unused shop functions for future reference
-  /*
-  const handleShopItemChange = (index: number, field: string, value: string) => {
-    const updatedItems = shopItems.map((item, i) =>
-      i === index ? {
-        ...item,
-        [field]: value,
-        ...(field === 'storeUrl' ? {
-          platform: (value.includes('shopify.com') ? 'shopify' :
-            value.includes('etsy.com') ? 'etsy' :
-              value.includes('gumroad.com') ? 'gumroad' :
-                value.includes('bigcartel.com') ? 'bigcartel' : 'other') as ShopItem['platform']
-        } : {})
-      } : item
-    )
-
-    setShopItems(updatedItems)
-    debouncedSave({
-      profile,
-      projects,
-      mediaItems,
-      sticker,
-      shopItems: updatedItems,
-      spotlightItems
-    })
-  }
-
-  const addShopItem = () => {
-    setShopItems(prev => [...prev, {
-      id: Date.now().toString(),
-      title: '',
-      storeUrl: '',
-      image: '',
-      platform: 'other'
-    }])
-  }
-
-  const removeShopItem = (index: number) => {
-    setShopItems(prev => prev.filter((_, i) => i !== index))
-  }
-  */
 
   const [previewMode, setPreviewMode] = useState(true);
 
-  const handleMediaChange = (index: number, field: string, value: string) => {
-    const updatedItems = [...mediaItems];
-    if (field === 'type') {
-      (updatedItems[index] as MediaItem).type = value as MediaType;
-    } else {
-      (updatedItems[index] as any)[field] = value;
-    }
-    setMediaItems(updatedItems);
-    debouncedSave({
-      profile,
-      projects,
-      mediaItems: updatedItems,
-      sticker,
-      shopItems,
-      spotlightItems
-    });
-  };
-
-  // New helper functions
-  const resetProfileState = useCallback(() => {
-    resetProfile()
-    setProjects([])
-    setMediaItems([])
-    setShopItems([])
-    setSpotlightItems(exampleProjects)
-    setSticker({
-      enabled: true,
-      image: defaultStickerImage
-    })
-    setIsUsingExampleContent(true)
-    setIsEditing(false)
-    setShowCropDialog(false)
-    setTempImage('')
-    setImageError(null)
-    setImageLoading(false)
-  }, [resetProfile])
-
-  const restoreProfileState = (saved: ReturnType<typeof loadFromLocalStorage>) => {
-    if (!saved) return;
-    setProfile(saved.profile)
-    setMediaItems(saved.mediaItems)
-    setShopItems(saved.shopItems)
-    setSpotlightItems(saved.spotlightItems)
-    setSticker(saved.sticker)
-    setIsUsingExampleContent(false)
-  }
-
-  // Add sticker handlers
-  const handleStickerChange = (checked: boolean) => {
-    console.log('Sticker enabled changed:', checked)
-    setSticker(prev => ({
-      ...prev,
-      enabled: checked
-    }))
-  }
-
-  // Function to handle image files being dropped
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    e.stopPropagation()
-    
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      handleImageChange(e.dataTransfer.files[0])
-    }
-  }
-
-  // Function to handle dragover event
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    e.stopPropagation()
-  }
-
-  // Function to handle file input change
-  const handleImageChange = (file: File) => {
-    setImageError(null)
-    
-    // Validate file size
-    if (file.size > 5 * 1024 * 1024) {
-      setImageError('Image must be less than 5MB')
-      return
-    }
-    
-    // Validate file type
-    if (!['image/jpeg', 'image/png', 'image/gif'].includes(file.type)) {
-      setImageError('Image must be JPG, PNG, or GIF')
-      return
-    }
-    
-    setImageLoading(true)
-    
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      if (e.target?.result) {
-        setTempImage(e.target.result as string)
-        setShowCropDialog(true)
-        setImageLoading(false)
-      }
-    }
-    
-    reader.onerror = () => {
-      setImageError('Error reading file')
-      setImageLoading(false)
-    }
-    
-    reader.readAsDataURL(file)
-  }
-
-  // Create a debounced save function
-  const debouncedSave = useCallback(
-    debounce((data: any) => {
-      saveToLocalStorage(data);
-    }, 500),
-    [saveToLocalStorage]
-  );
-
-  // Add handlers for form inputs
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    handleProfileChange('name', value);
-  };
-
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    handleProfileChange('title', value);
-  };
-  
-  const handleBioChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const value = e.target.value;
-    handleProfileChange('bio', value);
-  };
-  
-  // Add social link handlers
-  const addSocialLink = () => {
-    const newLink = { platform: "instagram", url: "" };
-    setProfile(prev => ({
-      ...prev,
-      socialLinks: [...prev.socialLinks, newLink]
-    }));
-  };
-  
-  const removeSocialLink = (index: number) => {
-    setProfile(prev => ({
-      ...prev,
-      socialLinks: prev.socialLinks.filter((_, i) => i !== index)
-    }));
-  };
-  
-  // Add media handlers
-  const addMedia = () => {
-    setMediaItems(prev => [...prev, {
-      id: Date.now().toString(),
-      type: 'youtube',
-      rawUrl: ''
-    }]);
-  };
-  
-  const removeMedia = (index: number) => {
-    setMediaItems(prev => prev.filter((_, i) => i !== index));
-  };
-
   return (
     <div className="dark min-h-screen bg-gray-900 text-gray-100">
-      <NavbarContainer />
-      <AuthDebug />
+      <Navbar
+        isAuthenticated={isAuthenticated}
+        onLoginToggle={handleLoginToggle}
+      />
       {isLoading ? (
         <div className="flex items-center justify-center min-h-screen">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white" />
@@ -1152,7 +647,9 @@ export default function Component(): JSX.Element {
                           <Checkbox
                             id="projects-visible"
                             checked={profile.sectionVisibility.projects}
-                            onCheckedChange={() => handleSectionVisibilityToggle('projects')}
+                            onCheckedChange={() => {
+                              handleSectionVisibilityToggle('projects')
+                            }}
                           />
                           <Label htmlFor="projects-visible">Show Spotlight section</Label>
                         </div>
@@ -1161,7 +658,9 @@ export default function Component(): JSX.Element {
                           <Checkbox
                             id="media-visible"
                             checked={profile.sectionVisibility.media}
-                            onCheckedChange={() => handleSectionVisibilityToggle('media')}
+                            onCheckedChange={() => {
+                              handleSectionVisibilityToggle('media')
+                            }}
                           />
                           <Label htmlFor="media-visible">Show Media section</Label>
                         </div>
@@ -1170,7 +669,9 @@ export default function Component(): JSX.Element {
                           <Checkbox
                             id="shop-visible"
                             checked={profile.sectionVisibility.shop}
-                            onCheckedChange={() => handleSectionVisibilityToggle('shop')}
+                            onCheckedChange={() => {
+                              handleSectionVisibilityToggle('shop')
+                            }}
                           />
                           <Label htmlFor="shop-visible">Show Shop section</Label>
                         </div>
@@ -1200,6 +701,7 @@ export default function Component(): JSX.Element {
                           onMediaChange={handleMediaChange}
                           onAddMedia={addMedia}
                           onRemoveMedia={removeMedia}
+                          isEditing={isEditing}
                         />
                       </ErrorBoundary>
                     </div>
@@ -1217,7 +719,7 @@ export default function Component(): JSX.Element {
                                 platform: (value.includes('shopify.com') ? 'shopify' :
                                   value.includes('etsy.com') ? 'etsy' :
                                   value.includes('gumroad.com') ? 'gumroad' :
-                                  value.includes('bigcartel.com') ? 'bigcartel' : 'other')
+                                  value.includes('bigcartel.com') ? 'bigcartel' : 'other') as ShopItem['platform']
                               } : {})
                             };
                             setShopItems(updatedItems);
@@ -1238,8 +740,8 @@ export default function Component(): JSX.Element {
                                 title: '',
                                 storeUrl: '',
                                 image: '',
-                                platform: 'other'
-                              }
+                                platform: 'other' as ShopItem['platform']
+                              } as ShopItem
                             ];
                             setShopItems(newItems);
                             setIsUsingExampleContent(false);
@@ -1312,26 +814,20 @@ export default function Component(): JSX.Element {
                         <h3 className="text-xl font-bold mb-4">Crop Image</h3>
                         <div className="relative flex-1 min-h-0 overflow-auto">
                           <ReactCrop
-                            crop={cropState.crop}
-                            onChange={(c: CropType) => setCropState({ ...cropState, crop: c })}
-                            onComplete={(c: CropType) => setCropState({ ...cropState, completedCrop: c })}
+                            crop={crop}
+                            onChange={(c: CropType) => setCrop(c)}
+                            onComplete={(c: CropType) => setCompletedCrop(c)}
                           >
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               src={tempImage}
                               onLoad={e => {
-                                const imageRef = e.currentTarget;
-                                setCropState({
-                                  crop: {
-                                    unit: '%',
-                                    width: 90,
-                                    height: 90,
-                                    x: 5,
-                                    y: 5
-                                  },
-                                  aspect: 1,
-                                  imageRef,
-                                  completedCrop: null
+                                setCrop({
+                                  unit: '%',
+                                  width: 90,
+                                  height: 90,
+                                  x: 5,
+                                  y: 5
                                 });
                               }}
                               alt="Crop preview"
@@ -1351,8 +847,8 @@ export default function Component(): JSX.Element {
                           </Button>
                           <Button
                             onClick={() => {
-                              if (cropState.completedCrop) {
-                                handleCropComplete(cropState.completedCrop)
+                              if (completedCrop) {
+                                handleCropComplete(completedCrop)
                               }
                             }}
                           >
@@ -1452,54 +948,17 @@ export default function Component(): JSX.Element {
                           })}
                         </div>
 
-                        {/* Edit profile button - only shown when authenticated */}
-                        {isAuthenticatedLocal && (
+                        {isAuthenticated && (
                           <Button
-                            onClick={() => {
-                              console.log('Edit button clicked! Auth state:', {isAuthenticated, isAuthenticatedLocal, userAddress})
-                              setIsEditing(true)
-                            }}
-                            variant="default"
-                            className="mt-4 bg-cyan-500 hover:bg-cyan-600 text-white transition-all shadow-md hover:shadow-lg"
+                            onClick={() => setIsEditing(true)}
+                            variant="outline"
+                            className="mt-4 border-cyan-300/30 hover:border-cyan-300/80 transition-colors group"
                           >
-                            <Edit2 className="mr-2 h-4 w-4" />
-                            <span>Edit Profile</span>
-                            <span className="ml-2 text-xs text-cyan-100">(Add your content)</span>
+                            <Edit2 className="mr-2 h-4 w-4 group-hover:text-cyan-300" />
+                            <span className="group-hover:text-cyan-300">Edit Profile</span>
+                            <span className="ml-2 text-xs text-gray-400">(Add your content)</span>
                           </Button>
                         )}
-
-                        {/* Debug button - temporarily visible for troubleshooting auth issues */}
-                        <Button
-                          onClick={() => {
-                            console.log('Debug button clicked! Forcing auth refresh...');
-                            refreshAuthState();
-                            
-                            setTimeout(() => {
-                              const hasWalletAddress = typeof userAddress === 'string' && userAddress.trim() !== '';
-                              const isUserAuthenticated = isAuthenticated === true || hasWalletAddress;
-                              
-                              console.log('Current auth state after refresh:', {
-                                isUserAuthenticated,
-                                isAuthenticated,
-                                hasWalletAddress,
-                                userAddress
-                              });
-                              
-                              setIsAuthenticatedLocal(isUserAuthenticated);
-                            }, 300);
-                          }}
-                          variant="outline"
-                          className="mt-2 border-amber-500 text-amber-500 hover:bg-amber-500 hover:text-white"
-                        >
-                          Force Auth Check
-                        </Button>
-
-                        {/* Debug text to show auth status */}
-                        <div className="mt-2 text-xs text-cyan-300">
-                          Auth status: {isAuthenticated ? 'Authenticated' : 'Not Authenticated'} | 
-                          Local: {isAuthenticatedLocal ? 'True' : 'False'} | 
-                          Address: {userAddress ? 'Has Address' : 'No Address'}
-                        </div>
                       </div>
                     </div>
                   </div>
@@ -1544,13 +1003,10 @@ export default function Component(): JSX.Element {
                         </p>
                       )}
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {videosLoading ? (
-                          Array(2).fill(0).map((_, i) => (
-                            <Card key={i} className="w-full max-w-[560px] mx-auto animate-pulse">
-                              <CardContent className="p-4">
-                                <div className="aspect-video bg-gray-700 rounded mb-2"></div>
-                                <div className="h-4 bg-gray-700 rounded w-3/4"></div>
-                              </CardContent>
+                        {isUsingExampleContent ? (
+                          exampleMediaItems.map((video, index) => (
+                            <Card key={index}>
+                              <MediaEmbed item={video} />
                             </Card>
                           ))
                         ) : (

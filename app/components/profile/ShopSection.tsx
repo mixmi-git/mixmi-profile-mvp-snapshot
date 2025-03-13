@@ -1,20 +1,15 @@
 'use client'
 
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Plus, Trash2 } from "lucide-react"
 import Image from "next/image"
 import ImageUpload from '../ui/ImageUpload'
-
-export interface ShopItem {
-  id: string | number
-  title: string
-  storeUrl: string
-  image: string
-  platform?: 'shopify' | 'etsy' | 'gumroad' | 'bigcartel' | 'other'
-}
+import { ShopItem } from '@/types/content'
 
 interface ShopSectionProps {
   items: ShopItem[]

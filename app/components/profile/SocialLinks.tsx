@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Trash2 } from "lucide-react"
 import { validateSocialUrl } from '@/lib/validation'
+import { SocialLink } from '@/types/content'
 
 interface SocialLinkError {
   platform: string;
@@ -13,11 +14,8 @@ interface SocialLinkError {
 }
 
 interface SocialLinksProps {
-  socialLinks: {
-    platform: string;
-    url: string;
-  }[];
-  onSocialLinkChange: (index: number, field: string, value: string) => void;
+  socialLinks: SocialLink[];
+  onSocialLinkChange: (index: number, field: keyof SocialLink, value: string) => void;
   onAddSocialLink: () => void;
   onRemoveSocialLink: (index: number) => void;
 }
@@ -42,7 +40,7 @@ export function SocialLinks({
       });
 
       if (validation.isValid) {
-        onSocialLinkChange(index, 'url', value);
+        onSocialLinkChange(index, 'url' as keyof SocialLink, value);
       }
     } else {
       setErrors(prev => {
@@ -65,7 +63,7 @@ export function SocialLinks({
                 newErrors[index] = { platform: '', url: '' };
                 return newErrors;
               });
-              onSocialLinkChange(index, 'platform', value);
+              onSocialLinkChange(index, 'platform' as keyof SocialLink, value);
             }}
           >
             <SelectTrigger className="w-[180px]">

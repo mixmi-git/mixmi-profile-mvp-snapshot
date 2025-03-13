@@ -1,6 +1,5 @@
-import { Project } from '@/components/UserProfile'
-import { MediaItem } from '@/components/UserProfile'
-import { ShopItem } from '@/components/profile/ShopSection'
+import { Project, ShopItem } from '@/types/content'
+import { MediaItem } from '@/types/media'
 
 export const exampleProjects: Project[] = [
   {
@@ -43,7 +42,7 @@ export const exampleMediaItems: MediaItem[] = [
 
 export const exampleShopItems: ShopItem[] = [
   {
-    id: 'example-store',
+    id: 1,
     title: 'Your Store',
     storeUrl: '#',
     image: '/images/shop-placeholder.jpg',

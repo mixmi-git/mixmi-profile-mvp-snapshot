@@ -14,12 +14,12 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { debounce } from "lodash"
 import ReactCrop, { Crop as CropType } from 'react-image-crop'
 import 'react-image-crop/dist/ReactCrop.css'
-import { useAuthState } from "@/hooks/useAuthState"
+import { useAuth } from "@/lib/auth"
 import { exampleProjects, exampleMediaItems, exampleShopItems } from '@/lib/example-content'
 import { SocialLinks } from "@/components/profile/SocialLinks"
-import { SpotlightSection } from "@/components/profile/SpotlightSection"
+import { SpotlightSection, SpotlightItem } from "@/components/profile/SpotlightSection"
 import { MediaSection } from "@/components/profile/MediaSection"
-import { ShopSection } from "@/components/profile/ShopSection"
+import { ShopSection, ShopItem } from "@/components/profile/ShopSection"
 import ErrorBoundary from './ui/ErrorBoundary'
 import { StickerSection } from "@/components/profile/StickerSection"
 import { 
@@ -29,11 +29,7 @@ import {
   transformMixcloudUrl,
   transformSpotifyUrl
 } from '@/lib/mediaUtils'
-import { MediaType } from '@/types/media'
-import { useProfileState } from '@/hooks/useProfileState'
-import { NavbarContainer } from '@/components/profile/NavbarContainer'
-import { useAuth } from '@/lib/auth'
-import { AuthDebug } from './AuthDebug'
+import { MediaItem, MediaType } from '@/types/media'
 
 /* eslint-disable react-hooks/exhaustive-deps */
 
@@ -60,26 +56,11 @@ interface SocialLink {
 }
 
 export interface Project {
-  id: string;
+  id: number;
   title: string;
   description: string;
   image: string;
-}
-
-export interface SpotlightItem {
-  id: number | string;
-  title: string;
-  description: string;
-  image: string;
-  link?: string;
-}
-
-export interface ShopItem {
-  id: string;
-  title: string;
-  storeUrl: string;
-  image: string;
-  platform: 'shopify' | 'etsy' | 'gumroad' | 'bigcartel' | 'other';
+  link: string;
 }
 
 export interface MediaItem {
@@ -317,11 +298,101 @@ const MediaEmbed = memo(({ item }: { item: MediaItem }) => {
 
 MediaEmbed.displayName = 'MediaEmbed'
 
+function Navbar({ isAuthenticated, onLoginToggle }: NavbarProps) {
+  return (
+    <nav className="sticky top-0 z-40 bg-gray-900/95 backdrop-blur-sm py-6 px-8 flex items-center justify-between border-b border-gray-800">
+      <div className="flex items-center">
+        <Link href="/">
+          <div className="w-20 h-8 relative">
+            <Image
+              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Logotype_Main@1.5x-v0CzgGF3X0t7k4yaBbFQWerwN5bGdC.png"
+              alt="mixmi"
+              fill
+              className="object-contain"
+              priority
+              sizes="(max-width: 768px) 100vw, 50vw"
+            />
+          </div>
+        </Link>
+      </div>
+      <div className="flex items-center space-x-4">
+        <Button
+          variant="outline"
+          className="text-white border-white hover:bg-gray-800"
+          onClick={onLoginToggle}
+        >
+          {isAuthenticated ? "Disconnect Wallet" : "Connect Wallet"}
+        </Button>
+      </div>
+    </nav>
+  )
+}
+
+// Comment out unused functions for future reference
+/*
+const extractMediaId = (url: string, type: MediaItem['type']): string => {
+  try {
+    switch (type) {
+      case 'youtube':
+        const ytRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/
+        const ytMatch = url.match(ytRegex)
+        return ytMatch ? ytMatch[1] : url
+
+      case 'soundcloud':
+      case 'soundcloud-playlist':
+        const iframeSrcRegex = /src="([^"]+)"/
+        const iframeMatch = url.match(iframeSrcRegex)
+        if (iframeMatch) return iframeMatch[1]
+
+        const scRegex = /soundcloud\.com\/([^\/]+\/(?:sets\/)?[^\/]+)/
+        const scMatch = url.match(scRegex)
+        return scMatch
+          ? `https://w.soundcloud.com/player/?url=https://soundcloud.com/${scMatch[1]}&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true`
+          : url
+
+      case 'spotify':
+        const spRegex = /spotify\.com\/track\/([a-zA-Z0-9]+)/
+        const spMatch = url.match(spRegex)
+        return spMatch ? spMatch[1] : url
+
+      case 'spotify-playlist':
+        const spPlaylistRegex = /spotify\.com\/playlist\/([a-zA-Z0-9]+)/
+        const spPlaylistMatch = url.match(spPlaylistRegex)
+        return spPlaylistMatch ? spPlaylistMatch[1] : url
+
+      case 'apple-music-album':
+      case 'apple-music-playlist':
+        try {
+          const cleanUrl = url.replace(/^@/, '').trim()
+          const match = cleanUrl.match(/music\.apple\.com\/([^\/]+)\/(album|playlist)\/([^\/]+)\/([^\/\?]+)/)
+          if (match) {
+            const [, country, mediaType, , id] = match
+            return `https://embed.music.apple.com/${country}/${mediaType}/${id}`
+          }
+          return url
+        } catch (error) {
+          console.error('Error parsing Apple Music URL:', error)
+          return url
+        }
+
+      default:
+        return url
+    }
+  } catch (error) {
+    console.error('Error parsing URL:', error)
+    return url
+  }
+}
+*/
+
 const defaultStickerImage = "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/daisy-blue-1sqZRfemKwLyREL0Eo89EfmQUT5wst.png"
+
+
+
 
 // Update the ProjectCard component for a more visual layout
 const ProjectCard = ({ project }: { project: Project }) => {
-  console.log('ProjectCard render:', { title: project.title });
+  console.log('ProjectCard render:', { title: project.title, link: project.link });
   
   const CardContent = (
     <>
@@ -347,149 +418,27 @@ const ProjectCard = ({ project }: { project: Project }) => {
 
   return (
     <Card className="overflow-hidden group hover:border-cyan-300/50 transition-all duration-300">
-      {CardContent}
+      {project.link ? (
+        <a
+          href={project.link}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block"
+        >
+          {CardContent}
+        </a>
+      ) : (
+        CardContent
+      )}
     </Card>
   );
 };
 
 export default function Component(): JSX.Element {
-  // Get authentication state directly from useAuth
-  const { isAuthenticated, userAddress, connectWallet, disconnectWallet, isInitialized, refreshAuthState } = useAuth()
-  
-  // Add a local state to track the auth state for rendering purposes
-  // TEMPORARY FIX: Always set to true to ensure Edit Profile button is visible
-  const [isAuthenticatedLocal, setIsAuthenticatedLocal] = useState(true)
-  
-  // State for editing mode
-  const [isEditing, setIsEditing] = useState(false)
-  
-  // IMPORTANT: Force check authentication on mount
-  useEffect(() => {
-    console.log('%c AUTH DIRECT CHECK ON MOUNT', 'background-color: #0f172a; color: #f97316; font-size: 14px; padding: 4px;');
-    
-    // Force a refresh of the auth state immediately
-    refreshAuthState();
-    
-    // Then force a direct check from the auth provider
-    setTimeout(() => {
-      // Force update the local state based on the auth state
-      const hasWalletAddress = typeof userAddress === 'string' && userAddress.trim() !== '';
-      const isUserAuthenticated = isAuthenticated === true || hasWalletAddress;
-      
-      console.log('%c FORCE AUTH UPDATE:', 'background-color: #0f172a; color: #f97316; font-size: 14px; padding: 4px;', {
-        isUserAuthenticated,
-        isAuthenticated,
-        hasWalletAddress,
-        userAddress
-      });
-      
-      // Force set the authenticated state
-      setIsAuthenticatedLocal(isUserAuthenticated);
-    }, 500);
-  }, [refreshAuthState, userAddress, isAuthenticated]);
-  
-  // Add enhanced debugging for authentication state
-  useEffect(() => {
-    // More prominent logging to track auth state changes
-    console.log('%c AUTH STATE IN USERPROFILE:', 'background-color: #0f172a; color: #06b6d4; font-size: 14px; padding: 4px;', { 
-      isAuthenticated, 
-      userAddress,
-      isInitialized,
-      isEditing,
-      time: new Date().toISOString()
-    })
-    
-    // Set our local authentication state with more thorough checks
-    // Consider user authenticated if isAuthenticated is true OR we have a non-empty wallet address
-    const hasWalletAddress = typeof userAddress === 'string' && userAddress.trim() !== '';
-    const isUserAuthenticated = isAuthenticated === true || hasWalletAddress;
-    
-    console.log('%c AUTH LOCAL STATE UPDATE:', 'background-color: #0f172a; color: #22c55e; font-size: 12px; padding: 3px;', { 
-      isUserAuthenticated,
-      isAuthenticated,
-      hasWalletAddress,
-      userAddress
-    });
-    
-    setIsAuthenticatedLocal(isUserAuthenticated);
-  }, [isAuthenticated, userAddress, isInitialized, isEditing]);
-  
-  // Add a polling mechanism to regularly check auth state
-  useEffect(() => {
-    const interval = setInterval(() => {
-      // Refresh auth state every 2 seconds
-      refreshAuthState();
-      
-      // Re-evaluate local auth state based on current values
-      const hasWalletAddress = typeof userAddress === 'string' && userAddress.trim() !== '';
-      const isUserAuthenticated = isAuthenticated === true || hasWalletAddress;
-      setIsAuthenticatedLocal(isUserAuthenticated);
-    }, 2000);
-    
-    return () => clearInterval(interval);
-  }, [refreshAuthState, isAuthenticated, userAddress]);
-  
-  // Reset editing mode when user disconnects
-  useEffect(() => {
-    if (!isAuthenticated && isEditing) {
-      console.log('User disconnected, exiting edit mode at', new Date().toISOString())
-      setIsEditing(false)
-    }
-  }, [isAuthenticated, isEditing])
-
-  // Local state for transitions
-  const [isTransitioning, setIsTransitioning] = useState(false)
-  
-  // State for image cropping
-  const [showCropDialog, setShowCropDialog] = useState(false)
-  const [tempImage, setTempImage] = useState<string>('')
-  const [cropState, setCropState] = useState<CropState>({
-    crop: {
-      unit: '%',
-      width: 90,
-      height: 90,
-      x: 5,
-      y: 5
-    },
-    aspect: 1,
-    imageRef: null,
-    completedCrop: null
-  })
-  
-  // Use the new profile state hook
-  const { 
-    profile, 
-    setProfile, 
-    formErrors, 
-    setFormErrors, 
-    handleProfileChange,
-    handleSectionVisibilityToggle,
-    handleSocialLinkChange,
-    resetProfile
-  } = useProfileState()
-
-  const [sticker, setSticker] = useState<Sticker>({
-    enabled: true,
-    image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/daisy-blue-1sqZRfemKwLyREL0Eo89EfmQUT5wst.png"
-  })
-
-  const [imageLoading, setImageLoading] = useState(true)
-  const [imageError, setImageError] = useState<string | null>(null)
-  
-  const [isLoading, setIsLoading] = useState(true)
-  
-  // Set loading to false after initial render
-  useEffect(() => {
-    // Short timeout to allow for any initial data loading
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 500);
-    
-    return () => clearTimeout(timer);
-  }, []);
+  const { isAuthenticated, userAddress, connectWallet, disconnectWallet } = useAuth()
 
   const saveToLocalStorage = (data: {
-    profile: typeof profile;
+    profile: Profile;
     projects: Project[];
     mediaItems: MediaItem[];
     sticker: Sticker;
@@ -520,13 +469,8 @@ export default function Component(): JSX.Element {
           setIsUsingExampleContent(true)
         }
 
-        // Update profile using the new setter
-        if (data.profile) {
-          setProfile(data.profile)
-        }
-
         return {
-          profile: data.profile || profile,
+          profile: data.profile || defaultProfile,
           projects: data.projects || [],
           mediaItems: data.mediaItems || [],
           sticker: data.sticker || { enabled: true, image: defaultStickerImage },
@@ -539,15 +483,54 @@ export default function Component(): JSX.Element {
       console.error('Failed to load from localStorage:', error)
       return null
     }
-  }, [userAddress, setProfile, profile])
+  }, [userAddress])
 
-  // Load saved data after successful connection
+  const [isEditing, setIsEditing] = useState(false)
+  const [formErrors, setFormErrors] = useState<FormErrors>({
+    name: { message: '', isValid: true },
+    title: { message: '', isValid: true },
+    bio: { message: '', isValid: true },
+    socialLinks: []
+  })
+
+  const [sticker, setSticker] = useState<Sticker>({
+    enabled: true,
+    image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/daisy-blue-1sqZRfemKwLyREL0Eo89EfmQUT5wst.png"
+  })
+
+  const [imageLoading, setImageLoading] = useState(true)
+  const [imageError, setImageError] = useState<string | null>(null)
+
+  const [isTransitioning, setIsTransitioning] = useState(false)
+
+  const [isLoading, setIsLoading] = useState(true)
+
+  const [profile, setProfile] = useState<Profile>({
+    name: "Your Name",
+    title: "Your Role / Title",
+    bio: "Tell your story here...",
+    image: "/images/placeholder.png",
+    socialLinks: [
+      { platform: "youtube", url: "" },
+      { platform: "spotify", url: "" },
+      { platform: "soundcloud", url: "" },
+      { platform: "instagram", url: "" }
+    ],
+    sectionVisibility: {
+      projects: true,
+      media: true,
+      shop: true
+    },
+    spotlightDescription: ""
+  })
+
   useEffect(() => {
     const saved = loadFromLocalStorage()
     if (saved) {
       setShopItems(saved.shopItems)
       setSpotlightItems(saved.spotlightItems)
     }
+    setIsLoading(false)
   }, [loadFromLocalStorage])
 
   const [projects, setProjects] = useState<Project[]>([])
@@ -556,7 +539,168 @@ export default function Component(): JSX.Element {
   const [spotlightItems, setSpotlightItems] = useState<SpotlightItem[]>(exampleProjects)
   const [shopItems, setShopItems] = useState<ShopItem[]>([])
 
-  const [isUsingExampleContent, setIsUsingExampleContent] = useState(true)
+  const handleLoginToggle = async () => {
+    setIsTransitioning(true)
+    try {
+      if (isAuthenticated) {
+        await disconnectWallet()
+        resetProfileState()
+      } else {
+        await connectWallet()
+        const saved = loadFromLocalStorage()
+        if (saved) {
+          restoreProfileState(saved)
+        }
+      }
+    } catch (error) {
+      console.error('Error handling wallet connection:', error)
+    } finally {
+      setIsTransitioning(false)
+    }
+  }
+
+  const debouncedSave = useCallback(
+    debounce((data: {
+      profile: Profile;
+      projects: Project[];
+      mediaItems: MediaItem[];
+      sticker: Sticker;
+      shopItems: ShopItem[];
+      spotlightItems: SpotlightItem[];
+    }) => {
+      saveToLocalStorage(data)
+    }, 1000),
+    []
+  )
+
+  const handleImageChange = async (file: FileWithPreview | null) => {
+    if (!file) return;
+    
+    try {
+      // Create a local URL for the file
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const imageUrl = reader.result as string;
+        setProfile(prev => ({
+          ...prev,
+          image: imageUrl
+        }));
+        
+        debouncedSave({
+          profile: {
+            ...profile,
+            image: imageUrl
+          },
+          projects,
+          mediaItems,
+          sticker,
+          shopItems,
+          spotlightItems
+        });
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('Error handling image:', error);
+    }
+  };
+
+  const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    const validation = validateProfile(name, value);
+    
+    // Update form errors
+    setFormErrors(prev => ({
+      ...prev,
+      [name]: { message: validation.message, isValid: validation.isValid }
+    }));
+
+    // Update profile if valid or allow typing but show error
+    const newProfile = { ...profile, [name]: value };
+    setProfile(newProfile);
+
+    // Only save if valid
+    if (validation.isValid) {
+      debouncedSave({
+        profile: newProfile,
+        projects,
+        mediaItems,
+        sticker,
+        shopItems: [],
+        spotlightItems: []
+      });
+    }
+  }
+
+  const handleSocialLinkChange = (index: number, field: string, value: string) => {
+    setProfile(prev => ({
+      ...prev,
+      socialLinks: prev.socialLinks.map((link, i) =>
+        i === index ? { ...link, [field]: value } : link
+      )
+    }))
+  }
+
+  const addSocialLink = () => {
+    setProfile(prev => ({
+      ...prev,
+      socialLinks: [...prev.socialLinks, { platform: "", url: "" }]
+    }))
+  }
+
+  const removeSocialLink = (index: number) => {
+    setProfile(prev => ({
+      ...prev,
+      socialLinks: prev.socialLinks.filter((_, i) => i !== index)
+    }))
+  }
+
+  const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    const file = e.dataTransfer.files[0]
+    if (file) {
+      handleImageChange(file)
+    }
+  }, [handleImageChange])
+
+  const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+  }, [])
+
+
+  const addMedia = () => {
+    setMediaItems(prev => [...prev, {
+      id: '',
+      type: 'youtube',
+      rawUrl: ''
+    }])
+  }
+
+  const removeMedia = (index: number) => {
+    setMediaItems(prev => prev.filter((_, i) => i !== index))
+  }
+
+  const handleStickerChange = (checked: boolean) => {
+    setSticker(prev => ({
+      ...prev,
+      enabled: checked
+    }))
+  }
+
+  const [showCropDialog, setShowCropDialog] = useState(false)
+  const [tempImage, setTempImage] = useState<string>('')
+  const [cropState, setCropState] = useState<CropState>({
+    crop: {
+      unit: '%',
+      width: 90,
+      height: 90,
+      x: 5,
+      y: 5
+    },
+    aspect: 1,
+    imageRef: null,
+    completedCrop: null
+  })
 
   const handleCropComplete = async (crop: CropType) => {
     if (!cropState.imageRef || !crop.width || !crop.height) {
@@ -656,6 +800,8 @@ export default function Component(): JSX.Element {
     setTimeout(() => setProjectsLoading(false), 800)
     setTimeout(() => setVideosLoading(false), 1200)
   }, [])
+
+  const [isUsingExampleContent, setIsUsingExampleContent] = useState(true);
 
   const displayProjects = spotlightItems === exampleProjects || spotlightItems.length === 0 
     ? exampleProjects 
@@ -821,151 +967,56 @@ export default function Component(): JSX.Element {
   };
 
   // New helper functions
-  const resetProfileState = useCallback(() => {
-    resetProfile()
+  const resetProfileState = () => {
+    setProfile({
+      name: "Your Name",
+      title: "Your Role / Title",
+      bio: "Tell your story here...",
+      image: "/images/placeholder.png",
+      socialLinks: [
+        { platform: "youtube", url: "" },
+        { platform: "spotify", url: "" },
+        { platform: "soundcloud", url: "" },
+        { platform: "instagram", url: "" }
+      ],
+      sectionVisibility: {
+        projects: true,
+        media: true,
+        shop: true
+      },
+      spotlightDescription: ""
+    })
     setProjects([])
     setMediaItems([])
-    setShopItems([])
+    setSticker({ enabled: true, image: defaultStickerImage })
     setSpotlightItems(exampleProjects)
-    setSticker({
-      enabled: true,
-      image: defaultStickerImage
-    })
     setIsUsingExampleContent(true)
+    setShopItems([])
     setIsEditing(false)
     setShowCropDialog(false)
     setTempImage('')
     setImageError(null)
     setImageLoading(false)
-  }, [resetProfile])
-
-  const restoreProfileState = (saved: ReturnType<typeof loadFromLocalStorage>) => {
-    if (!saved) return;
-    setProfile(saved.profile)
-    setMediaItems(saved.mediaItems)
-    setShopItems(saved.shopItems)
-    setSpotlightItems(saved.spotlightItems)
-    setSticker(saved.sticker)
-    setIsUsingExampleContent(false)
   }
 
-  // Add sticker handlers
-  const handleStickerChange = (checked: boolean) => {
-    console.log('Sticker enabled changed:', checked)
-    setSticker(prev => ({
-      ...prev,
-      enabled: checked
-    }))
-  }
-
-  // Function to handle image files being dropped
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    e.stopPropagation()
-    
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      handleImageChange(e.dataTransfer.files[0])
+  const restoreProfileState = (saved: any) => {
+    if (saved.profile) setProfile(saved.profile)
+    if (saved.projects) setProjects(saved.projects)
+    if (saved.mediaItems) setMediaItems(saved.mediaItems)
+    if (saved.sticker) setSticker(saved.sticker)
+    if (saved.shopItems) setShopItems(saved.shopItems)
+    if (saved.spotlightItems) {
+      setSpotlightItems(saved.spotlightItems)
+      setIsUsingExampleContent(false)
     }
   }
-
-  // Function to handle dragover event
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    e.stopPropagation()
-  }
-
-  // Function to handle file input change
-  const handleImageChange = (file: File) => {
-    setImageError(null)
-    
-    // Validate file size
-    if (file.size > 5 * 1024 * 1024) {
-      setImageError('Image must be less than 5MB')
-      return
-    }
-    
-    // Validate file type
-    if (!['image/jpeg', 'image/png', 'image/gif'].includes(file.type)) {
-      setImageError('Image must be JPG, PNG, or GIF')
-      return
-    }
-    
-    setImageLoading(true)
-    
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      if (e.target?.result) {
-        setTempImage(e.target.result as string)
-        setShowCropDialog(true)
-        setImageLoading(false)
-      }
-    }
-    
-    reader.onerror = () => {
-      setImageError('Error reading file')
-      setImageLoading(false)
-    }
-    
-    reader.readAsDataURL(file)
-  }
-
-  // Create a debounced save function
-  const debouncedSave = useCallback(
-    debounce((data: any) => {
-      saveToLocalStorage(data);
-    }, 500),
-    [saveToLocalStorage]
-  );
-
-  // Add handlers for form inputs
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    handleProfileChange('name', value);
-  };
-
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    handleProfileChange('title', value);
-  };
-  
-  const handleBioChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const value = e.target.value;
-    handleProfileChange('bio', value);
-  };
-  
-  // Add social link handlers
-  const addSocialLink = () => {
-    const newLink = { platform: "instagram", url: "" };
-    setProfile(prev => ({
-      ...prev,
-      socialLinks: [...prev.socialLinks, newLink]
-    }));
-  };
-  
-  const removeSocialLink = (index: number) => {
-    setProfile(prev => ({
-      ...prev,
-      socialLinks: prev.socialLinks.filter((_, i) => i !== index)
-    }));
-  };
-  
-  // Add media handlers
-  const addMedia = () => {
-    setMediaItems(prev => [...prev, {
-      id: Date.now().toString(),
-      type: 'youtube',
-      rawUrl: ''
-    }]);
-  };
-  
-  const removeMedia = (index: number) => {
-    setMediaItems(prev => prev.filter((_, i) => i !== index));
-  };
 
   return (
     <div className="dark min-h-screen bg-gray-900 text-gray-100">
-      <NavbarContainer />
-      <AuthDebug />
+      <Navbar
+        isAuthenticated={isAuthenticated}
+        onLoginToggle={handleLoginToggle}
+      />
       {isLoading ? (
         <div className="flex items-center justify-center min-h-screen">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white" />
@@ -1075,7 +1126,7 @@ export default function Component(): JSX.Element {
                           id="name"
                           name="name"
                           value={profile.name}
-                          onChange={handleNameChange}
+                          onChange={handleProfileChange}
                           className={`mt-1 whitespace-pre-wrap break-words ${!formErrors.name.isValid ? 'border-red-500 focus:ring-red-500' : ''}`}
                           aria-invalid={!formErrors.name.isValid}
                           aria-describedby={!formErrors.name.isValid ? "name-error" : undefined}
@@ -1093,7 +1144,7 @@ export default function Component(): JSX.Element {
                           id="title"
                           name="title"
                           value={profile.title}
-                          onChange={handleTitleChange}
+                          onChange={handleProfileChange}
                           className={`mt-1 whitespace-pre-wrap break-words ${!formErrors.title.isValid ? 'border-red-500 focus:ring-red-500' : ''}`}
                           aria-invalid={!formErrors.title.isValid}
                           aria-describedby={!formErrors.title.isValid ? "title-error" : undefined}
@@ -1114,7 +1165,7 @@ export default function Component(): JSX.Element {
                           id="bio"
                           name="bio"
                           value={profile.bio}
-                          onChange={handleBioChange}
+                          onChange={handleProfileChange}
                           rows={4}
                           className={`mt-1 whitespace-pre-wrap break-words ${!formErrors.bio.isValid ? 'border-red-500 focus:ring-red-500' : ''}`}
                           aria-invalid={!formErrors.bio.isValid}
@@ -1152,7 +1203,15 @@ export default function Component(): JSX.Element {
                           <Checkbox
                             id="projects-visible"
                             checked={profile.sectionVisibility.projects}
-                            onCheckedChange={() => handleSectionVisibilityToggle('projects')}
+                            onCheckedChange={(checked) => {
+                              setProfile(prev => ({
+                                ...prev,
+                                sectionVisibility: {
+                                  ...prev.sectionVisibility,
+                                  projects: checked as boolean
+                                }
+                              }))
+                            }}
                           />
                           <Label htmlFor="projects-visible">Show Spotlight section</Label>
                         </div>
@@ -1161,7 +1220,15 @@ export default function Component(): JSX.Element {
                           <Checkbox
                             id="media-visible"
                             checked={profile.sectionVisibility.media}
-                            onCheckedChange={() => handleSectionVisibilityToggle('media')}
+                            onCheckedChange={(checked) => {
+                              setProfile(prev => ({
+                                ...prev,
+                                sectionVisibility: {
+                                  ...prev.sectionVisibility,
+                                  media: checked as boolean
+                                }
+                              }))
+                            }}
                           />
                           <Label htmlFor="media-visible">Show Media section</Label>
                         </div>
@@ -1170,7 +1237,15 @@ export default function Component(): JSX.Element {
                           <Checkbox
                             id="shop-visible"
                             checked={profile.sectionVisibility.shop}
-                            onCheckedChange={() => handleSectionVisibilityToggle('shop')}
+                            onCheckedChange={(checked) => {
+                              setProfile(prev => ({
+                                ...prev,
+                                sectionVisibility: {
+                                  ...prev.sectionVisibility,
+                                  shop: checked as boolean
+                                }
+                              }))
+                            }}
                           />
                           <Label htmlFor="shop-visible">Show Shop section</Label>
                         </div>
@@ -1313,27 +1388,14 @@ export default function Component(): JSX.Element {
                         <div className="relative flex-1 min-h-0 overflow-auto">
                           <ReactCrop
                             crop={cropState.crop}
-                            onChange={(c: CropType) => setCropState({ ...cropState, crop: c })}
-                            onComplete={(c: CropType) => setCropState({ ...cropState, completedCrop: c })}
+                            onChange={(c: CropType) => setCropState(prev => ({ ...prev, crop: c }))}
+                            onComplete={(c: CropType) => setCropState(prev => ({ ...prev, completedCrop: c }))}
+                            aspect={cropState.aspect}
                           >
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               src={tempImage}
-                              onLoad={e => {
-                                const imageRef = e.currentTarget;
-                                setCropState({
-                                  crop: {
-                                    unit: '%',
-                                    width: 90,
-                                    height: 90,
-                                    x: 5,
-                                    y: 5
-                                  },
-                                  aspect: 1,
-                                  imageRef,
-                                  completedCrop: null
-                                });
-                              }}
+                              onLoad={e => setCropState(prev => ({ ...prev, imageRef: e.currentTarget }))}
                               alt="Crop preview"
                               className="max-w-full max-h-[calc(90vh-12rem)] w-auto mx-auto object-contain"
                             />
@@ -1452,54 +1514,17 @@ export default function Component(): JSX.Element {
                           })}
                         </div>
 
-                        {/* Edit profile button - only shown when authenticated */}
-                        {isAuthenticatedLocal && (
+                        {isAuthenticated && (
                           <Button
-                            onClick={() => {
-                              console.log('Edit button clicked! Auth state:', {isAuthenticated, isAuthenticatedLocal, userAddress})
-                              setIsEditing(true)
-                            }}
-                            variant="default"
-                            className="mt-4 bg-cyan-500 hover:bg-cyan-600 text-white transition-all shadow-md hover:shadow-lg"
+                            onClick={() => setIsEditing(true)}
+                            variant="outline"
+                            className="mt-4 border-cyan-300/30 hover:border-cyan-300/80 transition-colors group"
                           >
-                            <Edit2 className="mr-2 h-4 w-4" />
-                            <span>Edit Profile</span>
-                            <span className="ml-2 text-xs text-cyan-100">(Add your content)</span>
+                            <Edit2 className="mr-2 h-4 w-4 group-hover:text-cyan-300" />
+                            <span className="group-hover:text-cyan-300">Edit Profile</span>
+                            <span className="ml-2 text-xs text-gray-400">(Add your content)</span>
                           </Button>
                         )}
-
-                        {/* Debug button - temporarily visible for troubleshooting auth issues */}
-                        <Button
-                          onClick={() => {
-                            console.log('Debug button clicked! Forcing auth refresh...');
-                            refreshAuthState();
-                            
-                            setTimeout(() => {
-                              const hasWalletAddress = typeof userAddress === 'string' && userAddress.trim() !== '';
-                              const isUserAuthenticated = isAuthenticated === true || hasWalletAddress;
-                              
-                              console.log('Current auth state after refresh:', {
-                                isUserAuthenticated,
-                                isAuthenticated,
-                                hasWalletAddress,
-                                userAddress
-                              });
-                              
-                              setIsAuthenticatedLocal(isUserAuthenticated);
-                            }, 300);
-                          }}
-                          variant="outline"
-                          className="mt-2 border-amber-500 text-amber-500 hover:bg-amber-500 hover:text-white"
-                        >
-                          Force Auth Check
-                        </Button>
-
-                        {/* Debug text to show auth status */}
-                        <div className="mt-2 text-xs text-cyan-300">
-                          Auth status: {isAuthenticated ? 'Authenticated' : 'Not Authenticated'} | 
-                          Local: {isAuthenticatedLocal ? 'True' : 'False'} | 
-                          Address: {userAddress ? 'Has Address' : 'No Address'}
-                        </div>
                       </div>
                     </div>
                   </div>

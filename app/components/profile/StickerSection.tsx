@@ -4,17 +4,13 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import Image from "next/image"
-
-export interface Sticker {
-  enabled: boolean
-  image: string
-}
+import { Sticker } from "@/types/content"
 
 interface StickerSectionProps {
-  sticker: Sticker
-  onStickerChange: (checked: boolean) => void
-  onImageChange: (value: string) => void
-  isEditing?: boolean
+  sticker: Sticker;
+  onStickerChange: (checked: boolean) => void;
+  onImageChange: (value: string) => void;
+  isEditing?: boolean;
 }
 
 export function StickerSection({

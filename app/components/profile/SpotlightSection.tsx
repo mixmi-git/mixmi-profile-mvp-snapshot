@@ -16,13 +16,13 @@ import {
 import { validateSpotlightItem, validateSpotlightImage } from '@/lib/validation'
 import ImageUpload from '../ui/ImageUpload'
 import ErrorBoundary from '../ui/ErrorBoundary'
+import { SpotlightItem } from '@/types/content'
 
-export interface SpotlightItem {
-  id: number
-  title: string
-  description: string
-  image: string
-  link: string
+interface SpotlightError {
+  title: string;
+  description: string;
+  link: string;
+  image: string;
 }
 
 interface SpotlightSectionProps {
@@ -31,15 +31,8 @@ interface SpotlightSectionProps {
   onAddItem: () => void
   onRemoveItem: (index: number) => void
   onImageChange: (index: number, file: File | null) => void
-  isEditing?: boolean
+  isEditing: boolean
   isUsingExampleContent?: boolean
-}
-
-interface SpotlightError {
-  title: string;
-  description: string;
-  link: string;
-  image: string;
 }
 
 const renderEditForm = (item: SpotlightItem, index: number, errors: SpotlightError[], handlers: {
