@@ -2110,22 +2110,22 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
               
               <div 
                 className={`border-2 rounded-md p-1 cursor-pointer transition-all ${
-                  formValues.sticker?.image === '/images/stickers/daisy-green.png' 
+                  formValues.sticker?.image === '/images/stickers/daisy-yellow.png' 
                     ? 'border-cyan-500' 
                     : 'border-gray-700 hover:border-gray-500'
                 }`}
-                onClick={() => handleStickerChange('/images/stickers/daisy-green.png')}
+                onClick={() => handleStickerChange('/images/stickers/daisy-yellow.png')}
               >
                 <div className="aspect-square relative overflow-hidden rounded">
                   <div className="absolute inset-0 flex items-center justify-center bg-green-900/20">
                     <img 
-                      src="/images/stickers/daisy-green.png" 
-                      alt="Green Daisy Sticker" 
+                      src="/images/stickers/daisy-yellow.png" 
+                      alt="Yellow Daisy Sticker" 
                       className="w-10 h-10 object-contain"
                     />
                   </div>
                 </div>
-                <p className="text-xs text-center mt-1 text-gray-300">Green Daisy</p>
+                <p className="text-xs text-center mt-1 text-gray-300">Yellow Daisy</p>
               </div>
               
               {/* Placeholder for 3 new stickers - Will be filled in by the user later */}
