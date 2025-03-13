@@ -35,6 +35,7 @@ import { NavbarContainer } from '@/components/profile/NavbarContainer'
 import { useAuth } from '@/lib/auth'
 import { AuthDebug } from './AuthDebug'
 import { SpotlightItem as SpotlightItemType, ShopItem as ShopItemType, Profile as ProfileType, SocialLink, Project as ProjectType } from '../types/content'
+import { useMediaState } from '@/hooks/useMediaState'
 
 /* eslint-disable react-hooks/exhaustive-deps */
 
@@ -530,7 +531,16 @@ export default function Component(): JSX.Element {
 
   const [projects, setProjects] = useState<Project[]>([])
 
-  const [mediaItems, setMediaItems] = useState<MediaItem[]>([])
+  // Use the media state hook
+  const { 
+    mediaItems, 
+    setMediaItems, 
+    videosLoading, 
+    addMedia, 
+    removeMedia, 
+    handleMediaChange 
+  } = useMediaState(exampleMediaItems)
+  
   const [spotlightItems, setSpotlightItems] = useState<SpotlightItem[]>(exampleProjects)
   const [shopItems, setShopItems] = useState<ShopItem[]>([])
 
@@ -628,11 +638,9 @@ export default function Component(): JSX.Element {
   )
 
   const [projectsLoading, setProjectsLoading] = useState(true)
-  const [videosLoading, setVideosLoading] = useState(true)
 
   useEffect(() => {
     setTimeout(() => setProjectsLoading(false), 800)
-    setTimeout(() => setVideosLoading(false), 1200)
   }, [])
 
   // Update displayProjects computation to handle type compatibility
@@ -738,67 +746,7 @@ export default function Component(): JSX.Element {
     }
   };
 
-  // Comment out unused shop functions for future reference
-  /*
-  const handleShopItemChange = (index: number, field: string, value: string) => {
-    const updatedItems = shopItems.map((item, i) =>
-      i === index ? {
-        ...item,
-        [field]: value,
-        ...(field === 'storeUrl' ? {
-          platform: (value.includes('shopify.com') ? 'shopify' :
-            value.includes('etsy.com') ? 'etsy' :
-              value.includes('gumroad.com') ? 'gumroad' :
-                value.includes('bigcartel.com') ? 'bigcartel' : 'other') as ShopItem['platform']
-        } : {})
-      } : item
-    )
-
-    setShopItems(updatedItems)
-    debouncedSave({
-      profile,
-      projects,
-      mediaItems,
-      sticker,
-      shopItems: updatedItems,
-      spotlightItems
-    })
-  }
-
-  const addShopItem = () => {
-    setShopItems(prev => [...prev, {
-      id: Date.now(),
-      title: '',
-      storeUrl: '',
-      image: '',
-      platform: 'other'
-    }])
-  }
-
-  const removeShopItem = (index: number) => {
-    setShopItems(prev => prev.filter((_, i) => i !== index))
-  }
-  */
-
   const [previewMode, setPreviewMode] = useState(true);
-
-  const handleMediaChange = (index: number, field: string, value: string) => {
-    const updatedItems = [...mediaItems];
-    if (field === 'type') {
-      (updatedItems[index] as MediaItem).type = value as MediaType;
-    } else {
-      (updatedItems[index] as any)[field] = value;
-    }
-    setMediaItems(updatedItems);
-    debouncedSave({
-      profile,
-      projects,
-      mediaItems: updatedItems,
-      sticker,
-      shopItems,
-      spotlightItems
-    });
-  };
 
   // New helper functions
   const resetProfileState = useCallback(() => {
@@ -927,19 +875,6 @@ export default function Component(): JSX.Element {
       ...prev,
       socialLinks: prev.socialLinks.filter((_, i) => i !== index)
     }));
-  };
-  
-  // Add media handlers
-  const addMedia = () => {
-    setMediaItems(prev => [...prev, {
-      id: Date.now().toString(),
-      type: 'youtube',
-      rawUrl: ''
-    }]);
-  };
-  
-  const removeMedia = (index: number) => {
-    setMediaItems(prev => prev.filter((_, i) => i !== index));
   };
 
   return (
