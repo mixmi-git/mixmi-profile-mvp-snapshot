@@ -19,13 +19,14 @@ import {
   transformSpotifyUrl, 
   transformAppleMusicUrl 
 } from '@/lib/mediaUtils';
+import ImageCropper from '@/components/ui/ImageCropper';
 
 interface ProfileEditorProps {
   profile: ProfileData;
   mediaItems: MediaItemType[];
   spotlightItems: SpotlightItemType[];
   shopItems: ShopItemType[];
-  onSave: (updatedProfile: Partial<ProfileData> | { spotlightItems: SpotlightItemType[] } | { mediaItems: MediaItemType[] }) => void;
+  onSave: (updatedProfile: Partial<ProfileData> | { spotlightItems: SpotlightItemType[] } | { mediaItems: MediaItemType[] } | { shopItems: ShopItemType[] }) => void;
   onPreviewToggle: () => void;
   onDoneEditing: () => void;
   isPreviewMode?: boolean;
@@ -88,6 +89,12 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
   // Media error state
   const [mediaErrors, setMediaErrors] = useState<{[key: string]: string}>({});
   
+  // Add states for image cropper
+  const [showProfileCropper, setShowProfileCropper] = useState(false);
+  const [croppingImage, setCroppingImage] = useState('');
+  const [showShopCropper, setShowShopCropper] = useState<number | null>(null);
+  const [showSpotlightCropper, setShowSpotlightCropper] = useState<number | null>(null);
+  
   // Handle form input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -133,19 +140,35 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
     onSave({ sticker: updatedSticker });
   };
   
-  // Handle image upload
+  // Update handle image upload to use the cropper
   const handleImageUpload = (file: File) => {
     // Create a URL for the uploaded file
     const imageUrl = URL.createObjectURL(file);
     
+    // Show the cropper instead of immediately saving
+    setCroppingImage(imageUrl);
+    setShowProfileCropper(true);
+  };
+  
+  // Handle cropped profile image
+  const handleProfileCropComplete = (croppedImage: string) => {
     // Update local state
     setFormValues(prev => ({
       ...prev,
-      image: imageUrl
+      image: croppedImage
     }));
     
     // Save the change to parent component
-    onSave({ image: imageUrl });
+    onSave({ image: croppedImage });
+    
+    // Hide the cropper
+    setShowProfileCropper(false);
+  };
+  
+  // Handle cropping cancellation
+  const handleCropCancel = () => {
+    setShowProfileCropper(false);
+    setCroppingImage('');
   };
   
   // File input reference
@@ -314,7 +337,7 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
     }
   };
   
-  // Handle spotlight image change
+  // Update spotlight image handler to use cropper
   const handleSpotlightImageChange = (index: number, file: File) => {
     // Validate image
     const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
@@ -351,21 +374,29 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
       }
     }));
     
-    // Create a URL for the uploaded file
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const imageUrl = reader.result as string;
-      
-      const updatedItems = [...localSpotlightItems];
-      updatedItems[index] = {
-        ...updatedItems[index],
-        image: imageUrl
-      };
-      
-      setLocalSpotlightItems(updatedItems);
-      onSave({ spotlightItems: updatedItems });
+    // Create a URL for the uploaded file and show the cropper
+    const imageUrl = URL.createObjectURL(file);
+    setCroppingImage(imageUrl);
+    setShowSpotlightCropper(index);
+  };
+  
+  // Handle cropped spotlight image
+  const handleSpotlightCropComplete = (croppedImage: string) => {
+    if (showSpotlightCropper === null) return;
+    
+    const index = showSpotlightCropper;
+    const updatedItems = [...localSpotlightItems];
+    updatedItems[index] = {
+      ...updatedItems[index],
+      image: croppedImage
     };
-    reader.readAsDataURL(file);
+    
+    setLocalSpotlightItems(updatedItems);
+    onSave({ spotlightItems: updatedItems });
+    
+    // Hide the cropper
+    setShowSpotlightCropper(null);
+    setCroppingImage('');
   };
   
   // Handle adding a new spotlight item
@@ -421,6 +452,33 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
   const SpotlightItem = ({ item, index }: { item: SpotlightItemType & { link?: string }, index: number }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     
+    // Add local state for title, description and link to fix input bugs
+    const [localTitle, setLocalTitle] = useState(item.title || '');
+    const [localDescription, setLocalDescription] = useState(item.description || '');
+    const [localLink, setLocalLink] = useState((item as any).link || '');
+    
+    // Update local state if parent state changes
+    useEffect(() => {
+      setLocalTitle(item.title || '');
+      setLocalDescription(item.description || '');
+      setLocalLink((item as any).link || '');
+    }, [item.title, item.description, (item as any).link]);
+    
+    // Update title in parent state on blur or Enter key
+    const handleTitleBlur = () => {
+      handleSpotlightChange(index, 'title', localTitle);
+    };
+    
+    // Update description in parent state on blur or Enter key
+    const handleDescriptionBlur = () => {
+      handleSpotlightChange(index, 'description', localDescription);
+    };
+    
+    // Update link in parent state on blur or Enter key
+    const handleLinkBlur = () => {
+      handleSpotlightChange(index, 'link', localLink);
+    };
+    
     return (
       <AccordionItem value={`spotlight-${index}`} className="border border-gray-700 rounded-md overflow-hidden">
         <AccordionTrigger className="px-4 py-3 bg-gray-800 hover:bg-gray-750 hover:no-underline">
@@ -432,7 +490,7 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
         </AccordionTrigger>
         <AccordionContent className="p-4 bg-gray-800/50">
           <div className="space-y-4">
-            {/* Image upload area */}
+            {/* Image upload area with corner badge styling */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Image
@@ -446,7 +504,7 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
                 } rounded-lg p-4 flex flex-col items-center justify-center hover:border-gray-500 transition-colors`}
               >
                 {item.image ? (
-                  <div className="relative w-full aspect-video bg-gray-900 rounded overflow-hidden mb-4">
+                  <div className="relative w-full aspect-square bg-gray-900 rounded-lg overflow-hidden mb-4 group mx-auto max-w-xs">
                     <Image
                       src={item.image}
                       alt={item.title || `Spotlight ${index + 1}`}
@@ -454,6 +512,34 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
                       className="object-cover"
                       unoptimized
                     />
+                    
+                    {/* Corner badge - updated for mobile */}
+                    <div className="absolute bottom-0 right-0 bg-black bg-opacity-70 p-2 
+                      max-w-[90%] md:max-w-[80%] transition-all duration-300 
+                      md:group-hover:max-w-full rounded-tl-md">
+                      <div className="border-l-2 border-cyan-400 pl-2">
+                        <div className="flex items-center gap-2">
+                          <h4 className="text-white text-sm font-medium truncate">{localTitle || "Untitled"}</h4>
+                          {localLink && <Link className="h-3 w-3 text-cyan-400 flex-shrink-0" />}
+                        </div>
+                        <p className="text-xs text-gray-300 mt-1 line-clamp-2 block md:hidden md:group-hover:block">
+                          {localDescription}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    {/* Edit overlay */}
+                    <div 
+                      className="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        fileInputRef.current?.click();
+                      }}
+                    >
+                      <div className="bg-gray-800 bg-opacity-90 p-2 rounded">
+                        <p className="text-white text-sm">Click to change image</p>
+                      </div>
+                    </div>
                   </div>
                 ) : (
                   <div className="p-6 text-center">
@@ -477,17 +563,31 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
                   </p>
                 )}
               </div>
+              
+              {item.image && (
+                <p className="text-xs text-gray-400 mt-2">
+                  Images will display in square format with an info badge in the corner.
+                  {localLink && <span className="ml-1">Clicking the image will open the link.</span>}
+                </p>
+              )}
             </div>
             
-            {/* Title field */}
+            {/* Title field - using local state */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Title
               </label>
               <input
                 type="text"
-                value={item.title}
-                onChange={(e) => handleSpotlightChange(index, 'title', e.target.value)}
+                value={localTitle}
+                onChange={(e) => setLocalTitle(e.target.value)}
+                onBlur={handleTitleBlur}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleTitleBlur();
+                  }
+                }}
                 className={`w-full p-3 bg-gray-900 border ${
                   spotlightErrors[index]?.title ? 'border-red-500' : 'border-gray-700'
                 } rounded-md text-gray-100`}
@@ -500,14 +600,15 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
               )}
             </div>
             
-            {/* Description field */}
+            {/* Description field - using local state */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Description
               </label>
               <textarea
-                value={item.description}
-                onChange={(e) => handleSpotlightChange(index, 'description', e.target.value)}
+                value={localDescription}
+                onChange={(e) => setLocalDescription(e.target.value)}
+                onBlur={handleDescriptionBlur}
                 className={`w-full p-3 bg-gray-900 border ${
                   spotlightErrors[index]?.description ? 'border-red-500' : 'border-gray-700'
                 } rounded-md text-gray-100 resize-y`}
@@ -521,7 +622,7 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
               )}
             </div>
             
-            {/* Link field (optional) */}
+            {/* Link field (optional) - using local state */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Link (Optional)
@@ -532,8 +633,15 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
                 </div>
                 <input
                   type="text"
-                  value={(item as any).link || ''}
-                  onChange={(e) => handleSpotlightChange(index, 'link', e.target.value)}
+                  value={localLink}
+                  onChange={(e) => setLocalLink(e.target.value)}
+                  onBlur={handleLinkBlur}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleLinkBlur();
+                    }
+                  }}
                   className={`w-full p-3 pl-10 bg-gray-900 border ${
                     spotlightErrors[index]?.link ? 'border-red-500' : 'border-gray-700'
                   } rounded-md text-gray-100`}
@@ -629,192 +737,277 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
     handleSocialLinkChange: (index: number, field: 'platform' | 'url', value: string) => void;
     socialLinkErrors: SocialLinkError[];
     SOCIAL_PLATFORMS: {value: string, label: string}[];
-  }) => (
-    <div>
-      <div className="flex items-center gap-4 mb-6">
-        <h2 className="text-2xl font-bold text-cyan-300">Profile Details</h2>
-        <div className="flex-grow border-t border-gray-700" />
-      </div>
-      
-      <p className="text-sm text-gray-400 mb-6">
-        Welcome to your profile! This is where you can share who you are with the community.
-        Add your name, title, and a profile image to get started.
-      </p>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        {/* Profile image upload */}
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            Profile Image
-          </label>
-          
-          <div
-            onDragOver={handleDragOver}
-            onDrop={handleDrop}
-            className="border border-dashed border-gray-600 rounded-lg p-6 flex flex-col items-center justify-center hover:border-gray-500 transition-colors cursor-pointer"
-            onClick={() => fileInputRef.current?.click()}
-          >
-            {formValues.image && formValues.image !== '/images/placeholder.png' ? (
-              <div className="w-20 h-20 overflow-hidden rounded-md mb-3">
-                <img 
-                  src={formValues.image} 
-                  alt="Profile" 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            ) : (
-              <Upload className="h-10 w-10 text-gray-400 mb-2" />
-            )}
-            
-            <p className="text-gray-300 mb-2">Drag & drop an image here, or click to select one</p>
-            <p className="text-gray-400 text-sm mb-4">Supports JPG, PNG, and GIFs under 5MB</p>
-            
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                fileInputRef.current?.click();
-              }}
-              className="inline-flex items-center px-4 py-2 rounded bg-gray-800 border border-gray-600 text-gray-200 hover:bg-gray-700 transition-colors"
-            >
-              <Upload className="w-4 h-4 mr-2" />
-              Upload Image
-            </button>
-            
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/gif,image/webp"
-              className="hidden"
-              onChange={handleFileChange}
-            />
-          </div>
+  }) => {
+    // Add local state for name, title, and bio to fix glitchy inputs
+    const [localName, setLocalName] = useState(formValues.name || '');
+    const [localTitle, setLocalTitle] = useState(formValues.title || ''); 
+    const [localBio, setLocalBio] = useState(formValues.bio || '');
+    
+    // Update local state when parent state changes
+    useEffect(() => {
+      setLocalName(formValues.name || '');
+      setLocalTitle(formValues.title || '');
+      setLocalBio(formValues.bio || '');
+    }, [formValues.name, formValues.title, formValues.bio]);
+    
+    // Handle local input changes
+    const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      setLocalName(e.target.value);
+    };
+    
+    const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      setLocalTitle(e.target.value);
+    };
+    
+    const handleBioChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      setLocalBio(e.target.value);
+    };
+    
+    // Update parent state on blur
+    const handleNameBlur = () => {
+      handleInputChange({ target: { name: 'name', value: localName } } as React.ChangeEvent<HTMLInputElement>);
+    };
+    
+    const handleTitleBlur = () => {
+      handleInputChange({ target: { name: 'title', value: localTitle } } as React.ChangeEvent<HTMLInputElement>);
+    };
+    
+    const handleBioBlur = () => {
+      handleInputChange({ target: { name: 'bio', value: localBio } } as React.ChangeEvent<HTMLTextAreaElement>);
+    };
+    
+    return (
+      <div>
+        <div className="flex items-center gap-4 mb-6">
+          <h2 className="text-2xl font-bold text-cyan-300">Profile Details</h2>
+          <div className="flex-grow border-t border-gray-700" />
         </div>
         
-        {/* Name and title fields */}
-        <div className="space-y-6">
-          {/* Name field */}
+        <p className="text-sm text-gray-400 mb-6">
+          Welcome to your profile! This is where you can share who you are with the community.
+          Add your name, title, and a profile image to get started.
+        </p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          {/* Profile image upload - Updated to use rounded squares instead of circles */}
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">
-              Name
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Profile Image
             </label>
-            <input
-              id="name"
-              name="name"
-              type="text"
-              value={formValues.name}
-              onChange={handleInputChange}
-              className="w-full p-3 bg-gray-900 border border-gray-700 rounded-md text-gray-100"
-              placeholder="Your name"
-            />
-          </div>
-          
-          {/* Title field */}
-          <div>
-            <label htmlFor="title" className="block text-sm font-medium text-gray-300 mb-2">
-              Title
-            </label>
-            <input
-              id="title"
-              name="title"
-              type="text"
-              value={formValues.title}
-              onChange={handleInputChange}
-              className="w-full p-3 bg-gray-900 border border-gray-700 rounded-md text-gray-100"
-              placeholder="Producer, DJ, Sound Engineer, etc."
-            />
-          </div>
-        </div>
-      </div>
-      
-      {/* Bio field */}
-      <div>
-        <label htmlFor="bio" className="block text-sm font-medium text-gray-300 mb-2">
-          Bio
-        </label>
-        <textarea
-          id="bio"
-          name="bio"
-          value={formValues.bio}
-          onChange={handleInputChange}
-          className="w-full p-3 bg-gray-900 border border-gray-700 rounded-md text-gray-100 resize-y"
-          rows={4}
-          placeholder="Tell us about yourself..."
-        />
-      </div>
-      
-      {/* Social Links */}
-      <div className="mt-8">
-        <h3 className="text-lg font-medium text-gray-200 mb-3">Social Links</h3>
-        <div className="space-y-4">
-          {formValues.socialLinks.map((link, index) => (
-            <div key={index} className="flex items-center space-x-2">
-              <div className="w-[180px]">
-                <select
-                  value={link.platform}
-                  onChange={(e) => handleSocialLinkChange(index, 'platform', e.target.value)}
-                  className="w-full p-3 bg-gray-900 border border-gray-700 rounded-md text-gray-100"
-                >
-                  <option value="">Select platform</option>
-                  {SOCIAL_PLATFORMS.map((platform) => (
-                    <option key={platform.value} value={platform.value}>
-                      {platform.label}
-                    </option>
-                  ))}
-                </select>
-                {socialLinkErrors[index]?.platform && (
-                  <p className="text-sm text-red-500 mt-1">
-                    {socialLinkErrors[index].platform}
-                  </p>
-                )}
-              </div>
+            
+            <div
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+              className="border border-dashed border-gray-600 rounded-lg p-6 flex flex-col items-center justify-center hover:border-gray-500 transition-colors cursor-pointer"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              {formValues.image && formValues.image !== '/images/placeholder.png' ? (
+                <div className="relative w-32 h-32 overflow-hidden rounded-xl mb-3 border-2 border-cyan-600">
+                  <img 
+                    src={formValues.image} 
+                    alt="Profile" 
+                    className="w-full h-full object-cover"
+                  />
+                  
+                  {/* Add an edit overlay */}
+                  <div 
+                    className="absolute inset-0 bg-black bg-opacity-50 opacity-0 hover:opacity-100 flex items-center justify-center transition-opacity"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      fileInputRef.current?.click();
+                    }}
+                  >
+                    <div className="bg-gray-800 bg-opacity-75 p-2 rounded">
+                      <p className="text-white text-xs">Change image</p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="relative w-32 h-32 overflow-hidden rounded-xl mb-3 border-2 border-gray-600 bg-gray-800">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Upload className="h-8 w-8 text-gray-500" />
+                    </div>
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 bg-black bg-opacity-30 transition-opacity">
+                      <div className="bg-gray-800 bg-opacity-75 p-2 rounded">
+                        <p className="text-white text-xs">Add image</p>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
               
-              <div className="flex-grow">
-                <input
-                  type="text"
-                  value={link.url}
-                  onChange={(e) => handleSocialLinkChange(index, 'url', e.target.value)}
-                  placeholder="https://..."
-                  className={`w-full p-3 bg-gray-900 border ${
-                    socialLinkErrors[index]?.url ? 'border-red-500' : 'border-gray-700'
-                  } rounded-md text-gray-100`}
-                />
-                {socialLinkErrors[index]?.url && (
-                  <p className="text-sm text-red-500 mt-1">
-                    {socialLinkErrors[index].url}
-                  </p>
-                )}
-              </div>
+              <p className="text-gray-300 mb-2">Drag & drop an image here, or click to select one</p>
+              <p className="text-gray-400 text-sm mb-4">Supports JPG, PNG, and GIFs under 5MB</p>
               
               <button
                 type="button"
-                onClick={() => handleRemoveSocialLink(index)}
-                className="p-3 text-gray-400 hover:text-red-400 transition-colors"
-                aria-label="Remove social link"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  fileInputRef.current?.click();
+                }}
+                className="inline-flex items-center px-4 py-2 rounded bg-gray-800 border border-gray-600 text-gray-200 hover:bg-gray-700 transition-colors"
               >
-                <Trash2 className="h-5 w-5" />
+                <Upload className="w-4 h-4 mr-2" />
+                Upload Image
               </button>
+              
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/gif,image/webp"
+                className="hidden"
+                onChange={handleFileChange}
+              />
+              
+              {formValues.image && formValues.image !== '/images/placeholder.png' && (
+                <p className="text-xs text-gray-400 mt-4">
+                  Profile images display with rounded corners. You can crop your image after uploading.
+                </p>
+              )}
             </div>
-          ))}
+          </div>
           
-          <button
-            type="button"
-            onClick={handleAddSocialLink}
-            className="mt-3 inline-flex items-center px-4 py-2 rounded bg-gray-800 border border-gray-600 text-gray-200 hover:bg-gray-700 transition-colors"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Add Social Link
-          </button>
-          
-          {formValues.socialLinks.length === 0 && (
-            <p className="text-gray-400 italic mt-2">
-              Add your social media links to help people find you across platforms.
-            </p>
-          )}
+          {/* Name, title, and bio fields - Reorganized */}
+          <div className="space-y-6">
+            {/* Name field */}
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">
+                Name
+              </label>
+              <input
+                id="name"
+                name="name"
+                type="text"
+                value={localName}
+                onChange={handleNameChange}
+                onBlur={handleNameBlur}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleNameBlur();
+                  }
+                }}
+                className="w-full p-3 bg-gray-900 border border-gray-700 rounded-md text-gray-100"
+                placeholder="Your name"
+              />
+            </div>
+            
+            {/* Title field */}
+            <div>
+              <label htmlFor="title" className="block text-sm font-medium text-gray-300 mb-2">
+                Title
+              </label>
+              <input
+                id="title"
+                name="title"
+                type="text"
+                value={localTitle}
+                onChange={handleTitleChange}
+                onBlur={handleTitleBlur}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleTitleBlur();
+                  }
+                }}
+                className="w-full p-3 bg-gray-900 border border-gray-700 rounded-md text-gray-100"
+                placeholder="Producer, DJ, Sound Engineer, etc."
+              />
+            </div>
+            
+            {/* Bio field - Moved here from below */}
+            <div>
+              <label htmlFor="bio" className="block text-sm font-medium text-gray-300 mb-2">
+                Bio
+              </label>
+              <textarea
+                id="bio"
+                name="bio"
+                value={localBio}
+                onChange={handleBioChange}
+                onBlur={handleBioBlur}
+                className="w-full p-3 bg-gray-900 border border-gray-700 rounded-md text-gray-100 resize-y"
+                rows={4}
+                placeholder="Tell us about yourself..."
+              />
+            </div>
+          </div>
+        </div>
+        
+        {/* Social Links */}
+        <div className="mt-8">
+          <h3 className="text-lg font-medium text-gray-200 mb-3">Social Links</h3>
+          <div className="space-y-4">
+            {formValues.socialLinks.map((link, index) => (
+              <div key={index} className="flex items-center space-x-2">
+                <div className="w-[180px]">
+                  <select
+                    value={link.platform}
+                    onChange={(e) => handleSocialLinkChange(index, 'platform', e.target.value)}
+                    className="w-full p-3 bg-gray-900 border border-gray-700 rounded-md text-gray-100"
+                  >
+                    <option value="">Select platform</option>
+                    {SOCIAL_PLATFORMS.map((platform) => (
+                      <option key={platform.value} value={platform.value}>
+                        {platform.label}
+                      </option>
+                    ))}
+                  </select>
+                  {socialLinkErrors[index]?.platform && (
+                    <p className="text-sm text-red-500 mt-1">
+                      {socialLinkErrors[index].platform}
+                    </p>
+                  )}
+                </div>
+                
+                <div className="flex-grow">
+                  <input
+                    type="text"
+                    value={link.url}
+                    onChange={(e) => handleSocialLinkChange(index, 'url', e.target.value)}
+                    placeholder="https://..."
+                    className={`w-full p-3 bg-gray-900 border ${
+                      socialLinkErrors[index]?.url ? 'border-red-500' : 'border-gray-700'
+                    } rounded-md text-gray-100`}
+                  />
+                  {socialLinkErrors[index]?.url && (
+                    <p className="text-sm text-red-500 mt-1">
+                      {socialLinkErrors[index].url}
+                    </p>
+                  )}
+                </div>
+                
+                <button
+                  type="button"
+                  onClick={() => handleRemoveSocialLink(index)}
+                  className="p-3 text-gray-400 hover:text-red-400 transition-colors"
+                  aria-label="Remove social link"
+                >
+                  <Trash2 className="h-5 w-5" />
+                </button>
+              </div>
+            ))}
+            
+            <button
+              type="button"
+              onClick={handleAddSocialLink}
+              className="mt-3 inline-flex items-center px-4 py-2 rounded bg-gray-800 border border-gray-600 text-gray-200 hover:bg-gray-700 transition-colors"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add Social Link
+            </button>
+            
+            {formValues.socialLinks.length === 0 && (
+              <p className="text-gray-400 italic mt-2">
+                Add your social media links to help people find you across platforms.
+              </p>
+            )}
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   // Handle media URL change
   const handleMediaURLChange = (index: number, url: string) => {
@@ -1141,8 +1334,421 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
     );
   };
 
+  // Shop section state and handlers
+  const [localShopItems, setLocalShopItems] = useState<ShopItemType[]>(shopItems);
+  const [shopErrors, setShopErrors] = useState<{[key: string]: {[key: string]: string}}>({});
+
+  // Handle shop item changes
+  const handleShopChange = (index: number, field: keyof ShopItemType | 'link', value: string) => {
+    // Validate the field
+    let errorMessage = '';
+    if (field === 'title' && !value.trim()) {
+      errorMessage = 'Shop name is required';
+    } else if (field === 'link' && value.trim()) {
+      try {
+        new URL(value);
+      } catch (e) {
+        errorMessage = 'Please enter a valid URL';
+      }
+    }
+    
+    // Update errors state
+    setShopErrors(prev => ({
+      ...prev,
+      [index]: {
+        ...(prev[index] || {}),
+        [field]: errorMessage
+      }
+    }));
+    
+    // Only update if valid or for non-required fields
+    if (!errorMessage) {
+      // Make a deep copy to ensure we don't modify the original state
+      const updatedItems = JSON.parse(JSON.stringify(localShopItems));
+      
+      if (field === 'link') {
+        // Handle link separately since it's not in the type
+        (updatedItems[index] as any).link = value;
+      } else {
+        // Only update the specific field that changed
+        updatedItems[index][field] = value;
+      }
+      
+      setLocalShopItems(updatedItems);
+      onSave({ shopItems: updatedItems });
+    }
+  };
+  
+  // Update the shop image handler to use cropper
+  const handleShopImageChange = (index: number, file: File) => {
+    // Validate image
+    const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    
+    if (!validTypes.includes(file.type)) {
+      setShopErrors(prev => ({
+        ...prev,
+        [index]: {
+          ...(prev[index] || {}),
+          image: 'Please upload a valid image (JPEG, PNG, GIF, or WebP)'
+        }
+      }));
+      return;
+    }
+    
+    if (file.size > maxSize) {
+      setShopErrors(prev => ({
+        ...prev,
+        [index]: {
+          ...(prev[index] || {}),
+          image: 'Image must be less than 5MB'
+        }
+      }));
+      return;
+    }
+    
+    // Clear any previous errors
+    setShopErrors(prev => ({
+      ...prev,
+      [index]: {
+        ...(prev[index] || {}),
+        image: ''
+      }
+    }));
+    
+    // Create a URL for the uploaded file and show the cropper
+    const imageUrl = URL.createObjectURL(file);
+    setCroppingImage(imageUrl);
+    setShowShopCropper(index);
+  };
+  
+  // Handle cropped shop image
+  const handleShopCropComplete = (croppedImage: string) => {
+    if (showShopCropper === null) return;
+    
+    const index = showShopCropper;
+    const updatedItems = JSON.parse(JSON.stringify(localShopItems));
+    updatedItems[index].image = croppedImage;
+    
+    setLocalShopItems(updatedItems);
+    onSave({ shopItems: updatedItems });
+    
+    // Hide the cropper
+    setShowShopCropper(null);
+    setCroppingImage('');
+  };
+  
+  // Handle adding a new shop item
+  const handleAddShop = () => {
+    const newItem: ShopItemType = {
+      id: `shop-${Date.now()}`,
+      title: '',
+      description: '',
+      image: '',
+      price: '' // Keeping this to avoid TypeScript errors since it's in the interface
+    };
+    
+    // Add link property separately since it's not in the ShopItemType interface
+    const newItemWithLink = {
+      ...newItem,
+      link: ''
+    };
+    
+    const updatedItems = [...localShopItems, newItemWithLink as ShopItemType];
+    setLocalShopItems(updatedItems);
+    onSave({ shopItems: updatedItems });
+  };
+  
+  // Handle removing a shop item
+  const handleRemoveShop = (index: number) => {
+    const updatedItems = localShopItems.filter((_, i) => i !== index);
+    setLocalShopItems(updatedItems);
+    onSave({ shopItems: updatedItems });
+    
+    // Clean up errors for the removed item
+    const updatedErrors = { ...shopErrors };
+    delete updatedErrors[index];
+    setShopErrors(updatedErrors);
+  };
+  
+  // Handle shop image upload via file input
+  const handleShopFileChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    if (e.target.files && e.target.files[0]) {
+      handleShopImageChange(index, e.target.files[0]);
+    }
+  };
+  
+  // Handle shop image drag and drop
+  const handleShopDrop = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleShopImageChange(index, e.dataTransfer.files[0]);
+    }
+  };
+  
+  // Custom shop item component
+  const ShopItem = ({ item, index }: { item: ShopItemType & { link?: string }, index: number }) => {
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    
+    // Add local state for title, description and link to fix input bugs
+    const [localTitle, setLocalTitle] = useState(item.title || '');
+    const [localDescription, setLocalDescription] = useState(item.description || '');
+    const [localLink, setLocalLink] = useState((item as any).link || '');
+    
+    // Update local state if parent state changes
+    useEffect(() => {
+      setLocalTitle(item.title || '');
+      setLocalDescription(item.description || '');
+      setLocalLink((item as any).link || '');
+    }, [item.title, item.description, (item as any).link]);
+    
+    // Update title in parent state on blur or Enter key
+    const handleTitleBlur = () => {
+      handleShopChange(index, 'title', localTitle);
+    };
+    
+    // Update description in parent state on blur or Enter key
+    const handleDescriptionBlur = () => {
+      handleShopChange(index, 'description', localDescription);
+    };
+    
+    // Update link in parent state on blur or Enter key
+    const handleLinkBlur = () => {
+      handleShopChange(index, 'link', localLink);
+    };
+    
+    return (
+      <AccordionItem value={`shop-${index}`} className="border border-gray-700 rounded-md overflow-hidden">
+        <AccordionTrigger className="px-4 py-3 bg-gray-800 hover:bg-gray-750 hover:no-underline">
+          <div className="flex items-center gap-2 text-left">
+            <span className="font-medium text-gray-200">
+              {item.title || `Shop Item ${index + 1}`}
+            </span>
+          </div>
+        </AccordionTrigger>
+        <AccordionContent className="p-4 bg-gray-800/50">
+          <div className="space-y-4">
+            {/* Image upload area with corner badge styling */}
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Image
+              </label>
+              <div
+                onDrop={(e) => handleShopDrop(e, index)}
+                onDragOver={handleDragOver}
+                onClick={() => fileInputRef.current?.click()}
+                className={`cursor-pointer border border-dashed ${
+                  shopErrors[index]?.image ? 'border-red-500' : 'border-gray-600'
+                } rounded-lg p-4 flex flex-col items-center justify-center hover:border-gray-500 transition-colors`}
+              >
+                {item.image ? (
+                  <div className="relative w-full aspect-square bg-gray-900 rounded-lg overflow-hidden mb-4 group mx-auto max-w-xs">
+                    <Image
+                      src={item.image}
+                      alt={item.title || `Shop ${index + 1}`}
+                      fill
+                      className="object-cover"
+                      unoptimized
+                    />
+                    
+                    {/* Corner badge - updated for mobile */}
+                    <div className="absolute bottom-0 right-0 bg-black bg-opacity-70 p-2 
+                      max-w-[90%] md:max-w-[80%] transition-all duration-300 
+                      md:group-hover:max-w-full rounded-tl-md">
+                      <div className="border-l-2 border-cyan-400 pl-2">
+                        <div className="flex items-center gap-2">
+                          <h4 className="text-white text-sm font-medium truncate">{localTitle || "Untitled"}</h4>
+                          {localLink && <Link className="h-3 w-3 text-cyan-400 flex-shrink-0" />}
+                        </div>
+                        <p className="text-xs text-gray-300 mt-1 line-clamp-2 block md:hidden md:group-hover:block">
+                          {localDescription}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    {/* Edit overlay */}
+                    <div 
+                      className="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        fileInputRef.current?.click();
+                      }}
+                    >
+                      <div className="bg-gray-800 bg-opacity-90 p-2 rounded">
+                        <p className="text-white text-sm">Click to change image</p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-6 text-center">
+                    <Upload className="mx-auto h-10 w-10 text-gray-400 mb-2" />
+                    <p className="text-gray-300 mb-2">Drag & drop an image here, or click to select one</p>
+                    <p className="text-gray-400 text-sm">Supports JPG, PNG, GIF, and WebP under 5MB</p>
+                  </div>
+                )}
+                
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/gif,image/webp"
+                  className="hidden"
+                  onChange={(e) => handleShopFileChange(e, index)}
+                />
+                
+                {shopErrors[index]?.image && (
+                  <p className="text-sm text-red-500 mt-1">
+                    {shopErrors[index].image}
+                  </p>
+                )}
+              </div>
+              
+              {item.image && (
+                <p className="text-xs text-gray-400 mt-2">
+                  Images will display in square format with an info badge in the corner.
+                  {localLink && <span className="ml-1">Clicking the image will open the link.</span>}
+                </p>
+              )}
+            </div>
+            
+            {/* Shop Name field - using local state */}
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Shop Name
+              </label>
+              <input
+                type="text"
+                value={localTitle}
+                onChange={(e) => setLocalTitle(e.target.value)}
+                onBlur={handleTitleBlur}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleTitleBlur();
+                  }
+                }}
+                className={`w-full p-3 bg-gray-900 border ${
+                  shopErrors[index]?.title ? 'border-red-500' : 'border-gray-700'
+                } rounded-md text-gray-100`}
+                placeholder="Add a shop name"
+              />
+              {shopErrors[index]?.title && (
+                <p className="text-sm text-red-500 mt-1">
+                  {shopErrors[index].title}
+                </p>
+              )}
+            </div>
+            
+            {/* Description field - using local state */}
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Description
+              </label>
+              <textarea
+                value={localDescription}
+                onChange={(e) => setLocalDescription(e.target.value)}
+                onBlur={handleDescriptionBlur}
+                className={`w-full p-3 bg-gray-900 border ${
+                  shopErrors[index]?.description ? 'border-red-500' : 'border-gray-700'
+                } rounded-md text-gray-100 resize-y`}
+                rows={3}
+                placeholder="Add a shop description"
+              />
+              {shopErrors[index]?.description && (
+                <p className="text-sm text-red-500 mt-1">
+                  {shopErrors[index].description}
+                </p>
+              )}
+            </div>
+            
+            {/* Link field - using local state */}
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Shop Link
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <Link className="h-4 w-4 text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  value={localLink}
+                  onChange={(e) => setLocalLink(e.target.value)}
+                  onBlur={handleLinkBlur}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleLinkBlur();
+                    }
+                  }}
+                  className={`w-full p-3 pl-10 bg-gray-900 border ${
+                    shopErrors[index]?.link ? 'border-red-500' : 'border-gray-700'
+                  } rounded-md text-gray-100`}
+                  placeholder="https://..."
+                />
+              </div>
+              {shopErrors[index]?.link && (
+                <p className="text-sm text-red-500 mt-1">
+                  {shopErrors[index].link}
+                </p>
+              )}
+              <p className="mt-1 text-xs text-gray-400">
+                Add a link to your online shop
+              </p>
+            </div>
+            
+            {/* Remove button */}
+            <button
+              type="button"
+              onClick={() => handleRemoveShop(index)}
+              className="mt-2 inline-flex items-center px-4 py-2 rounded bg-red-900/30 border border-red-800 text-red-300 hover:bg-red-900/50 transition-colors"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Remove Shop
+            </button>
+          </div>
+        </AccordionContent>
+      </AccordionItem>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100">
+      {/* Image Croppers */}
+      {showProfileCropper && (
+        <ImageCropper
+          image={croppingImage}
+          aspectRatio={1} // 1:1 for profile
+          onCropComplete={handleProfileCropComplete}
+          onCancel={handleCropCancel}
+        />
+      )}
+      
+      {showShopCropper !== null && (
+        <ImageCropper
+          image={croppingImage}
+          aspectRatio={1} // 1:1 for shop items
+          onCropComplete={handleShopCropComplete}
+          onCancel={() => {
+            setShowShopCropper(null);
+            setCroppingImage('');
+          }}
+        />
+      )}
+      
+      {showSpotlightCropper !== null && (
+        <ImageCropper
+          image={croppingImage}
+          aspectRatio={1} // 1:1 for spotlight items (changed from 16:9)
+          onCropComplete={handleSpotlightCropComplete}
+          onCancel={() => {
+            setShowSpotlightCropper(null);
+            setCroppingImage('');
+          }}
+        />
+      )}
+      
       <div className="container mx-auto p-4 sm:p-8 md:p-12 lg:p-16">
         {/* Profile Edit Form - Updated to match screenshot */}
         <div className="rounded-lg overflow-hidden bg-gray-800/50 mb-12 p-6">
@@ -1282,11 +1888,34 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
           </div>
           
           <p className="text-sm text-gray-400 mb-6">
-            Sell your merch, music, or digital products directly from your profile.
+            Add links to your online shops and marketplaces where fans can find your merchandise.
           </p>
           
-          <div className="border border-dashed border-gray-600 rounded-md p-8 text-center">
-            <p className="text-gray-400">Shop editor will be implemented here</p>
+          <div className="space-y-4">
+            {localShopItems.length > 0 ? (
+              <Accordion type="single" collapsible className="space-y-3">
+                {localShopItems.map((item, index) => (
+                  <ShopItem 
+                    key={item.id} 
+                    item={item} 
+                    index={index} 
+                  />
+                ))}
+              </Accordion>
+            ) : (
+              <div className="text-center py-8 border border-dashed border-gray-700 rounded-lg">
+                <p className="text-gray-400 mb-4">No shops yet. Add your first one!</p>
+              </div>
+            )}
+            
+            <button
+              type="button"
+              onClick={handleAddShop}
+              className="mt-4 inline-flex items-center px-4 py-2 rounded bg-gray-800 border border-gray-600 text-gray-200 hover:bg-gray-700 transition-colors"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add Shop
+            </button>
           </div>
         </div>
         
@@ -1358,48 +1987,25 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
               
               <div 
                 className={`border-2 rounded-md p-2 cursor-pointer transition-all ${
-                  formValues.sticker?.image === '/images/stickers/daisy-yellow.png' 
+                  formValues.sticker?.image === '/images/stickers/daisy-green.png' 
                     ? 'border-cyan-500' 
                     : 'border-gray-700 hover:border-gray-500'
                 }`}
-                onClick={() => handleStickerChange('/images/stickers/daisy-yellow.png')}
+                onClick={() => handleStickerChange('/images/stickers/daisy-green.png')}
               >
                 <div className="aspect-square relative overflow-hidden rounded">
-                  <div className="absolute inset-0 flex items-center justify-center bg-yellow-900/20">
+                  <div className="absolute inset-0 flex items-center justify-center bg-green-900/20">
                     <img 
-                      src="/images/stickers/daisy-yellow.png" 
-                      alt="Yellow Daisy Sticker" 
+                      src="/images/stickers/daisy-green.png" 
+                      alt="Green Daisy Sticker" 
                       className="w-20 h-20 object-contain"
                     />
                   </div>
                 </div>
-                <p className="text-xs text-center mt-1 text-gray-300">Yellow Daisy</p>
+                <p className="text-xs text-center mt-1 text-gray-300">Green Daisy</p>
               </div>
             </div>
           </div>
-        </div>
-      </div>
-      
-      {/* Sticky footer for editor controls */}
-      <div className="fixed bottom-0 left-0 right-0 bg-gray-900/95 backdrop-blur-sm border-t border-gray-800 z-50">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center space-x-4">
-            <div className="text-sm text-gray-400">
-              Changes save automatically
-            </div>
-            <button 
-              onClick={onPreviewToggle}
-              className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-200 rounded-md transition-colors"
-            >
-              {isPreviewMode ? 'Exit Preview' : 'Preview'}
-            </button>
-          </div>
-          <button 
-            onClick={onDoneEditing}
-            className="px-6 py-2 text-lg border-2 border-cyan-300/60 hover:border-cyan-300/80 transition-colors rounded-md"
-          >
-            Done Editing
-          </button>
         </div>
       </div>
     </div>
