@@ -802,29 +802,35 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
               onClick={() => fileInputRef.current?.click()}
             >
               {formValues.image && formValues.image !== '/images/placeholder.png' ? (
-                <div className="relative w-32 h-32 overflow-hidden rounded-xl mb-3 border-2 border-cyan-600">
-                  <img 
-                    src={formValues.image} 
-                    alt="Profile" 
-                    className="w-full h-full object-cover"
-                  />
-                  
-                  {/* Add an edit overlay */}
-                  <div 
-                    className="absolute inset-0 bg-black bg-opacity-50 opacity-0 hover:opacity-100 flex items-center justify-center transition-opacity"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      fileInputRef.current?.click();
-                    }}
-                  >
-                    <div className="bg-gray-800 bg-opacity-75 p-2 rounded">
-                      <p className="text-white text-xs">Change image</p>
+                <>
+                  <div className="relative w-32 h-32 overflow-hidden rounded-xl mb-5 border-2 border-cyan-600">
+                    <img 
+                      src={formValues.image} 
+                      alt="Profile" 
+                      className="w-full h-full object-cover"
+                    />
+                    
+                    {/* Add an edit overlay */}
+                    <div 
+                      className="absolute inset-0 bg-black bg-opacity-50 opacity-0 hover:opacity-100 flex items-center justify-center transition-opacity"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        fileInputRef.current?.click();
+                      }}
+                    >
+                      <div className="bg-gray-800 bg-opacity-75 p-2 rounded">
+                        <p className="text-white text-xs">Change image</p>
+                      </div>
                     </div>
                   </div>
-                </div>
+                  
+                  <p className="text-xs text-gray-400 mt-1 mb-4">
+                    Profile images display with rounded corners.
+                  </p>
+                </>
               ) : (
                 <>
-                  <div className="relative w-32 h-32 overflow-hidden rounded-xl mb-3 border-2 border-gray-600 bg-gray-800">
+                  <div className="relative w-32 h-32 overflow-hidden rounded-xl mb-5 border-2 border-gray-600 bg-gray-800">
                     <div className="absolute inset-0 flex items-center justify-center">
                       <Upload className="h-8 w-8 text-gray-500" />
                     </div>
@@ -837,8 +843,8 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
                 </>
               )}
               
-              <p className="text-gray-300 mb-2">Drag & drop an image here, or click to select one</p>
-              <p className="text-gray-400 text-sm mb-4">Supports JPG, PNG, and GIFs under 5MB</p>
+              <p className="text-gray-300 text-sm mb-2">Drag and drop an image here or upload</p>
+              <p className="text-gray-400 text-xs mb-4">Supports JPG, PNG, and GIFs under 5MB</p>
               
               <button
                 type="button"
@@ -846,9 +852,9 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
                   e.stopPropagation();
                   fileInputRef.current?.click();
                 }}
-                className="inline-flex items-center px-4 py-2 rounded bg-gray-800 border border-gray-600 text-gray-200 hover:bg-gray-700 transition-colors"
+                className="inline-flex items-center px-3 py-1.5 rounded bg-gray-800 border border-gray-600 text-sm text-gray-200 hover:bg-gray-700 transition-colors"
               >
-                <Upload className="w-4 h-4 mr-2" />
+                <Upload className="w-3.5 h-3.5 mr-1.5" />
                 Upload Image
               </button>
               
@@ -859,12 +865,6 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
                 className="hidden"
                 onChange={handleFileChange}
               />
-              
-              {formValues.image && formValues.image !== '/images/placeholder.png' && (
-                <p className="text-xs text-gray-400 mt-4">
-                  Profile images display with rounded corners. You can crop your image after uploading.
-                </p>
-              )}
             </div>
           </div>
           
