@@ -1118,12 +1118,6 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
               </div>
             ))}
             
-            {formValues.socialLinks.length === 0 && (
-              <p className="text-gray-300 text-sm mb-4">
-                You haven't added any social links yet. Add your first one below.
-              </p>
-            )}
-            
             <button
               type="button"
               onClick={handleAddSocialLink}
