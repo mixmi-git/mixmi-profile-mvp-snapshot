@@ -798,12 +798,12 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
             <div
               onDragOver={handleDragOver}
               onDrop={handleDrop}
-              className="border border-dashed border-gray-600 rounded-lg p-8 flex flex-col items-center justify-center hover:border-gray-500 transition-colors cursor-pointer h-full"
+              className="border border-dashed border-gray-600 rounded-lg p-6 flex flex-col items-center justify-center hover:border-gray-500 transition-colors cursor-pointer h-full"
               onClick={() => fileInputRef.current?.click()}
             >
               {formValues.image && formValues.image !== '/images/placeholder.png' ? (
                 <>
-                  <div className="relative w-32 h-32 overflow-hidden rounded-xl mb-6 border-2 border-cyan-600">
+                  <div className="relative w-32 h-32 overflow-hidden rounded-xl mb-5 border-2 border-cyan-600">
                     <img 
                       src={formValues.image} 
                       alt="Profile" 
@@ -824,13 +824,13 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
                     </div>
                   </div>
                   
-                  <p className="text-xs text-gray-400 mt-1 mb-6">
+                  <p className="text-xs text-gray-400 mt-1 mb-5">
                     Profile images display with rounded corners.
                   </p>
                 </>
               ) : (
                 <>
-                  <div className="relative w-32 h-32 overflow-hidden rounded-xl mb-6 border-2 border-gray-600 bg-gray-800">
+                  <div className="relative w-32 h-32 overflow-hidden rounded-xl mb-5 border-2 border-gray-600 bg-gray-800">
                     <div className="absolute inset-0 flex items-center justify-center">
                       <Upload className="h-8 w-8 text-gray-500" />
                     </div>
@@ -844,7 +844,7 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
               )}
               
               <p className="text-gray-300 text-sm mb-3">Drag and drop an image here or upload</p>
-              <p className="text-gray-400 text-xs mb-6">Supports JPG, PNG, and GIFs under 5MB</p>
+              <p className="text-gray-400 text-xs mb-5">Supports JPG, PNG, and GIFs under 5MB</p>
               
               <button
                 type="button"
@@ -928,16 +928,24 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
                 onChange={handleBioChange}
                 onBlur={handleBioBlur}
                 className="w-full p-3 bg-gray-900 border border-gray-700 rounded-md text-gray-100 resize-y"
-                rows={4}
-                placeholder="Tell us about yourself..."
+                rows={5}
+                placeholder="Tell your story here..."
               />
             </div>
           </div>
         </div>
         
-        {/* Social Links */}
-        <div className="mt-8">
-          <h3 className="text-lg font-medium text-gray-200 mb-3">Social Links</h3>
+        {/* Social Links - Redesigned to match the pattern of other sections */}
+        <div className="mt-12">
+          <div className="flex items-center gap-4 mb-6">
+            <h2 className="text-2xl font-bold text-cyan-300">Social Links</h2>
+            <div className="flex-grow border-t border-gray-700" />
+          </div>
+          
+          <p className="text-sm text-gray-400 mb-6">
+            Add your social media links to help people find you across platforms.
+          </p>
+          
           <div className="space-y-4">
             {formValues.socialLinks.map((link, index) => (
               <div key={index} className="flex items-center space-x-2">
@@ -989,6 +997,12 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
               </div>
             ))}
             
+            {formValues.socialLinks.length === 0 && (
+              <p className="text-gray-300 text-sm mb-4">
+                You haven't added any social links yet. Add your first one below.
+              </p>
+            )}
+            
             <button
               type="button"
               onClick={handleAddSocialLink}
@@ -997,12 +1011,6 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
               <Plus className="w-4 h-4 mr-2" />
               Add Social Link
             </button>
-            
-            {formValues.socialLinks.length === 0 && (
-              <p className="text-gray-400 italic mt-2">
-                Add your social media links to help people find you across platforms.
-              </p>
-            )}
           </div>
         </div>
       </div>
