@@ -3,7 +3,7 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { ProfileData, MediaItemType, SpotlightItemType, ShopItemType } from './UserProfileContainer';
 import ImageUpload from '@/components/ui/ImageUpload';
-import { Upload, Plus, Trash2, Check, Square, Link } from 'lucide-react';
+import { Upload, Plus, Trash2, Check, Square, Link, Copy } from 'lucide-react';
 import { validateSocialUrl } from '@/lib/validation';
 import Image from 'next/image';
 import {
@@ -742,13 +742,18 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
     const [localName, setLocalName] = useState(formValues.name || '');
     const [localTitle, setLocalTitle] = useState(formValues.title || ''); 
     const [localBio, setLocalBio] = useState(formValues.bio || '');
+    const [localWallet, setLocalWallet] = useState(formValues.wallet?.address || '');
+    const [walletVisible, setWalletVisible] = useState(formValues.wallet?.visible || false);
+    const [copySuccess, setCopySuccess] = useState(false);
     
     // Update local state when parent state changes
     useEffect(() => {
       setLocalName(formValues.name || '');
       setLocalTitle(formValues.title || '');
       setLocalBio(formValues.bio || '');
-    }, [formValues.name, formValues.title, formValues.bio]);
+      setLocalWallet(formValues.wallet?.address || '');
+      setWalletVisible(formValues.wallet?.visible || false);
+    }, [formValues.name, formValues.title, formValues.bio, formValues.wallet]);
     
     // Handle local input changes
     const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -762,6 +767,10 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
     const handleBioChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       setLocalBio(e.target.value);
     };
+
+    const handleWalletChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      setLocalWallet(e.target.value);
+    };
     
     // Update parent state on blur
     const handleNameBlur = () => {
@@ -774,6 +783,43 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
     
     const handleBioBlur = () => {
       handleInputChange({ target: { name: 'bio', value: localBio } } as React.ChangeEvent<HTMLTextAreaElement>);
+    };
+
+    const handleWalletBlur = () => {
+      const updatedWallet = {
+        ...formValues.wallet || {},
+        address: localWallet,
+        visible: walletVisible
+      };
+      
+      // Update the parent state
+      onSave({ wallet: updatedWallet });
+    };
+
+    const handleWalletVisibilityToggle = () => {
+      const newVisibility = !walletVisible;
+      setWalletVisible(newVisibility);
+      
+      const updatedWallet = {
+        ...formValues.wallet || { address: localWallet },
+        visible: newVisibility
+      };
+      
+      // Update the parent state
+      onSave({ wallet: updatedWallet });
+    };
+
+    const copyWalletToClipboard = () => {
+      if (localWallet) {
+        navigator.clipboard.writeText(localWallet)
+          .then(() => {
+            setCopySuccess(true);
+            setTimeout(() => setCopySuccess(false), 2000);
+          })
+          .catch(err => {
+            console.error('Failed to copy wallet address: ', err);
+          });
+      }
     };
     
     return (
@@ -868,7 +914,7 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
             </div>
           </div>
           
-          {/* Name, title, and bio fields - Reorganized */}
+          {/* Name, title, bio, and wallet fields - Reorganized */}
           <div className="space-y-6">
             {/* Name field */}
             <div>
@@ -916,7 +962,7 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
               />
             </div>
             
-            {/* Bio field - Moved here from below */}
+            {/* Bio field - Shortened from 5 to 4 rows */}
             <div>
               <label htmlFor="bio" className="block text-sm font-medium text-gray-300 mb-2">
                 Bio
@@ -928,9 +974,66 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
                 onChange={handleBioChange}
                 onBlur={handleBioBlur}
                 className="w-full p-3 bg-gray-900 border border-gray-700 rounded-md text-gray-100 resize-y"
-                rows={5}
+                rows={4}
                 placeholder="Tell your story here..."
               />
+            </div>
+
+            {/* Wallet address field - New addition */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label htmlFor="wallet" className="block text-sm font-medium text-gray-300">
+                  Wallet Address for Tips
+                </label>
+                <div className="flex items-center">
+                  <span className="text-sm text-gray-400 mr-2">Show on profile</span>
+                  <div 
+                    className={`w-10 h-6 rounded-full p-1 cursor-pointer ${
+                      walletVisible ? 'bg-cyan-500' : 'bg-gray-700'
+                    }`}
+                    onClick={handleWalletVisibilityToggle}
+                  >
+                    <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform ${
+                      walletVisible ? 'translate-x-4' : ''
+                    }`}></div>
+                  </div>
+                </div>
+              </div>
+              <div className="relative">
+                <input
+                  id="wallet"
+                  type="text"
+                  value={localWallet}
+                  onChange={handleWalletChange}
+                  onBlur={handleWalletBlur}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleWalletBlur();
+                    }
+                  }}
+                  className="w-full p-3 pr-10 bg-gray-900 border border-gray-700 rounded-md text-gray-100"
+                  placeholder="Enter your wallet address for receiving tips"
+                />
+                <button
+                  type="button"
+                  onClick={copyWalletToClipboard}
+                  disabled={!localWallet}
+                  className={`absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-cyan-400 transition-colors ${!localWallet ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                  title="Copy wallet address"
+                >
+                  {copySuccess ? (
+                    <Check className="h-5 w-5 text-green-500" />
+                  ) : (
+                    <Copy className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
+              <p className="text-xs text-gray-400 mt-1">
+                {walletVisible 
+                  ? "Your wallet address will be displayed on your profile with a 'Tip' button."
+                  : "Add a wallet address to let fans support you directly."}
+              </p>
             </div>
           </div>
         </div>

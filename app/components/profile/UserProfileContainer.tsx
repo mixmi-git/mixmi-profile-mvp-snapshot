@@ -27,6 +27,10 @@ export interface ProfileData {
     position?: string;
     visible?: boolean;
   };
+  wallet?: {
+    address: string;
+    visible: boolean;
+  };
   socialLinks: {
     platform: string;
     url: string;
@@ -165,9 +169,17 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
   };
   
   // Handle saving profile changes
-  const handleSave = async (updatedProfile: Partial<ProfileData>) => {
+  const handleSave = async (updatedProfile: Partial<ProfileData> | { spotlightItems: SpotlightItemType[] } | { mediaItems: MediaItemType[] } | { shopItems: ShopItemType[] }) => {
     // For immediate UI updates, apply changes directly to state
-    setProfile(prev => ({ ...prev, ...updatedProfile }));
+    if ('spotlightItems' in updatedProfile) {
+      setSpotlightItems(updatedProfile.spotlightItems);
+    } else if ('mediaItems' in updatedProfile) {
+      setMediaItems(updatedProfile.mediaItems);
+    } else if ('shopItems' in updatedProfile) {
+      setShopItems(updatedProfile.shopItems);
+    } else {
+      setProfile(prev => ({ ...prev, ...updatedProfile }));
+    }
     
     // If we wanted to simulate an API call, we could uncomment this:
     // transitionMode(ProfileMode.SAVING);
