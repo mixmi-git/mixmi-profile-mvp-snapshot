@@ -34,6 +34,7 @@ import { useProfileState } from '@/hooks/useProfileState'
 import { NavbarContainer } from '@/components/profile/NavbarContainer'
 import { useAuth } from '@/lib/auth'
 import { AuthDebug } from './AuthDebug'
+import { SpotlightItem as SpotlightItemType, ShopItem as ShopItemType, Profile as ProfileType, SocialLink, Project as ProjectType } from '../types/content'
 
 /* eslint-disable react-hooks/exhaustive-deps */
 
@@ -54,33 +55,10 @@ interface NavbarProps {
   onLoginToggle: () => void;
 }
 
-interface SocialLink {
-  platform: string;
-  url: string;
-}
-
-export interface Project {
-  id: string;
-  title: string;
-  description: string;
-  image: string;
-}
-
-export interface SpotlightItem {
-  id: number | string;
-  title: string;
-  description: string;
-  image: string;
-  link?: string;
-}
-
-export interface ShopItem {
-  id: string;
-  title: string;
-  storeUrl: string;
-  image: string;
-  platform: 'shopify' | 'etsy' | 'gumroad' | 'bigcartel' | 'other';
-}
+// Define local type aliases that are compatible with imported types
+export type Project = ProjectType;
+export type SpotlightItem = SpotlightItemType;
+export type ShopItem = ShopItemType;
 
 export interface MediaItem {
   id: string;
@@ -657,11 +635,13 @@ export default function Component(): JSX.Element {
     setTimeout(() => setVideosLoading(false), 1200)
   }, [])
 
+  // Update displayProjects computation to handle type compatibility
   const displayProjects = spotlightItems === exampleProjects || spotlightItems.length === 0 
     ? exampleProjects 
-    : spotlightItems;
+    : spotlightItems as SpotlightItemType[];
   const displayMedia = mediaItems.length > 0 ? mediaItems : exampleMediaItems;
-  const displayShop = shopItems.length > 0 ? shopItems : exampleShopItems;
+  // Update displayShop computation to handle type compatibility
+  const displayShop = shopItems.length > 0 ? shopItems as ShopItemType[] : exampleShopItems;
 
   const handleShopImageChange = (index: number, file: File | null) => {
     if (file) {
@@ -787,7 +767,7 @@ export default function Component(): JSX.Element {
 
   const addShopItem = () => {
     setShopItems(prev => [...prev, {
-      id: Date.now().toString(),
+      id: Date.now(),
       title: '',
       storeUrl: '',
       image: '',
@@ -1180,7 +1160,7 @@ export default function Component(): JSX.Element {
                       <ErrorBoundary>
                         <SpotlightSection
                           items={isEditing 
-                            ? (isUsingExampleContent ? [] : spotlightItems)
+                            ? (isUsingExampleContent ? [] : spotlightItems as SpotlightItemType[])
                             : displayProjects
                           }
                           onItemChange={handleSpotlightChange}
@@ -1207,7 +1187,7 @@ export default function Component(): JSX.Element {
                     <div className="space-y-8 pt-8 border-t border-gray-700">
                       <ErrorBoundary>
                         <ShopSection
-                          items={shopItems}
+                          items={displayShop}
                           onItemChange={(index, field, value) => {
                             const updatedItems = [...shopItems];
                             updatedItems[index] = {
@@ -1238,7 +1218,7 @@ export default function Component(): JSX.Element {
                                 title: '',
                                 storeUrl: '',
                                 image: '',
-                                platform: 'other'
+                                platform: 'other' as const
                               }
                             ];
                             setShopItems(newItems);
