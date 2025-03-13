@@ -2066,10 +2066,10 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
               </div>
             </div>
             
-            <div className="grid grid-cols-3 gap-4 mt-4">
-              {/* Sticker options */}
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mt-4">
+              {/* Sticker options - Made smaller for 6-sticker layout */}
               <div 
-                className={`border-2 rounded-md p-2 cursor-pointer transition-all ${
+                className={`border-2 rounded-md p-1 cursor-pointer transition-all ${
                   formValues.sticker?.image === '/images/stickers/daisy-blue.png' 
                     ? 'border-cyan-500' 
                     : 'border-gray-700 hover:border-gray-500'
@@ -2081,7 +2081,7 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
                     <img 
                       src="/images/stickers/daisy-blue.png" 
                       alt="Blue Daisy Sticker" 
-                      className="w-20 h-20 object-contain"
+                      className="w-10 h-10 object-contain"
                     />
                   </div>
                 </div>
@@ -2089,7 +2089,7 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
               </div>
               
               <div 
-                className={`border-2 rounded-md p-2 cursor-pointer transition-all ${
+                className={`border-2 rounded-md p-1 cursor-pointer transition-all ${
                   formValues.sticker?.image === '/images/stickers/daisy-pink.png' 
                     ? 'border-cyan-500' 
                     : 'border-gray-700 hover:border-gray-500'
@@ -2101,7 +2101,7 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
                     <img 
                       src="/images/stickers/daisy-pink.png" 
                       alt="Pink Daisy Sticker" 
-                      className="w-20 h-20 object-contain"
+                      className="w-10 h-10 object-contain"
                     />
                   </div>
                 </div>
@@ -2109,7 +2109,7 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
               </div>
               
               <div 
-                className={`border-2 rounded-md p-2 cursor-pointer transition-all ${
+                className={`border-2 rounded-md p-1 cursor-pointer transition-all ${
                   formValues.sticker?.image === '/images/stickers/daisy-green.png' 
                     ? 'border-cyan-500' 
                     : 'border-gray-700 hover:border-gray-500'
@@ -2121,13 +2121,39 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
                     <img 
                       src="/images/stickers/daisy-green.png" 
                       alt="Green Daisy Sticker" 
-                      className="w-20 h-20 object-contain"
+                      className="w-10 h-10 object-contain"
                     />
                   </div>
                 </div>
                 <p className="text-xs text-center mt-1 text-gray-300">Green Daisy</p>
               </div>
+              
+              {/* Placeholder for 3 new stickers - Will be filled in by the user later */}
+              <div className="border-2 border-gray-700 hover:border-gray-500 rounded-md p-1 cursor-default opacity-50">
+                <div className="aspect-square relative overflow-hidden rounded bg-gray-800 flex items-center justify-center">
+                  <p className="text-xs text-gray-500">Coming soon</p>
+                </div>
+                <p className="text-xs text-center mt-1 text-gray-500">New option</p>
+              </div>
+              
+              <div className="border-2 border-gray-700 hover:border-gray-500 rounded-md p-1 cursor-default opacity-50">
+                <div className="aspect-square relative overflow-hidden rounded bg-gray-800 flex items-center justify-center">
+                  <p className="text-xs text-gray-500">Coming soon</p>
+                </div>
+                <p className="text-xs text-center mt-1 text-gray-500">New option</p>
+              </div>
+              
+              <div className="border-2 border-gray-700 hover:border-gray-500 rounded-md p-1 cursor-default opacity-50">
+                <div className="aspect-square relative overflow-hidden rounded bg-gray-800 flex items-center justify-center">
+                  <p className="text-xs text-gray-500">Coming soon</p>
+                </div>
+                <p className="text-xs text-center mt-1 text-gray-500">New option</p>
+              </div>
             </div>
+            
+            <p className="text-xs text-gray-400 mt-3">
+              Select a sticker to add a decorative touch to your profile. More options coming soon!
+            </p>
           </div>
         </div>
       </div>
