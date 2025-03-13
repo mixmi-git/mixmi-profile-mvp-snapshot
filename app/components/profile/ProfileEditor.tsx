@@ -5,6 +5,7 @@ import { ProfileData, MediaItemType, SpotlightItemType, ShopItemType } from './U
 import ImageUpload from '@/components/ui/ImageUpload';
 import { Upload, Plus, Trash2, Check, Square, Link, Copy } from 'lucide-react';
 import { validateSocialUrl } from '@/lib/validation';
+import { useAuth } from '@/lib/auth';
 import Image from 'next/image';
 import {
   Accordion,
@@ -71,6 +72,9 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
   onDoneEditing,
   isPreviewMode = false,
 }) => {
+  // Get the authenticated user's wallet address
+  const { userAddress } = useAuth();
+  
   // Local state for form values
   const [formValues, setFormValues] = useState<ProfileData>(profile);
   
@@ -94,6 +98,20 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
   const [croppingImage, setCroppingImage] = useState('');
   const [showShopCropper, setShowShopCropper] = useState<number | null>(null);
   const [showSpotlightCropper, setShowSpotlightCropper] = useState<number | null>(null);
+  
+  // Auto-fill wallet address from authentication if not already set
+  useEffect(() => {
+    // Only auto-fill if we have a wallet address from auth and the profile doesn't have one yet
+    if (userAddress && (!profile.wallet || !profile.wallet.address)) {
+      console.log('Auto-filling wallet address from authentication:', userAddress);
+      onSave({ 
+        wallet: { 
+          address: userAddress,
+          visible: false // Default to not visible for privacy
+        } 
+      });
+    }
+  }, [userAddress, profile.wallet, onSave]);
   
   // Handle form input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
