@@ -47,6 +47,7 @@ export interface SpotlightItemType {
   title: string;
   description: string;
   image: string;
+  link?: string;
 }
 
 export interface ShopItemType {
@@ -55,6 +56,7 @@ export interface ShopItemType {
   description: string;
   image: string;
   price?: string;
+  link?: string;
 }
 
 export interface MediaItemType {
