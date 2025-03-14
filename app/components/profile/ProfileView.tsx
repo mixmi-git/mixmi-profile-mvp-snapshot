@@ -66,7 +66,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
               </div>
 
               {/* Wallet Address - only show if visible */}
-              {profile.wallet?.visible && profile.wallet?.address ? (
+              {profile.wallet?.visible && profile.wallet?.address && (
                 <div className="bg-gray-800/60 p-3 rounded-lg border border-gray-700">
                   <div className="flex items-center gap-2 justify-center">
                     <span className="text-xs text-gray-400">Wallet for tips:</span>
@@ -75,14 +75,6 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                     </span>
                   </div>
                 </div>
-              ) : (
-                isAuthenticated && (
-                  <div className="bg-gray-800/30 p-3 rounded-lg border border-gray-700/50">
-                    <div className="flex items-center gap-2 justify-center">
-                      <span className="text-xs text-gray-500">Add a wallet address for tips in Edit Profile</span>
-                    </div>
-                  </div>
-                )
               )}
 
               {/* Social Links */}
