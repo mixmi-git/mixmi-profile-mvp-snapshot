@@ -270,23 +270,43 @@ const ProfileView: React.FC<ProfileViewProps> = ({
             </p>
             
             {mediaItems && mediaItems.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                {mediaItems.map((item, index) => (
-                  <div key={index} className="rounded-lg overflow-hidden">
+              mediaItems.length === 1 ? (
+                // Single media item - centered with constrained width
+                <div className="flex justify-center">
+                  <div className="w-full sm:w-[calc(50%-12px)] rounded-lg overflow-hidden">
                     <div className="w-full">
                       {/* This would be replaced with an actual embed component */}
                       <div className="flex items-center justify-center bg-transparent min-h-[200px]">
-                        <p className="text-cyan-400">Media embed from {item.embedUrl || "external platform"}</p>
+                        <p className="text-cyan-400">Media embed from {mediaItems[0].embedUrl || "external platform"}</p>
                       </div>
                     </div>
-                    {item.title && (
+                    {mediaItems[0].title && (
                       <div className="py-3">
-                        <h3 className="text-xl font-medium text-white">{item.title}</h3>
+                        <h3 className="text-xl font-medium text-white">{mediaItems[0].title}</h3>
                       </div>
                     )}
                   </div>
-                ))}
-              </div>
+                </div>
+              ) : (
+                // Multiple media items - grid layout
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  {mediaItems.map((item, index) => (
+                    <div key={index} className="rounded-lg overflow-hidden">
+                      <div className="w-full">
+                        {/* This would be replaced with an actual embed component */}
+                        <div className="flex items-center justify-center bg-transparent min-h-[200px]">
+                          <p className="text-cyan-400">Media embed from {item.embedUrl || "external platform"}</p>
+                        </div>
+                      </div>
+                      {item.title && (
+                        <div className="py-3">
+                          <h3 className="text-xl font-medium text-white">{item.title}</h3>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 {/* YouTube Example */}
