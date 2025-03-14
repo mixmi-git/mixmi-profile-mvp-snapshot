@@ -272,132 +272,87 @@ const ProfileView: React.FC<ProfileViewProps> = ({
             {mediaItems && mediaItems.length > 0 ? (
               <div className="grid grid-cols-1 gap-8">
                 {mediaItems.map((item, index) => (
-                  <div key={index} className="bg-gray-800/30 rounded-lg overflow-hidden">
-                    <div className="aspect-video relative">
+                  <div key={index} className="rounded-lg overflow-hidden">
+                    <div className="w-full">
                       {/* This would be replaced with an actual embed component */}
-                      <div className="absolute inset-0 flex items-center justify-center bg-gray-900">
-                        <p className="text-cyan-400">Media embed will display here</p>
+                      <div className="flex items-center justify-center bg-transparent min-h-[200px]">
+                        <p className="text-cyan-400">Media embed from {item.embedUrl || "external platform"}</p>
                       </div>
                     </div>
-                    <div className="p-4">
-                      <h3 className="text-xl font-medium text-white">{item.title}</h3>
-                    </div>
+                    {item.title && (
+                      <div className="py-3">
+                        <h3 className="text-xl font-medium text-white">{item.title}</h3>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-8">
-                {/* Music Track Example */}
-                <div className="bg-gray-800/30 rounded-lg overflow-hidden group">
-                  <div className="aspect-video relative bg-gray-900">
-                    <div className="absolute inset-0 flex flex-col md:flex-row items-center justify-center p-6">
-                      <div className="w-full md:w-1/3 aspect-square bg-cyan-900/20 rounded-lg flex items-center justify-center mb-4 md:mb-0 md:mr-6">
-                        <div className="w-16 h-16 rounded-full bg-cyan-500/20 flex items-center justify-center">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-cyan-300">
-                            <path d="M9 18V5l12-2v13"></path>
-                            <circle cx="6" cy="18" r="3"></circle>
-                            <circle cx="18" cy="16" r="3"></circle>
-                          </svg>
-                        </div>
-                      </div>
-                      <div className="w-full md:w-2/3 flex flex-col">
-                        <div className="h-2 bg-gray-800 rounded-full w-full mb-4"></div>
-                        <div className="h-2 bg-gray-800 rounded-full w-3/4 mb-4"></div>
-                        <div className="flex items-center space-x-4">
-                          <div className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-600">
-                              <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                            </svg>
-                          </div>
-                          <div className="flex-1">
-                            <div className="h-2 bg-gray-800 rounded-full w-full"></div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="p-4">
-                    <div className="flex items-center justify-between">
-                      <a href="#" className="group/title">
-                        <h3 className="text-xl font-medium text-white group-hover/title:underline">Latest Track</h3>
-                      </a>
-                      <span className="text-xs text-gray-400">3:42</span>
-                    </div>
-                    <p className="text-sm text-gray-400 mt-1">
-                      Share your latest music release or favorite track
-                    </p>
-                  </div>
-                </div>
-                
-                {/* Video Example */}
-                <div className="bg-gray-800/30 rounded-lg overflow-hidden group">
-                  <div className="aspect-video relative bg-gray-900">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-20 h-20 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
-                          <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                {/* YouTube Example */}
+                <div className="rounded-lg overflow-hidden">
+                  <div className="aspect-video w-full bg-gray-900 rounded-lg">
+                    <div className="flex items-center justify-center h-full">
+                      <div className="w-16 h-16 rounded-full bg-red-600/30 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-500">
+                          <path d="M12 19c-2.3 0-6.4-.2-8.1-.6-.7-.2-1.2-.7-1.4-1.4-.3-1.1-.5-3.4-.5-5s.2-3.9.5-5c.2-.7.7-1.2 1.4-1.4C5.6 5.2 9.7 5 12 5s6.4.2 8.1.6c.7.2 1.2.7 1.4 1.4.3 1.1.5 3.4.5 5s-.2 3.9-.5 5c-.2.7-.7 1.2-1.4 1.4-1.7.4-5.8.6-8.1.6 0 0 0 0 0 0z"></path>
+                          <polygon points="10 15 15 12 10 9"></polygon>
                         </svg>
                       </div>
                     </div>
-                    <div className="absolute bottom-4 right-4 bg-black/70 px-2 py-1 rounded text-xs text-white">
-                      5:28
-                    </div>
                   </div>
-                  <div className="p-4">
-                    <div className="flex items-center justify-between">
-                      <a href="#" className="group/title">
-                        <h3 className="text-xl font-medium text-white group-hover/title:underline">Performance Video</h3>
-                      </a>
-                    </div>
-                    <p className="text-sm text-gray-400 mt-1">
-                      Showcase a live performance, music video, or interview
-                    </p>
+                  <div className="py-3">
+                    <h3 className="text-xl font-medium text-white">YouTube Video</h3>
                   </div>
                 </div>
                 
-                {/* Playlist Example */}
-                <div className="bg-gray-800/30 rounded-lg overflow-hidden group">
-                  <div className="aspect-video relative bg-gray-900">
-                    <div className="absolute inset-0 grid grid-cols-2 grid-rows-2 gap-1 p-4">
-                      <div className="bg-gray-800/80 rounded flex items-center p-2">
-                        <div className="w-10 h-10 bg-cyan-900/30 rounded mr-3 flex-shrink-0"></div>
-                        <div className="flex-1">
-                          <div className="h-2 bg-gray-700 rounded-full w-3/4 mb-1"></div>
-                          <div className="h-2 bg-gray-700 rounded-full w-1/2"></div>
-                        </div>
+                {/* SoundCloud Example */}
+                <div className="rounded-lg overflow-hidden">
+                  <div className="rounded-lg bg-gradient-to-r from-orange-900/30 to-orange-600/20 p-6">
+                    <div className="flex items-center">
+                      <div className="w-12 h-12 rounded-full bg-orange-500/30 flex items-center justify-center mr-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-400">
+                          <path d="M3 6H5"></path>
+                          <path d="M3 12H5"></path>
+                          <path d="M3 18H5"></path>
+                          <path d="M8 6H22"></path>
+                          <path d="M8 12H22"></path>
+                          <path d="M8 18H22"></path>
+                        </svg>
                       </div>
-                      <div className="bg-gray-800/80 rounded flex items-center p-2">
-                        <div className="w-10 h-10 bg-purple-900/30 rounded mr-3 flex-shrink-0"></div>
-                        <div className="flex-1">
-                          <div className="h-2 bg-gray-700 rounded-full w-1/2 mb-1"></div>
-                          <div className="h-2 bg-gray-700 rounded-full w-3/4"></div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="h-1 bg-gray-800/50 rounded-full w-2/3"></div>
+                          <div className="h-1 bg-orange-400/50 rounded-full w-1/3"></div>
                         </div>
-                      </div>
-                      <div className="bg-gray-800/80 rounded flex items-center p-2">
-                        <div className="w-10 h-10 bg-blue-900/30 rounded mr-3 flex-shrink-0"></div>
-                        <div className="flex-1">
-                          <div className="h-2 bg-gray-700 rounded-full w-2/3 mb-1"></div>
-                          <div className="h-2 bg-gray-700 rounded-full w-1/3"></div>
-                        </div>
-                      </div>
-                      <div className="bg-gray-800/80 rounded flex items-center p-2">
-                        <div className="w-10 h-10 bg-pink-900/30 rounded mr-3 flex-shrink-0"></div>
-                        <div className="flex-1">
-                          <div className="h-2 bg-gray-700 rounded-full w-1/4 mb-1"></div>
-                          <div className="h-2 bg-gray-700 rounded-full w-2/3"></div>
-                        </div>
+                        <div className="h-1 bg-gray-800/50 rounded-full w-full"></div>
                       </div>
                     </div>
                   </div>
-                  <div className="p-4">
-                    <div className="flex items-center justify-between">
-                      <a href="#" className="group/title">
-                        <h3 className="text-xl font-medium text-white group-hover/title:underline">DJ Mix Collection</h3>
-                      </a>
+                  <div className="py-3">
+                    <h3 className="text-xl font-medium text-white">SoundCloud Track</h3>
+                  </div>
+                </div>
+                
+                {/* Spotify Example */}
+                <div className="rounded-lg overflow-hidden">
+                  <div className="rounded-lg bg-gradient-to-r from-green-900/30 to-green-600/20 p-6">
+                    <div className="flex items-center">
+                      <div className="w-12 h-12 rounded-full bg-green-500/30 flex items-center justify-center mr-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-400">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <circle cx="12" cy="12" r="4"></circle>
+                          <line x1="12" y1="12" x2="12" y2="16"></line>
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <div className="h-2 bg-gray-800/50 rounded-full w-3/4 mb-2"></div>
+                        <div className="h-2 bg-gray-800/50 rounded-full w-1/2"></div>
+                      </div>
                     </div>
-                    <p className="text-sm text-gray-400 mt-1">
-                      Share a playlist, mix, or collection of tracks
-                    </p>
+                  </div>
+                  <div className="py-3">
+                    <h3 className="text-xl font-medium text-white">Spotify Playlist</h3>
                   </div>
                 </div>
               </div>
