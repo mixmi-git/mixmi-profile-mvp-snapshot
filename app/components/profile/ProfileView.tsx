@@ -57,14 +57,23 @@ const ProfileView: React.FC<ProfileViewProps> = ({
           {/* Left column - Profile image */}
           <div className="w-full lg:w-[40%] max-w-md mx-auto lg:mx-0">
             <div className="relative aspect-square overflow-hidden rounded-xl border-2 border-cyan-600">
-              <Image
-                src={profile.image || '/images/placeholder.png'}
-                alt="Profile photo"
-                fill
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 40vw, 33vw"
-                className="object-cover"
-                priority
-              />
+              {profile.image && profile.image.startsWith('data:') ? (
+                <img
+                  src={profile.image}
+                  alt="Profile photo"
+                  className="absolute w-full h-full object-cover"
+                  style={{ imageRendering: 'auto' }} // Ensures GIFs animate properly
+                />
+              ) : (
+                <Image
+                  src={profile.image || '/images/placeholder.png'}
+                  alt="Profile photo"
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 40vw, 33vw"
+                  className="object-cover"
+                  priority
+                />
+              )}
             </div>
           </div>
 
@@ -155,12 +164,21 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                     >
                       <div className="aspect-square relative bg-gray-800">
                         {item.image ? (
-                          <Image
-                            src={item.image}
-                            alt={item.title}
-                            fill
-                            className="object-cover"
-                          />
+                          item.image.startsWith('data:') ? (
+                            <img
+                              src={item.image}
+                              alt={item.title}
+                              className="absolute w-full h-full object-cover"
+                              style={{ imageRendering: 'auto' }} // Ensures GIFs animate properly
+                            />
+                          ) : (
+                            <Image
+                              src={item.image}
+                              alt={item.title}
+                              fill
+                              className="object-cover"
+                            />
+                          )
                         ) : (
                           <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
                             <p className="text-gray-500">No image</p>
@@ -206,12 +224,21 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                       {/* Same content as above */}
                       <div className="aspect-square relative bg-gray-800">
                         {item.image ? (
-                          <Image
-                            src={item.image}
-                            alt={item.title}
-                            fill
-                            className="object-cover"
-                          />
+                          item.image.startsWith('data:') ? (
+                            <img
+                              src={item.image}
+                              alt={item.title}
+                              className="absolute w-full h-full object-cover"
+                              style={{ imageRendering: 'auto' }} // Ensures GIFs animate properly
+                            />
+                          ) : (
+                            <Image
+                              src={item.image}
+                              alt={item.title}
+                              fill
+                              className="object-cover"
+                            />
+                          )
                         ) : (
                           <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
                             <p className="text-gray-500">No image</p>
@@ -466,12 +493,21 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                     >
                       <div className="aspect-square relative bg-gray-800">
                         {item.image ? (
-                          <Image
-                            src={item.image}
-                            alt={item.title}
-                            fill
-                            className="object-cover"
-                          />
+                          item.image.startsWith('data:') ? (
+                            <img
+                              src={item.image}
+                              alt={item.title}
+                              className="absolute w-full h-full object-cover"
+                              style={{ imageRendering: 'auto' }} // Ensures GIFs animate properly
+                            />
+                          ) : (
+                            <Image
+                              src={item.image}
+                              alt={item.title}
+                              fill
+                              className="object-cover"
+                            />
+                          )
                         ) : (
                           <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
                             <p className="text-gray-500">No image</p>
@@ -520,12 +556,21 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                       {/* Same content as above */}
                       <div className="aspect-square relative bg-gray-800">
                         {item.image ? (
-                          <Image
-                            src={item.image}
-                            alt={item.title}
-                            fill
-                            className="object-cover"
-                          />
+                          item.image.startsWith('data:') ? (
+                            <img
+                              src={item.image}
+                              alt={item.title}
+                              className="absolute w-full h-full object-cover"
+                              style={{ imageRendering: 'auto' }} // Ensures GIFs animate properly
+                            />
+                          ) : (
+                            <Image
+                              src={item.image}
+                              alt={item.title}
+                              fill
+                              className="object-cover"
+                            />
+                          )
                         ) : (
                           <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
                             <p className="text-gray-500">No image</p>
@@ -603,13 +648,24 @@ const ProfileView: React.FC<ProfileViewProps> = ({
           <div className="mt-24 sm:mt-32 flex justify-center opacity-0 animate-fadeIn mb-16"
                style={{ animationDelay: '350ms', animationFillMode: 'forwards' }}>
             <div className="w-32 h-32 animate-sticker-rotate">
-              <Image
-                src={profile.sticker.image}
-                alt="Profile sticker"
-                width={128}
-                height={128}
-                className="object-contain"
-              />
+              {profile.sticker.image.startsWith('data:') ? (
+                <img
+                  src={profile.sticker.image}
+                  alt="Profile sticker"
+                  width={128}
+                  height={128}
+                  className="w-full h-full object-contain"
+                  style={{ imageRendering: 'auto' }} // Ensures GIFs animate properly
+                />
+              ) : (
+                <Image
+                  src={profile.sticker.image}
+                  alt="Profile sticker"
+                  width={128}
+                  height={128}
+                  className="object-contain"
+                />
+              )}
             </div>
           </div>
         ) : (

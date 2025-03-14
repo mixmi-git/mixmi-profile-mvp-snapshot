@@ -158,14 +158,45 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
     onSave({ sticker: updatedSticker });
   };
   
-  // Update handle image upload to use the cropper
+  // Update handle image upload to better handle GIFs
   const handleImageUpload = (file: File) => {
-    // Create a URL for the uploaded file
-    const imageUrl = URL.createObjectURL(file);
+    // Validate file type and size
+    const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    const maxSize = 5 * 1024 * 1024; // 5MB
     
-    // Show the cropper instead of immediately saving
-    setCroppingImage(imageUrl);
-    setShowProfileCropper(true);
+    if (!validTypes.includes(file.type)) {
+      console.error('Invalid file type. Please upload a JPEG, PNG, GIF, or WebP image.');
+      return;
+    }
+    
+    if (file.size > maxSize) {
+      console.error('File too large. Maximum size is 5MB.');
+      return;
+    }
+    
+    // Special handling for GIFs - bypass cropper to preserve animation
+    if (file.type === 'image/gif') {
+      // Convert GIF to base64 data URL for persistence
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const base64String = e.target?.result as string;
+        
+        // Update local state
+        setFormValues(prev => ({
+          ...prev,
+          image: base64String
+        }));
+        
+        // Save the change to parent component
+        onSave({ image: base64String });
+      };
+      reader.readAsDataURL(file);
+    } else {
+      // For non-GIF images, show the cropper
+      const imageUrl = URL.createObjectURL(file);
+      setCroppingImage(imageUrl);
+      setShowProfileCropper(true);
+    }
   };
   
   // Handle cropped profile image
@@ -392,10 +423,29 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
       }
     }));
     
-    // Create a URL for the uploaded file and show the cropper
-    const imageUrl = URL.createObjectURL(file);
-    setCroppingImage(imageUrl);
-    setShowSpotlightCropper(index);
+    // Special handling for GIFs - bypass cropper to preserve animation
+    if (file.type === 'image/gif') {
+      // Convert GIF to base64 data URL for persistence
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const base64String = e.target?.result as string;
+        
+        const updatedItems = [...localSpotlightItems];
+        updatedItems[index] = {
+          ...updatedItems[index],
+          image: base64String
+        };
+        
+        setLocalSpotlightItems(updatedItems);
+        onSave({ spotlightItems: updatedItems });
+      };
+      reader.readAsDataURL(file);
+    } else {
+      // For non-GIF images, show the cropper
+      const imageUrl = URL.createObjectURL(file);
+      setCroppingImage(imageUrl);
+      setShowSpotlightCropper(index);
+    }
   };
   
   // Handle cropped spotlight image
@@ -523,12 +573,11 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
               >
                 {item.image ? (
                   <div className="relative w-full aspect-square bg-gray-900 rounded-lg overflow-hidden mb-4 group mx-auto max-w-xs">
-                    <Image
+                    <img
                       src={item.image}
                       alt={item.title || `Spotlight ${index + 1}`}
-                      fill
-                      className="object-cover"
-                      unoptimized
+                      className="w-full h-full object-cover"
+                      style={{ imageRendering: 'auto' }} // Ensures GIFs animate properly
                     />
                     
                     {/* Corner badge - updated for mobile */}
@@ -872,6 +921,7 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
                       src={formValues.image} 
                       alt="Profile" 
                       className="w-full h-full object-cover"
+                      style={{ imageRendering: 'auto' }} // Ensures GIFs animate properly
                     />
                     
                     {/* Add an edit overlay */}
@@ -889,7 +939,7 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
                   </div>
                   
                   <p className="text-xs text-gray-400 mt-1 mb-5">
-                    Profile images display with rounded corners.
+                    Profile images display with rounded corners. GIFs are supported.
                   </p>
                 </>
               ) : (
@@ -1539,10 +1589,26 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
       }
     }));
     
-    // Create a URL for the uploaded file and show the cropper
-    const imageUrl = URL.createObjectURL(file);
-    setCroppingImage(imageUrl);
-    setShowShopCropper(index);
+    // Special handling for GIFs - bypass cropper to preserve animation
+    if (file.type === 'image/gif') {
+      // Convert GIF to base64 data URL for persistence
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const base64String = e.target?.result as string;
+        
+        const updatedItems = JSON.parse(JSON.stringify(localShopItems));
+        updatedItems[index].image = base64String;
+        
+        setLocalShopItems(updatedItems);
+        onSave({ shopItems: updatedItems });
+      };
+      reader.readAsDataURL(file);
+    } else {
+      // For non-GIF images, show the cropper
+      const imageUrl = URL.createObjectURL(file);
+      setCroppingImage(imageUrl);
+      setShowShopCropper(index);
+    }
   };
   
   // Handle cropped shop image
@@ -1668,12 +1734,11 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
               >
                 {item.image ? (
                   <div className="relative w-full aspect-square bg-gray-900 rounded-lg overflow-hidden mb-4 group mx-auto max-w-xs">
-                    <Image
+                    <img
                       src={item.image}
                       alt={item.title || `Shop ${index + 1}`}
-                      fill
-                      className="object-cover"
-                      unoptimized
+                      className="w-full h-full object-cover"
+                      style={{ imageRendering: 'auto' }} // Ensures GIFs animate properly
                     />
                     
                     {/* Corner badge - updated for mobile */}
@@ -1836,324 +1901,346 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
     );
   };
 
+  // Handle save
+  const handleSave = () => {
+    onSave(formValues);
+  };
+
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100">
-      {/* Image Croppers */}
-      {showProfileCropper && (
-        <ImageCropper
-          image={croppingImage}
-          aspectRatio={1} // 1:1 for profile
-          onCropComplete={handleProfileCropComplete}
-          onCancel={handleCropCancel}
-        />
-      )}
-      
-      {showShopCropper !== null && (
-        <ImageCropper
-          image={croppingImage}
-          aspectRatio={1} // 1:1 for shop items
-          onCropComplete={handleShopCropComplete}
-          onCancel={() => {
-            setShowShopCropper(null);
-            setCroppingImage('');
-          }}
-        />
-      )}
-      
-      {showSpotlightCropper !== null && (
-        <ImageCropper
-          image={croppingImage}
-          aspectRatio={1} // 1:1 for spotlight items (changed from 16:9)
-          onCropComplete={handleSpotlightCropComplete}
-          onCancel={() => {
-            setShowSpotlightCropper(null);
-            setCroppingImage('');
-          }}
-        />
-      )}
-      
-      <div className="container mx-auto p-4 sm:p-8 md:p-12 lg:p-16">
-        {/* Profile Edit Form - Updated to match screenshot */}
-        <div className="rounded-lg overflow-hidden bg-gray-800/50 mb-12 p-6">
-          <ProfileSection 
-            formValues={formValues}
-            handleInputChange={handleInputChange}
-            fileInputRef={fileInputRef}
-            handleDragOver={handleDragOver}
-            handleDrop={handleDrop}
-            handleFileChange={handleFileChange}
-            handleAddSocialLink={handleAddSocialLink}
-            handleRemoveSocialLink={handleRemoveSocialLink}
-            handleSocialLinkChange={handleSocialLinkChange}
-            socialLinkErrors={socialLinkErrors}
-            SOCIAL_PLATFORMS={SOCIAL_PLATFORMS}
+      <div className="max-w-4xl mx-auto px-4 py-8 pb-24">
+        {/* Image Croppers */}
+        {showProfileCropper && (
+          <ImageCropper
+            image={croppingImage}
+            aspectRatio={1} // 1:1 for profile
+            onCropComplete={handleProfileCropComplete}
+            onCancel={handleCropCancel}
           />
-        </div>
+        )}
         
-        {/* Section Visibility Controls */}
-        <div className="rounded-lg overflow-hidden bg-gray-800/50 mb-12 p-6">
-          <div className="flex items-center gap-4 mb-4">
-            <h2 className="text-2xl font-bold text-cyan-300">Section Visibility</h2>
-            <div className="flex-grow border-t border-gray-700" />
-          </div>
-          
-          <p className="text-sm text-gray-400 mb-6">
-            Choose which sections to display on your profile
-          </p>
-          
-          <div className="space-y-4">
-            <Checkbox 
-              id="spotlight-visible" 
-              checked={formValues.sectionVisibility?.spotlight !== false} 
-              onChange={() => handleSectionVisibilityToggle('spotlight')}
-              label="Show Spotlight section"
+        {showShopCropper !== null && (
+          <ImageCropper
+            image={croppingImage}
+            aspectRatio={1} // 1:1 for shop items
+            onCropComplete={handleShopCropComplete}
+            onCancel={() => {
+              setShowShopCropper(null);
+              setCroppingImage('');
+            }}
+          />
+        )}
+        
+        {showSpotlightCropper !== null && (
+          <ImageCropper
+            image={croppingImage}
+            aspectRatio={1} // 1:1 for spotlight items (changed from 16:9)
+            onCropComplete={handleSpotlightCropComplete}
+            onCancel={() => {
+              setShowSpotlightCropper(null);
+              setCroppingImage('');
+            }}
+          />
+        )}
+        
+        <div className="container mx-auto p-4 sm:p-8 md:p-12 lg:p-16">
+          {/* Profile Edit Form - Updated to match screenshot */}
+          <div className="rounded-lg overflow-hidden bg-gray-800/50 mb-12 p-6">
+            <ProfileSection 
+              formValues={formValues}
+              handleInputChange={handleInputChange}
+              fileInputRef={fileInputRef}
+              handleDragOver={handleDragOver}
+              handleDrop={handleDrop}
+              handleFileChange={handleFileChange}
+              handleAddSocialLink={handleAddSocialLink}
+              handleRemoveSocialLink={handleRemoveSocialLink}
+              handleSocialLinkChange={handleSocialLinkChange}
+              socialLinkErrors={socialLinkErrors}
+              SOCIAL_PLATFORMS={SOCIAL_PLATFORMS}
             />
-            
-            <Checkbox 
-              id="media-visible" 
-              checked={formValues.sectionVisibility?.media !== false} 
-              onChange={() => handleSectionVisibilityToggle('media')}
-              label="Show Media section"
-            />
-            
-            <Checkbox 
-              id="shop-visible" 
-              checked={formValues.sectionVisibility?.shop !== false} 
-              onChange={() => handleSectionVisibilityToggle('shop')}
-              label="Show Shop section"
-            />
-          </div>
-        </div>
-        
-        {/* Spotlight Section - Implemented with full functionality */}
-        <div className="rounded-lg overflow-hidden bg-gray-800/50 mb-12 p-6">
-          <div className="flex items-center gap-4 mb-4">
-            <h2 className="text-2xl font-bold text-cyan-300">Spotlight</h2>
-            <div className="flex-grow border-t border-gray-700" />
           </div>
           
-          <p className="text-sm text-gray-400 mb-6">
-            Share anything you want to highlight - your work, collaborations, friends' projects, or inspiring content. Supports all image formats including GIFs.
-          </p>
-          
-          <div className="space-y-4">
-            {localSpotlightItems.length > 0 ? (
-              <Accordion type="single" collapsible className="space-y-3">
-                {localSpotlightItems.map((item, index) => (
-                  <SpotlightItem 
-                    key={item.id} 
-                    item={item} 
-                    index={index} 
-                  />
-                ))}
-              </Accordion>
-            ) : (
-              <div className="text-center py-8 border border-dashed border-gray-700 rounded-lg">
-                <p className="text-gray-400 mb-4">No spotlight items yet. Add your first one!</p>
-              </div>
-            )}
-            
-            <button
-              type="button"
-              onClick={handleAddSpotlight}
-              className="mt-4 inline-flex items-center px-4 py-2 rounded bg-gray-800 border border-gray-600 text-gray-200 hover:bg-gray-700 transition-colors"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Add Spotlight Item
-            </button>
-          </div>
-        </div>
-        
-        {/* Media Section - Now below Spotlight */}
-        <div className="rounded-lg overflow-hidden bg-gray-800/50 mb-12 p-6">
-          <div className="flex items-center gap-4 mb-4">
-            <h2 className="text-2xl font-bold text-cyan-300">Media</h2>
-            <div className="flex-grow border-t border-gray-700" />
-          </div>
-          
-          <p className="text-sm text-gray-400 mb-6">
-            Share your music, videos, DJ mixes, and playlists from YouTube, SoundCloud, Spotify and Apple Music. Supports all formats.
-          </p>
-          
-          <div className="space-y-4">
-            {localMediaItems.length > 0 ? (
-              <Accordion type="single" collapsible className="space-y-3">
-                {localMediaItems.map((item, index) => (
-                  <MediaItem 
-                    key={item.id} 
-                    item={item} 
-                    index={index} 
-                  />
-                ))}
-              </Accordion>
-            ) : (
-              <div className="text-center py-8 border border-dashed border-gray-700 rounded-lg">
-                <p className="text-gray-400 mb-4">No media items yet. Add your first one!</p>
-              </div>
-            )}
-            
-            <button
-              type="button"
-              onClick={handleAddMedia}
-              className="mt-4 inline-flex items-center px-4 py-2 rounded bg-gray-800 border border-gray-600 text-gray-200 hover:bg-gray-700 transition-colors"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Add Media
-            </button>
-          </div>
-        </div>
-        
-        {/* Shop Section */}
-        <div className="rounded-lg overflow-hidden bg-gray-800/50 mb-12 p-6">
-          <div className="flex items-center gap-4 mb-4">
-            <h2 className="text-2xl font-bold text-cyan-300">Shop</h2>
-            <div className="flex-grow border-t border-gray-700" />
-          </div>
-          
-          <p className="text-sm text-gray-400 mb-6">
-            Add links to your online shops and marketplaces where fans can find your merchandise.
-          </p>
-          
-          <div className="space-y-4">
-            {localShopItems.length > 0 ? (
-              <Accordion type="single" collapsible className="space-y-3">
-                {localShopItems.map((item, index) => (
-                  <ShopItem 
-                    key={item.id} 
-                    item={item} 
-                    index={index} 
-                  />
-                ))}
-              </Accordion>
-            ) : (
-              <div className="text-center py-8 border border-dashed border-gray-700 rounded-lg">
-                <p className="text-gray-400 mb-4">No shops yet. Add your first one!</p>
-              </div>
-            )}
-            
-            <button
-              type="button"
-              onClick={handleAddShop}
-              className="mt-4 inline-flex items-center px-4 py-2 rounded bg-gray-800 border border-gray-600 text-gray-200 hover:bg-gray-700 transition-colors"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Add Shop
-            </button>
-          </div>
-        </div>
-        
-        {/* Sticker selection - moved to bottom */}
-        <div className="rounded-lg overflow-hidden bg-gray-800/50 mb-12 p-6">
-          <div className="flex items-center gap-4 mb-4">
-            <h2 className="text-2xl font-bold text-cyan-300">Profile Sticker</h2>
-            <div className="flex-grow border-t border-gray-700" />
-          </div>
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-gray-300">Add a decorative sticker to your profile</p>
-              <div className="flex items-center">
-                <span className="text-sm text-gray-400 mr-2">Show sticker</span>
-                <div 
-                  className={`w-10 h-6 rounded-full p-1 cursor-pointer ${
-                    formValues.sticker?.visible ? 'bg-cyan-500' : 'bg-gray-700'
-                  }`}
-                  onClick={handleStickerToggle}
-                >
-                  <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform ${
-                    formValues.sticker?.visible ? 'translate-x-4' : ''
-                  }`}></div>
-                </div>
-              </div>
+          {/* Section Visibility Controls */}
+          <div className="rounded-lg overflow-hidden bg-gray-800/50 mb-12 p-6">
+            <div className="flex items-center gap-4 mb-4">
+              <h2 className="text-2xl font-bold text-cyan-300">Section Visibility</h2>
+              <div className="flex-grow border-t border-gray-700" />
             </div>
             
-            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mt-4">
-              {/* Sticker options - Made smaller for 6-sticker layout */}
-              <div 
-                className={`border-2 rounded-md p-1 cursor-pointer transition-all ${
-                  formValues.sticker?.image === '/images/stickers/daisy-blue.png' 
-                    ? 'border-cyan-500' 
-                    : 'border-gray-700 hover:border-gray-500'
-                }`}
-                onClick={() => handleStickerChange('/images/stickers/daisy-blue.png')}
-              >
-                <div className="aspect-square relative overflow-hidden rounded">
-                  <div className="absolute inset-0 flex items-center justify-center bg-blue-900/20">
-                    <img 
-                      src="/images/stickers/daisy-blue.png" 
-                      alt="Blue Daisy Sticker" 
-                      className="w-10 h-10 object-contain"
-                    />
-                  </div>
-                </div>
-                <p className="text-xs text-center mt-1 text-gray-300">Blue Daisy</p>
-              </div>
-              
-              <div 
-                className={`border-2 rounded-md p-1 cursor-pointer transition-all ${
-                  formValues.sticker?.image === '/images/stickers/daisy-pink.png' 
-                    ? 'border-cyan-500' 
-                    : 'border-gray-700 hover:border-gray-500'
-                }`}
-                onClick={() => handleStickerChange('/images/stickers/daisy-pink.png')}
-              >
-                <div className="aspect-square relative overflow-hidden rounded">
-                  <div className="absolute inset-0 flex items-center justify-center bg-pink-900/20">
-                    <img 
-                      src="/images/stickers/daisy-pink.png" 
-                      alt="Pink Daisy Sticker" 
-                      className="w-10 h-10 object-contain"
-                    />
-                  </div>
-                </div>
-                <p className="text-xs text-center mt-1 text-gray-300">Pink Daisy</p>
-              </div>
-              
-              <div 
-                className={`border-2 rounded-md p-1 cursor-pointer transition-all ${
-                  formValues.sticker?.image === '/images/stickers/daisy-yellow.png' 
-                    ? 'border-cyan-500' 
-                    : 'border-gray-700 hover:border-gray-500'
-                }`}
-                onClick={() => handleStickerChange('/images/stickers/daisy-yellow.png')}
-              >
-                <div className="aspect-square relative overflow-hidden rounded">
-                  <div className="absolute inset-0 flex items-center justify-center bg-green-900/20">
-                    <img 
-                      src="/images/stickers/daisy-yellow.png" 
-                      alt="Yellow Daisy Sticker" 
-                      className="w-10 h-10 object-contain"
-                    />
-                  </div>
-                </div>
-                <p className="text-xs text-center mt-1 text-gray-300">Yellow Daisy</p>
-              </div>
-              
-              {/* Placeholder for 3 new stickers - Will be filled in by the user later */}
-              <div className="border-2 border-gray-700 hover:border-gray-500 rounded-md p-1 cursor-default opacity-50">
-                <div className="aspect-square relative overflow-hidden rounded bg-gray-800 flex items-center justify-center">
-                  <p className="text-xs text-gray-500">Coming soon</p>
-                </div>
-                <p className="text-xs text-center mt-1 text-gray-500">New option</p>
-              </div>
-              
-              <div className="border-2 border-gray-700 hover:border-gray-500 rounded-md p-1 cursor-default opacity-50">
-                <div className="aspect-square relative overflow-hidden rounded bg-gray-800 flex items-center justify-center">
-                  <p className="text-xs text-gray-500">Coming soon</p>
-                </div>
-                <p className="text-xs text-center mt-1 text-gray-500">New option</p>
-              </div>
-              
-              <div className="border-2 border-gray-700 hover:border-gray-500 rounded-md p-1 cursor-default opacity-50">
-                <div className="aspect-square relative overflow-hidden rounded bg-gray-800 flex items-center justify-center">
-                  <p className="text-xs text-gray-500">Coming soon</p>
-                </div>
-                <p className="text-xs text-center mt-1 text-gray-500">New option</p>
-              </div>
-            </div>
-            
-            <p className="text-xs text-gray-400 mt-3">
-              Select a sticker to add a decorative touch to your profile. More options coming soon!
+            <p className="text-sm text-gray-400 mb-6">
+              Choose which sections to display on your profile
             </p>
+            
+            <div className="space-y-4">
+              <Checkbox 
+                id="spotlight-visible" 
+                checked={formValues.sectionVisibility?.spotlight !== false} 
+                onChange={() => handleSectionVisibilityToggle('spotlight')}
+                label="Show Spotlight section"
+              />
+              
+              <Checkbox 
+                id="media-visible" 
+                checked={formValues.sectionVisibility?.media !== false} 
+                onChange={() => handleSectionVisibilityToggle('media')}
+                label="Show Media section"
+              />
+              
+              <Checkbox 
+                id="shop-visible" 
+                checked={formValues.sectionVisibility?.shop !== false} 
+                onChange={() => handleSectionVisibilityToggle('shop')}
+                label="Show Shop section"
+              />
+            </div>
+          </div>
+          
+          {/* Spotlight Section - Implemented with full functionality */}
+          <div className="rounded-lg overflow-hidden bg-gray-800/50 mb-12 p-6">
+            <div className="flex items-center gap-4 mb-4">
+              <h2 className="text-2xl font-bold text-cyan-300">Spotlight</h2>
+              <div className="flex-grow border-t border-gray-700" />
+            </div>
+            
+            <p className="text-sm text-gray-400 mb-6">
+              Share anything you want to highlight - your work, collaborations, friends' projects, or inspiring content. Supports all image formats including GIFs.
+            </p>
+            
+            <div className="space-y-4">
+              {localSpotlightItems.length > 0 ? (
+                <Accordion type="single" collapsible className="space-y-3">
+                  {localSpotlightItems.map((item, index) => (
+                    <SpotlightItem 
+                      key={item.id} 
+                      item={item} 
+                      index={index} 
+                    />
+                  ))}
+                </Accordion>
+              ) : (
+                <div className="text-center py-8 border border-dashed border-gray-700 rounded-lg">
+                  <p className="text-gray-400 mb-4">No spotlight items yet. Add your first one!</p>
+                </div>
+              )}
+              
+              <button
+                type="button"
+                onClick={handleAddSpotlight}
+                className="mt-4 inline-flex items-center px-4 py-2 rounded bg-gray-800 border border-gray-600 text-gray-200 hover:bg-gray-700 transition-colors"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Spotlight Item
+              </button>
+            </div>
+          </div>
+          
+          {/* Media Section - Now below Spotlight */}
+          <div className="rounded-lg overflow-hidden bg-gray-800/50 mb-12 p-6">
+            <div className="flex items-center gap-4 mb-4">
+              <h2 className="text-2xl font-bold text-cyan-300">Media</h2>
+              <div className="flex-grow border-t border-gray-700" />
+            </div>
+            
+            <p className="text-sm text-gray-400 mb-6">
+              Share your music, videos, DJ mixes, and playlists from YouTube, SoundCloud, Spotify and Apple Music. Supports all formats.
+            </p>
+            
+            <div className="space-y-4">
+              {localMediaItems.length > 0 ? (
+                <Accordion type="single" collapsible className="space-y-3">
+                  {localMediaItems.map((item, index) => (
+                    <MediaItem 
+                      key={item.id} 
+                      item={item} 
+                      index={index} 
+                    />
+                  ))}
+                </Accordion>
+              ) : (
+                <div className="text-center py-8 border border-dashed border-gray-700 rounded-lg">
+                  <p className="text-gray-400 mb-4">No media items yet. Add your first one!</p>
+                </div>
+              )}
+              
+              <button
+                type="button"
+                onClick={handleAddMedia}
+                className="mt-4 inline-flex items-center px-4 py-2 rounded bg-gray-800 border border-gray-600 text-gray-200 hover:bg-gray-700 transition-colors"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Media
+              </button>
+            </div>
+          </div>
+          
+          {/* Shop Section */}
+          <div className="rounded-lg overflow-hidden bg-gray-800/50 mb-12 p-6">
+            <div className="flex items-center gap-4 mb-4">
+              <h2 className="text-2xl font-bold text-cyan-300">Shop</h2>
+              <div className="flex-grow border-t border-gray-700" />
+            </div>
+            
+            <p className="text-sm text-gray-400 mb-6">
+              Add links to your online shops and marketplaces where fans can find your merchandise.
+            </p>
+            
+            <div className="space-y-4">
+              {localShopItems.length > 0 ? (
+                <Accordion type="single" collapsible className="space-y-3">
+                  {localShopItems.map((item, index) => (
+                    <ShopItem 
+                      key={item.id} 
+                      item={item} 
+                      index={index} 
+                    />
+                  ))}
+                </Accordion>
+              ) : (
+                <div className="text-center py-8 border border-dashed border-gray-700 rounded-lg">
+                  <p className="text-gray-400 mb-4">No shops yet. Add your first one!</p>
+                </div>
+              )}
+              
+              <button
+                type="button"
+                onClick={handleAddShop}
+                className="mt-4 inline-flex items-center px-4 py-2 rounded bg-gray-800 border border-gray-600 text-gray-200 hover:bg-gray-700 transition-colors"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Shop
+              </button>
+            </div>
+          </div>
+          
+          {/* Sticker selection - moved to bottom */}
+          <div className="rounded-lg overflow-hidden bg-gray-800/50 mb-12 p-6">
+            <div className="flex items-center gap-4 mb-4">
+              <h2 className="text-2xl font-bold text-cyan-300">Profile Sticker</h2>
+              <div className="flex-grow border-t border-gray-700" />
+            </div>
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-gray-300">Add a decorative sticker to your profile</p>
+                <div className="flex items-center">
+                  <span className="text-sm text-gray-400 mr-2">Show sticker</span>
+                  <div 
+                    className={`w-10 h-6 rounded-full p-1 cursor-pointer ${
+                      formValues.sticker?.visible ? 'bg-cyan-500' : 'bg-gray-700'
+                    }`}
+                    onClick={handleStickerToggle}
+                  >
+                    <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform ${
+                      formValues.sticker?.visible ? 'translate-x-4' : ''
+                    }`}></div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mt-4">
+                {/* Sticker options - Made smaller for 6-sticker layout */}
+                <div 
+                  className={`border-2 rounded-md p-1 cursor-pointer transition-all ${
+                    formValues.sticker?.image === '/images/stickers/daisy-blue.png' 
+                      ? 'border-cyan-500' 
+                      : 'border-gray-700 hover:border-gray-500'
+                  }`}
+                  onClick={() => handleStickerChange('/images/stickers/daisy-blue.png')}
+                >
+                  <div className="aspect-square relative overflow-hidden rounded">
+                    <div className="absolute inset-0 flex items-center justify-center bg-blue-900/20">
+                      <img 
+                        src="/images/stickers/daisy-blue.png" 
+                        alt="Blue Daisy Sticker" 
+                        className="w-10 h-10 object-contain"
+                      />
+                    </div>
+                  </div>
+                  <p className="text-xs text-center mt-1 text-gray-300">Blue Daisy</p>
+                </div>
+                
+                <div 
+                  className={`border-2 rounded-md p-1 cursor-pointer transition-all ${
+                    formValues.sticker?.image === '/images/stickers/daisy-pink.png' 
+                      ? 'border-cyan-500' 
+                      : 'border-gray-700 hover:border-gray-500'
+                  }`}
+                  onClick={() => handleStickerChange('/images/stickers/daisy-pink.png')}
+                >
+                  <div className="aspect-square relative overflow-hidden rounded">
+                    <div className="absolute inset-0 flex items-center justify-center bg-pink-900/20">
+                      <img 
+                        src="/images/stickers/daisy-pink.png" 
+                        alt="Pink Daisy Sticker" 
+                        className="w-10 h-10 object-contain"
+                      />
+                    </div>
+                  </div>
+                  <p className="text-xs text-center mt-1 text-gray-300">Pink Daisy</p>
+                </div>
+                
+                <div 
+                  className={`border-2 rounded-md p-1 cursor-pointer transition-all ${
+                    formValues.sticker?.image === '/images/stickers/daisy-yellow.png' 
+                      ? 'border-cyan-500' 
+                      : 'border-gray-700 hover:border-gray-500'
+                  }`}
+                  onClick={() => handleStickerChange('/images/stickers/daisy-yellow.png')}
+                >
+                  <div className="aspect-square relative overflow-hidden rounded">
+                    <div className="absolute inset-0 flex items-center justify-center bg-green-900/20">
+                      <img 
+                        src="/images/stickers/daisy-yellow.png" 
+                        alt="Yellow Daisy Sticker" 
+                        className="w-10 h-10 object-contain"
+                      />
+                    </div>
+                  </div>
+                  <p className="text-xs text-center mt-1 text-gray-300">Yellow Daisy</p>
+                </div>
+                
+                {/* Placeholder for 3 new stickers - Will be filled in by the user later */}
+                <div className="border-2 border-gray-700 hover:border-gray-500 rounded-md p-1 cursor-default opacity-50">
+                  <div className="aspect-square relative overflow-hidden rounded bg-gray-800 flex items-center justify-center">
+                    <p className="text-xs text-gray-500">Coming soon</p>
+                  </div>
+                  <p className="text-xs text-center mt-1 text-gray-500">New option</p>
+                </div>
+                
+                <div className="border-2 border-gray-700 hover:border-gray-500 rounded-md p-1 cursor-default opacity-50">
+                  <div className="aspect-square relative overflow-hidden rounded bg-gray-800 flex items-center justify-center">
+                    <p className="text-xs text-gray-500">Coming soon</p>
+                  </div>
+                  <p className="text-xs text-center mt-1 text-gray-500">New option</p>
+                </div>
+                
+                <div className="border-2 border-gray-700 hover:border-gray-500 rounded-md p-1 cursor-default opacity-50">
+                  <div className="aspect-square relative overflow-hidden rounded bg-gray-800 flex items-center justify-center">
+                    <p className="text-xs text-gray-500">Coming soon</p>
+                  </div>
+                  <p className="text-xs text-center mt-1 text-gray-500">New option</p>
+                </div>
+              </div>
+              
+              <p className="text-xs text-gray-400 mt-3">
+                Select a sticker to add a decorative touch to your profile. More options coming soon!
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        {/* Sticky Footer */}
+        <div className="fixed bottom-0 left-0 right-0 bg-gray-800 border-t border-gray-700 shadow-lg z-50">
+          <div className="max-w-4xl mx-auto px-4 py-3 flex justify-end">
+            <button
+              onClick={handleSave}
+              className="bg-cyan-600 hover:bg-cyan-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center gap-2"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h-2v5.586l-1.293-1.293z" />
+              </svg>
+              Save Changes
+            </button>
           </div>
         </div>
       </div>

@@ -149,18 +149,14 @@ function getCroppedImg(imageSrc: string, pixelCrop: Area): Promise<string> {
       pixelCrop.height
     );
 
-    // Convert canvas to blob
-    canvas.toBlob(
-      (blob) => {
-        if (!blob) {
-          console.error('Canvas is empty');
-          return;
-        }
-        resolve(URL.createObjectURL(blob));
-      },
-      'image/jpeg',
-      0.95
-    );
+    // Determine the original image format
+    const imageType = imageSrc.startsWith('data:') 
+      ? imageSrc.split(',')[0].split(':')[1].split(';')[0]
+      : 'image/jpeg';
+
+    // Convert directly to base64 data URL instead of blob URL
+    const dataUrl = canvas.toDataURL(imageType, 0.95);
+    resolve(dataUrl);
   });
 }
 
