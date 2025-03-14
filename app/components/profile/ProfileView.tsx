@@ -29,25 +29,25 @@ const ProfileView: React.FC<ProfileViewProps> = ({
     <div className="min-h-screen bg-gray-900 text-gray-100">
       <div className="container mx-auto p-4 sm:p-8 md:p-12 lg:p-16">
         {/* Profile section */}
-        <div className="flex flex-col items-center gap-8 lg:gap-16 opacity-0 animate-fadeIn"
+        <div className="flex flex-col lg:flex-row lg:items-start gap-8 lg:gap-16 opacity-0 animate-fadeIn"
              style={{ animationFillMode: 'forwards' }}>
-          {/* Profile image */}
-          <div className="w-full max-w-md mx-auto">
+          {/* Left column - Profile image */}
+          <div className="w-full lg:w-[40%] max-w-md mx-auto lg:mx-0">
             <div className="relative aspect-square overflow-hidden rounded-xl border-2 border-cyan-600">
               <Image
                 src={profile.image || '/images/placeholder.png'}
                 alt="Profile photo"
                 fill
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 40vw, 33vw"
                 className="object-cover"
                 priority
               />
             </div>
           </div>
 
-          {/* Profile info */}
-          <div className="w-full flex flex-col items-center text-center">
-            <div className="space-y-6 max-w-2xl">
+          {/* Right column - Profile info */}
+          <div className="w-full lg:w-[60%] flex flex-col items-center text-center">
+            <div className="space-y-6 w-full max-w-xl">
               {/* Name and Title */}
               <div>
                 <h1 className="text-3xl sm:text-4xl font-bold text-cyan-300">
@@ -67,7 +67,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
 
               {/* Wallet Address - only show if visible */}
               {profile.wallet?.visible && profile.wallet?.address && (
-                <div className="bg-gray-800/60 p-3 rounded-lg border border-gray-700 max-w-md mx-auto">
+                <div className="bg-gray-800/60 p-3 rounded-lg border border-gray-700">
                   <div className="flex items-center gap-2 justify-center">
                     <span className="text-xs text-gray-400">Wallet for tips:</span>
                     <span className="text-xs font-mono text-cyan-300 truncate max-w-[200px] sm:max-w-[300px]">
