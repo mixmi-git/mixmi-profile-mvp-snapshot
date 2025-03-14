@@ -545,8 +545,34 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                 </div>
               )
             ) : (
-              <div className="text-center text-gray-400 py-16 border border-dashed border-gray-700 rounded-lg">
-                No shop items yet
+              // Shop placeholder - center justified like other sections
+              <div className="flex justify-center">
+                <div className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] relative rounded-lg overflow-hidden group">
+                  <div className="aspect-square relative bg-gray-800/50">
+                    <Image
+                      src="/images/shop-placeholder.jpg"
+                      alt="Shop item example"
+                      fill
+                      className="object-cover"
+                    />
+                    
+                    {/* Corner badge */}
+                    <div className="absolute bottom-0 left-0 bg-black bg-opacity-70 p-2 
+                      max-w-[90%] md:max-w-[80%] transition-all duration-300 
+                      md:group-hover:max-w-full rounded-tr-md">
+                      <div className="border-l-2 border-cyan-400 pl-2">
+                        <a href="#" className="group/title">
+                          <div className="flex items-center gap-2">
+                            <h4 className="text-white text-sm font-medium truncate group-hover/title:underline">Exclusive Content</h4>
+                          </div>
+                        </a>
+                        <p className="text-xs text-gray-300 mt-1 line-clamp-2 hidden md:group-hover:block md:hidden">
+                          Sell merchandise, digital downloads, or offer token-gated content <span className="text-cyan-300">$25</span>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
           </div>
