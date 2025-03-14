@@ -124,12 +124,9 @@ const ProfileView: React.FC<ProfileViewProps> = ({
             {spotlightItems && spotlightItems.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {spotlightItems.map((item, index) => (
-                  <a 
-                    key={index} 
-                    href={item.link || '#'} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className={`group block relative rounded-lg overflow-hidden ${item.link ? 'cursor-pointer' : 'cursor-default'}`}
+                  <div 
+                    key={index}
+                    className="group block relative rounded-lg overflow-hidden"
                   >
                     <div className="aspect-square relative bg-gray-800">
                       {item.image ? (
@@ -150,20 +147,28 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                         max-w-[90%] md:max-w-[80%] transition-all duration-300 
                         md:group-hover:max-w-full rounded-tr-md">
                         <div className="border-l-2 border-cyan-400 pl-2">
-                          <div className="flex items-center gap-2">
-                            <h4 className="text-white text-sm font-medium truncate">{item.title || "Untitled"}</h4>
-                            {item.link && <ExternalLink className="h-3 w-3 text-white flex-shrink-0" />}
-                          </div>
+                          {item.link ? (
+                            <a 
+                              href={item.link} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="group/title"
+                            >
+                              <div className="flex items-center gap-2">
+                                <h4 className="text-white text-sm font-medium truncate group-hover/title:underline">{item.title || "Untitled"}</h4>
+                                <ExternalLink className="h-3 w-3 text-white flex-shrink-0" />
+                              </div>
+                            </a>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <h4 className="text-white text-sm font-medium truncate">{item.title || "Untitled"}</h4>
+                            </div>
+                          )}
                           <p className="text-xs text-gray-300 mt-1 line-clamp-2 hidden md:group-hover:block md:hidden">{item.description}</p>
                         </div>
                       </div>
-                      
-                      {/* Hover effect */}
-                      {item.link && (
-                        <div className="absolute inset-0 bg-black bg-opacity-25 opacity-0 group-hover:opacity-100 transition-opacity" />
-                      )}
                     </div>
-                  </a>
+                  </div>
                 ))}
               </div>
             ) : (
@@ -183,10 +188,12 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                       max-w-[90%] md:max-w-[80%] transition-all duration-300 
                       md:group-hover:max-w-full rounded-tr-md">
                       <div className="border-l-2 border-cyan-400 pl-2">
-                        <div className="flex items-center gap-2">
-                          <h4 className="text-white text-sm font-medium truncate">Your Next Event</h4>
-                          <ExternalLink className="h-3 w-3 text-white flex-shrink-0" />
-                        </div>
+                        <a href="#" className="group/title">
+                          <div className="flex items-center gap-2">
+                            <h4 className="text-white text-sm font-medium truncate group-hover/title:underline">Your Next Event</h4>
+                            <ExternalLink className="h-3 w-3 text-white flex-shrink-0" />
+                          </div>
+                        </a>
                         <p className="text-xs text-gray-300 mt-1 line-clamp-2 hidden md:group-hover:block md:hidden">
                           Share details about your upcoming shows, releases, or collaborations
                         </p>
@@ -209,10 +216,12 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                       max-w-[90%] md:max-w-[80%] transition-all duration-300 
                       md:group-hover:max-w-full rounded-tr-md">
                       <div className="border-l-2 border-cyan-400 pl-2">
-                        <div className="flex items-center gap-2">
-                          <h4 className="text-white text-sm font-medium truncate">Featured Artist</h4>
-                          <ExternalLink className="h-3 w-3 text-white flex-shrink-0" />
-                        </div>
+                        <a href="#" className="group/title">
+                          <div className="flex items-center gap-2">
+                            <h4 className="text-white text-sm font-medium truncate group-hover/title:underline">Featured Artist</h4>
+                            <ExternalLink className="h-3 w-3 text-white flex-shrink-0" />
+                          </div>
+                        </a>
                         <p className="text-xs text-gray-300 mt-1 line-clamp-2 hidden md:group-hover:block md:hidden">
                           Highlight creators and collaborators you want to support
                         </p>
@@ -235,10 +244,12 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                       max-w-[90%] md:max-w-[80%] transition-all duration-300 
                       md:group-hover:max-w-full rounded-tr-md">
                       <div className="border-l-2 border-cyan-400 pl-2">
-                        <div className="flex items-center gap-2">
-                          <h4 className="text-white text-sm font-medium truncate">Latest Project</h4>
-                          <ExternalLink className="h-3 w-3 text-white flex-shrink-0" />
-                        </div>
+                        <a href="#" className="group/title">
+                          <div className="flex items-center gap-2">
+                            <h4 className="text-white text-sm font-medium truncate group-hover/title:underline">Latest Project</h4>
+                            <ExternalLink className="h-3 w-3 text-white flex-shrink-0" />
+                          </div>
+                        </a>
                         <p className="text-xs text-gray-300 mt-1 line-clamp-2 hidden md:group-hover:block md:hidden">
                           Showcase your work, ideas, or upcoming releases
                         </p>
@@ -300,12 +311,9 @@ const ProfileView: React.FC<ProfileViewProps> = ({
             {shopItems && shopItems.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {shopItems.map((item, index) => (
-                  <a 
-                    key={index} 
-                    href={item.link || '#'} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className={`group block relative rounded-lg overflow-hidden ${item.link ? 'cursor-pointer' : 'cursor-default'}`}
+                  <div 
+                    key={index}
+                    className="group block relative rounded-lg overflow-hidden"
                   >
                     <div className="aspect-square relative bg-gray-800">
                       {item.image ? (
@@ -323,25 +331,34 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                       
                       {/* Corner badge - similar to the editor but optimized for viewing */}
                       <div className="absolute bottom-0 left-0 bg-black bg-opacity-70 p-2 
-                        max-w-full transition-all duration-300 rounded-tr-md">
+                        max-w-[90%] md:max-w-[80%] transition-all duration-300 
+                        md:group-hover:max-w-full rounded-tr-md">
                         <div className="border-l-2 border-cyan-400 pl-2">
-                          <div className="flex items-center gap-2">
-                            <h4 className="text-white text-sm font-medium truncate">{item.title || "Untitled"}</h4>
-                            {item.link && <ExternalLink className="h-3 w-3 text-cyan-400 flex-shrink-0" />}
-                          </div>
-                          <p className="text-xs text-gray-300 mt-1 line-clamp-2">
+                          {item.link ? (
+                            <a 
+                              href={item.link} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="group/title"
+                            >
+                              <div className="flex items-center gap-2">
+                                <h4 className="text-white text-sm font-medium truncate group-hover/title:underline">{item.title || "Untitled"}</h4>
+                                <ExternalLink className="h-3 w-3 text-white flex-shrink-0" />
+                              </div>
+                            </a>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <h4 className="text-white text-sm font-medium truncate">{item.title || "Untitled"}</h4>
+                            </div>
+                          )}
+                          <p className="text-xs text-gray-300 mt-1 line-clamp-2 hidden md:group-hover:block md:hidden">
                             {item.description}
                             {item.price && <span className="ml-1 text-cyan-300">{item.price}</span>}
                           </p>
                         </div>
                       </div>
-                      
-                      {/* Hover effect */}
-                      {item.link && (
-                        <div className="absolute inset-0 bg-black bg-opacity-25 opacity-0 group-hover:opacity-100 transition-opacity" />
-                      )}
                     </div>
-                  </a>
+                  </div>
                 ))}
               </div>
             ) : (
