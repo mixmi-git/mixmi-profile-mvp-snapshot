@@ -156,7 +156,6 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                             >
                               <div className="flex items-center gap-2">
                                 <h4 className="text-white text-sm font-medium truncate group-hover/title:underline">{item.title || "Untitled"}</h4>
-                                <ExternalLink className="h-3 w-3 text-white flex-shrink-0" />
                               </div>
                             </a>
                           ) : (
@@ -191,7 +190,6 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                         <a href="#" className="group/title">
                           <div className="flex items-center gap-2">
                             <h4 className="text-white text-sm font-medium truncate group-hover/title:underline">Your Next Event</h4>
-                            <ExternalLink className="h-3 w-3 text-white flex-shrink-0" />
                           </div>
                         </a>
                         <p className="text-xs text-gray-300 mt-1 line-clamp-2 hidden md:group-hover:block md:hidden">
@@ -219,7 +217,6 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                         <a href="#" className="group/title">
                           <div className="flex items-center gap-2">
                             <h4 className="text-white text-sm font-medium truncate group-hover/title:underline">Featured Artist</h4>
-                            <ExternalLink className="h-3 w-3 text-white flex-shrink-0" />
                           </div>
                         </a>
                         <p className="text-xs text-gray-300 mt-1 line-clamp-2 hidden md:group-hover:block md:hidden">
@@ -247,7 +244,6 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                         <a href="#" className="group/title">
                           <div className="flex items-center gap-2">
                             <h4 className="text-white text-sm font-medium truncate group-hover/title:underline">Latest Project</h4>
-                            <ExternalLink className="h-3 w-3 text-white flex-shrink-0" />
                           </div>
                         </a>
                         <p className="text-xs text-gray-300 mt-1 line-clamp-2 hidden md:group-hover:block md:hidden">
@@ -343,7 +339,6 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                             >
                               <div className="flex items-center gap-2">
                                 <h4 className="text-white text-sm font-medium truncate group-hover/title:underline">{item.title || "Untitled"}</h4>
-                                <ExternalLink className="h-3 w-3 text-white flex-shrink-0" />
                               </div>
                             </a>
                           ) : (
