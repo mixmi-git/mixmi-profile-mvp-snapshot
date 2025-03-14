@@ -110,21 +110,6 @@ const ProfileView: React.FC<ProfileViewProps> = ({
           </div>
         </div>
         
-        {/* Sticker display */}
-        {profile.sticker?.visible && profile.sticker?.image && (
-          <div className="mt-12 flex justify-center">
-            <div className="w-32 h-32 animate-sticker-rotate">
-              <Image
-                src={profile.sticker.image}
-                alt="Profile sticker"
-                width={128}
-                height={128}
-                className="object-contain"
-              />
-            </div>
-          </div>
-        )}
-
         {/* Spotlight section - moved above Media */}
         {(!profile.sectionVisibility || profile.sectionVisibility.spotlight) && (
           <div className="mt-24 sm:mt-32 max-w-6xl mx-auto px-4 mb-24 opacity-0 animate-fadeIn"
@@ -317,6 +302,22 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                 No shop items yet
               </div>
             )}
+          </div>
+        )}
+        
+        {/* Sticker display - moved to bottom */}
+        {profile.sticker?.visible && profile.sticker?.image && (
+          <div className="mt-24 sm:mt-32 flex justify-center opacity-0 animate-fadeIn mb-16"
+               style={{ animationDelay: '350ms', animationFillMode: 'forwards' }}>
+            <div className="w-32 h-32 animate-sticker-rotate">
+              <Image
+                src={profile.sticker.image}
+                alt="Profile sticker"
+                width={128}
+                height={128}
+                className="object-contain"
+              />
+            </div>
           </div>
         )}
       </div>
