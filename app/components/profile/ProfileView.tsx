@@ -414,7 +414,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                       <iframe 
                         width="100%" 
                         height="100%" 
-                        src="https://www.youtube.com/embed/ewRjZoRtu0Y" 
+                        src="https://www.youtube.com/embed/coh2TB6B2EA" 
                         title="YouTube video player" 
                         frameBorder="0" 
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
@@ -423,9 +423,6 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                       ></iframe>
                     </div>
                   </div>
-                  <div className="py-3">
-                    <h3 className="text-xl font-medium text-white">Paper Planes (Live Performance)</h3>
-                  </div>
                 </div>
                 
                 {/* Spotify Example */}
@@ -433,7 +430,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                   <div className="w-full bg-transparent">
                     {/* Spotify embed */}
                     <iframe 
-                      src="https://open.spotify.com/embed/playlist/37i9dQZF1DX0XUsuxWHRQd" 
+                      src="https://open.spotify.com/embed/playlist/37i9dQZEVXbNG2KDcFcKOF?si=O2aB8rkiQqqQhUtBfx8I_g" 
                       width="100%" 
                       height="380" 
                       frameBorder="0" 
@@ -455,7 +452,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
               SHOP
             </h2>
             <p className="text-sm text-gray-400 text-center mb-12">
-              Browse merchandise and exclusive content
+              Connect visitors to your shop and products
             </p>
             
             {shopItems && shopItems.length > 0 ? (
@@ -590,7 +587,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                           </div>
                         </a>
                         <p className="text-xs text-gray-300 mt-1 line-clamp-2 hidden md:group-hover:block md:hidden">
-                          Link to your online merch, digital downloads or offer STX or BTC token gated content
+                          Link to anywhere you sell your stuff, including merch, NFT's or token gated content
                         </p>
                       </div>
                     </div>
@@ -619,12 +616,12 @@ const ProfileView: React.FC<ProfileViewProps> = ({
           // Daisy sticker placeholder
           <div className="mt-24 sm:mt-32 flex justify-center opacity-0 animate-fadeIn mb-16"
                style={{ animationDelay: '350ms', animationFillMode: 'forwards' }}>
-            <div className="w-32 h-32 animate-daisy-rotate">
+            <div className="w-64 h-64 animate-daisy-rotate">
               <Image
                 src="/images/stickers/daisy-blue.png"
                 alt="Daisy sticker"
-                width={128}
-                height={128}
+                width={256}
+                height={256}
                 className="object-contain"
               />
             </div>

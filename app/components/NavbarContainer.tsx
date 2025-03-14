@@ -10,8 +10,12 @@ export const NavbarContainer: React.FC = () => {
     <header className="bg-gray-900 border-b border-gray-800 p-4">
       <div className="container mx-auto flex justify-between items-center">
         <div className="flex items-center">
-          <a href="/" className="text-cyan-300 font-bold text-xl">
-            mi<span className="text-white">x</span>mi
+          <a href="/" className="h-8 w-auto relative">
+            <img
+              src="/images/logos/Logotype_Main.svg"
+              alt="mixmi"
+              className="h-8 w-auto"
+            />
           </a>
         </div>
         
