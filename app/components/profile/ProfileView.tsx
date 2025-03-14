@@ -567,7 +567,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                           </div>
                         </a>
                         <p className="text-xs text-gray-300 mt-1 line-clamp-2 hidden md:group-hover:block md:hidden">
-                          Sell merchandise, digital downloads, or offer token-gated content <span className="text-cyan-300">$25</span>
+                          Link to your online merch, digital downloads or offer STX or BTC token gated content
                         </p>
                       </div>
                     </div>
