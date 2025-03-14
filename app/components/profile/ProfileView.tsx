@@ -125,45 +125,10 @@ const ProfileView: React.FC<ProfileViewProps> = ({
           </div>
         )}
 
-        {/* Media section */}
-        {(!profile.sectionVisibility || profile.sectionVisibility.media) && (
-          <div className="mt-24 sm:mt-32 max-w-6xl mx-auto px-4 mb-24 opacity-0 animate-fadeIn"
-               style={{ animationDelay: '50ms', animationFillMode: 'forwards' }}>
-            <h2 className="text-3xl font-semibold text-white text-center mb-4">
-              MEDIA
-            </h2>
-            <p className="text-sm text-gray-400 text-center mb-12">
-              Share your music, videos, DJ mixes, and playlists
-            </p>
-            
-            {mediaItems && mediaItems.length > 0 ? (
-              <div className="grid grid-cols-1 gap-8">
-                {mediaItems.map((item, index) => (
-                  <div key={index} className="bg-gray-800/30 rounded-lg overflow-hidden">
-                    <div className="aspect-video relative">
-                      {/* This would be replaced with an actual embed component */}
-                      <div className="absolute inset-0 flex items-center justify-center bg-gray-900">
-                        <p className="text-cyan-400">Media embed will display here</p>
-                      </div>
-                    </div>
-                    <div className="p-4">
-                      <h3 className="text-xl font-medium text-white">{item.title}</h3>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center text-gray-400 py-16 border border-dashed border-gray-700 rounded-lg">
-                No media items yet
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Spotlight section */}
+        {/* Spotlight section - moved above Media */}
         {(!profile.sectionVisibility || profile.sectionVisibility.spotlight) && (
           <div className="mt-24 sm:mt-32 max-w-6xl mx-auto px-4 mb-24 opacity-0 animate-fadeIn"
-               style={{ animationDelay: '150ms', animationFillMode: 'forwards' }}>
+               style={{ animationDelay: '50ms', animationFillMode: 'forwards' }}>
             <h2 className="text-3xl font-semibold text-white text-center mb-4">
               SPOTLIGHT
             </h2>
@@ -216,8 +181,74 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                 ))}
               </div>
             ) : (
+              isAuthenticated ? (
+                <div className="text-center text-gray-400 py-16 border border-dashed border-gray-700 rounded-lg">
+                  <p className="mb-3">No spotlight items yet</p>
+                  <p className="text-sm text-cyan-400">Use the Edit Profile button to add your first spotlight item</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {[1, 2, 3].map((index) => (
+                    <div key={index} className="relative rounded-lg overflow-hidden">
+                      <div className="aspect-square relative bg-gray-800/50">
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="w-16 h-16 rounded-full bg-gray-700/50 flex items-center justify-center">
+                            <ExternalLink className="h-6 w-6 text-gray-600" />
+                          </div>
+                        </div>
+                        
+                        {/* Placeholder corner badge */}
+                        <div className="absolute bottom-0 left-0 bg-black bg-opacity-50 p-2 
+                          max-w-full rounded-tr-md">
+                          <div className="border-l-2 border-gray-600 pl-2">
+                            <div className="flex items-center gap-2">
+                              <div className="h-3 w-24 bg-gray-700 rounded"></div>
+                            </div>
+                            <div className="mt-1">
+                              <div className="h-2 w-32 bg-gray-700 rounded mb-1"></div>
+                              <div className="h-2 w-20 bg-gray-700 rounded"></div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )
+            )}
+          </div>
+        )}
+
+        {/* Media section */}
+        {(!profile.sectionVisibility || profile.sectionVisibility.media) && (
+          <div className="mt-24 sm:mt-32 max-w-6xl mx-auto px-4 mb-24 opacity-0 animate-fadeIn"
+               style={{ animationDelay: '150ms', animationFillMode: 'forwards' }}>
+            <h2 className="text-3xl font-semibold text-white text-center mb-4">
+              MEDIA
+            </h2>
+            <p className="text-sm text-gray-400 text-center mb-12">
+              Share your music, videos, DJ mixes, and playlists
+            </p>
+            
+            {mediaItems && mediaItems.length > 0 ? (
+              <div className="grid grid-cols-1 gap-8">
+                {mediaItems.map((item, index) => (
+                  <div key={index} className="bg-gray-800/30 rounded-lg overflow-hidden">
+                    <div className="aspect-video relative">
+                      {/* This would be replaced with an actual embed component */}
+                      <div className="absolute inset-0 flex items-center justify-center bg-gray-900">
+                        <p className="text-cyan-400">Media embed will display here</p>
+                      </div>
+                    </div>
+                    <div className="p-4">
+                      <h3 className="text-xl font-medium text-white">{item.title}</h3>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
               <div className="text-center text-gray-400 py-16 border border-dashed border-gray-700 rounded-lg">
-                No spotlight items yet
+                No media items yet
               </div>
             )}
           </div>
