@@ -381,9 +381,10 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                 </div>
               )
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              // Example placeholder media items (2 items) - should be center-justified
+              <div className="flex flex-col sm:flex-row justify-center gap-6">
                 {/* YouTube Example */}
-                <div className="rounded-lg overflow-hidden">
+                <div className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] rounded-lg overflow-hidden">
                   <div className="w-full bg-transparent">
                     {/* YouTube embed */}
                     <div className="aspect-video">
@@ -405,7 +406,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                 </div>
                 
                 {/* Spotify Example */}
-                <div className="rounded-lg overflow-hidden">
+                <div className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] rounded-lg overflow-hidden">
                   <div className="w-full bg-transparent">
                     {/* Spotify embed */}
                     <iframe 
