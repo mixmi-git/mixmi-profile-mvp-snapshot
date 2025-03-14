@@ -29,7 +29,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
     <div className="min-h-screen bg-gray-900 text-gray-100">
       <div className="container mx-auto p-4 sm:p-8 md:p-12 lg:p-16">
         {/* Profile section */}
-        <div className="flex flex-col lg:flex-row lg:items-start gap-8 lg:gap-16 opacity-0 animate-fadeIn"
+        <div className="flex flex-col lg:flex-row lg:items-center gap-8 lg:gap-16 opacity-0 animate-fadeIn"
              style={{ animationFillMode: 'forwards' }}>
           {/* Left column - Profile image */}
           <div className="w-full lg:w-[40%] max-w-md mx-auto lg:mx-0">
@@ -46,7 +46,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
           </div>
 
           {/* Right column - Profile info */}
-          <div className="w-full lg:w-[60%] flex flex-col items-center text-center">
+          <div className="w-full lg:w-[60%] flex flex-col items-center justify-center text-center lg:h-full">
             <div className="space-y-6 w-full max-w-xl">
               {/* Name and Title */}
               <div>
