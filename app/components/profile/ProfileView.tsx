@@ -579,13 +579,27 @@ const ProfileView: React.FC<ProfileViewProps> = ({
         )}
         
         {/* Sticker display - moved to bottom */}
-        {profile.sticker?.visible && profile.sticker?.image && (
+        {profile.sticker?.visible && profile.sticker?.image ? (
           <div className="mt-24 sm:mt-32 flex justify-center opacity-0 animate-fadeIn mb-16"
                style={{ animationDelay: '350ms', animationFillMode: 'forwards' }}>
             <div className="w-32 h-32 animate-sticker-rotate">
               <Image
                 src={profile.sticker.image}
                 alt="Profile sticker"
+                width={128}
+                height={128}
+                className="object-contain"
+              />
+            </div>
+          </div>
+        ) : (
+          // Daisy sticker placeholder
+          <div className="mt-24 sm:mt-32 flex justify-center opacity-0 animate-fadeIn mb-16"
+               style={{ animationDelay: '350ms', animationFillMode: 'forwards' }}>
+            <div className="w-32 h-32 animate-sticker-rotate">
+              <Image
+                src="/images/daisy-sticker.png"
+                alt="Daisy sticker"
                 width={128}
                 height={128}
                 className="object-contain"
