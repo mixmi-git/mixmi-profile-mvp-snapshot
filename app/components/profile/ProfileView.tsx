@@ -270,7 +270,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
             </p>
             
             {mediaItems && mediaItems.length > 0 ? (
-              <div className="grid grid-cols-1 gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {mediaItems.map((item, index) => (
                   <div key={index} className="rounded-lg overflow-hidden">
                     <div className="w-full">
@@ -288,7 +288,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {/* YouTube Example */}
                 <div className="rounded-lg overflow-hidden">
                   <div className="aspect-video w-full bg-gray-900 rounded-lg">
