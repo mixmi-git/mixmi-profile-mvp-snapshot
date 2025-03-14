@@ -854,12 +854,18 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
 
     const handleWalletBlur = () => {
       const updatedWallet = {
-        ...formValues.wallet || {},
+        ...(formValues.wallet || {}),
         address: localWallet,
         visible: walletVisible
       };
       
-      // Update the parent state
+      // Update formValues
+      setFormValues(prev => ({
+        ...prev,
+        wallet: updatedWallet
+      }));
+      
+      // Auto-save changes
       onSave({ wallet: updatedWallet });
     };
 
@@ -868,11 +874,17 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
       setWalletVisible(newVisibility);
       
       const updatedWallet = {
-        ...formValues.wallet || { address: localWallet },
+        ...(formValues.wallet || { address: localWallet }),
         visible: newVisibility
       };
       
-      // Update the parent state
+      // Update formValues
+      setFormValues(prev => ({
+        ...prev,
+        wallet: updatedWallet
+      }));
+      
+      // Auto-save changes
       onSave({ wallet: updatedWallet });
     };
 
