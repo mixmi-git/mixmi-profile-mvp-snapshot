@@ -166,90 +166,83 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                 ))}
               </div>
             ) : (
-              isAuthenticated ? (
-                <div className="text-center text-gray-400 py-16 border border-dashed border-gray-700 rounded-lg">
-                  <p className="mb-3">No spotlight items yet</p>
-                  <p className="text-sm text-cyan-400">Use the Edit Profile button to add your first spotlight item</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {/* Example cards showing what you can do with Spotlight */}
-                  <div className="relative rounded-lg overflow-hidden">
-                    <div className="aspect-square relative bg-gray-800/50">
-                      <Image
-                        src="/images/next-event-placeholder.jpg"
-                        alt="Event example"
-                        fill
-                        className="object-cover"
-                      />
-                      
-                      {/* Corner badge */}
-                      <div className="absolute bottom-0 left-0 bg-black bg-opacity-70 p-2 
-                        max-w-full rounded-tr-md">
-                        <div className="border-l-2 border-cyan-400 pl-2">
-                          <div className="flex items-center gap-2">
-                            <h4 className="text-white text-sm font-medium truncate">Your Next Event</h4>
-                            <ExternalLink className="h-3 w-3 text-cyan-400 flex-shrink-0" />
-                          </div>
-                          <p className="text-xs text-gray-300 mt-1 line-clamp-2">
-                            Share details about your upcoming shows, releases, or collaborations
-                          </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {/* Example cards showing what you can do with Spotlight */}
+                <div className="relative rounded-lg overflow-hidden">
+                  <div className="aspect-square relative bg-gray-800/50">
+                    <Image
+                      src="/images/next-event-placeholder.jpg"
+                      alt="Event example"
+                      fill
+                      className="object-cover"
+                    />
+                    
+                    {/* Corner badge */}
+                    <div className="absolute bottom-0 left-0 bg-black bg-opacity-70 p-2 
+                      max-w-full rounded-tr-md">
+                      <div className="border-l-2 border-cyan-400 pl-2">
+                        <div className="flex items-center gap-2">
+                          <h4 className="text-white text-sm font-medium truncate">Your Next Event</h4>
+                          <ExternalLink className="h-3 w-3 text-cyan-400 flex-shrink-0" />
                         </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="relative rounded-lg overflow-hidden">
-                    <div className="aspect-square relative bg-gray-800/50">
-                      <Image
-                        src="/images/featured-artist-placeholder.jpg"
-                        alt="Featured artist example"
-                        fill
-                        className="object-cover"
-                      />
-                      
-                      {/* Corner badge */}
-                      <div className="absolute bottom-0 left-0 bg-black bg-opacity-70 p-2 
-                        max-w-full rounded-tr-md">
-                        <div className="border-l-2 border-cyan-400 pl-2">
-                          <div className="flex items-center gap-2">
-                            <h4 className="text-white text-sm font-medium truncate">Featured Artist</h4>
-                            <ExternalLink className="h-3 w-3 text-cyan-400 flex-shrink-0" />
-                          </div>
-                          <p className="text-xs text-gray-300 mt-1 line-clamp-2">
-                            Highlight creators and collaborators you want to support
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="relative rounded-lg overflow-hidden">
-                    <div className="aspect-square relative bg-gray-800/50">
-                      <Image
-                        src="/images/latest-project-placeholder.jpg"
-                        alt="Project example"
-                        fill
-                        className="object-cover"
-                      />
-                      
-                      {/* Corner badge */}
-                      <div className="absolute bottom-0 left-0 bg-black bg-opacity-70 p-2 
-                        max-w-full rounded-tr-md">
-                        <div className="border-l-2 border-cyan-400 pl-2">
-                          <div className="flex items-center gap-2">
-                            <h4 className="text-white text-sm font-medium truncate">Latest Project</h4>
-                            <ExternalLink className="h-3 w-3 text-cyan-400 flex-shrink-0" />
-                          </div>
-                          <p className="text-xs text-gray-300 mt-1 line-clamp-2">
-                            Showcase your work, ideas, or upcoming releases
-                          </p>
-                        </div>
+                        <p className="text-xs text-gray-300 mt-1 line-clamp-2">
+                          Share details about your upcoming shows, releases, or collaborations
+                        </p>
                       </div>
                     </div>
                   </div>
                 </div>
-              )
+                
+                <div className="relative rounded-lg overflow-hidden">
+                  <div className="aspect-square relative bg-gray-800/50">
+                    <Image
+                      src="/images/featured-artist-placeholder.jpg"
+                      alt="Featured artist example"
+                      fill
+                      className="object-cover"
+                    />
+                    
+                    {/* Corner badge */}
+                    <div className="absolute bottom-0 left-0 bg-black bg-opacity-70 p-2 
+                      max-w-full rounded-tr-md">
+                      <div className="border-l-2 border-cyan-400 pl-2">
+                        <div className="flex items-center gap-2">
+                          <h4 className="text-white text-sm font-medium truncate">Featured Artist</h4>
+                          <ExternalLink className="h-3 w-3 text-cyan-400 flex-shrink-0" />
+                        </div>
+                        <p className="text-xs text-gray-300 mt-1 line-clamp-2">
+                          Highlight creators and collaborators you want to support
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="relative rounded-lg overflow-hidden">
+                  <div className="aspect-square relative bg-gray-800/50">
+                    <Image
+                      src="/images/latest-project-placeholder.jpg"
+                      alt="Project example"
+                      fill
+                      className="object-cover"
+                    />
+                    
+                    {/* Corner badge */}
+                    <div className="absolute bottom-0 left-0 bg-black bg-opacity-70 p-2 
+                      max-w-full rounded-tr-md">
+                      <div className="border-l-2 border-cyan-400 pl-2">
+                        <div className="flex items-center gap-2">
+                          <h4 className="text-white text-sm font-medium truncate">Latest Project</h4>
+                          <ExternalLink className="h-3 w-3 text-cyan-400 flex-shrink-0" />
+                        </div>
+                        <p className="text-xs text-gray-300 mt-1 line-clamp-2">
+                          Showcase your work, ideas, or upcoming releases
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
         )}
