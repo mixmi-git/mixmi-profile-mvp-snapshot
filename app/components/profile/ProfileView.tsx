@@ -270,7 +270,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
             </p>
             
             {mediaItems && mediaItems.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 {mediaItems.map((item, index) => (
                   <div key={index} className="rounded-lg overflow-hidden">
                     <div className="w-full">
@@ -288,71 +288,42 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 {/* YouTube Example */}
                 <div className="rounded-lg overflow-hidden">
-                  <div className="aspect-video w-full bg-gray-900 rounded-lg">
-                    <div className="flex items-center justify-center h-full">
-                      <div className="w-16 h-16 rounded-full bg-red-600/30 flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-500">
-                          <path d="M12 19c-2.3 0-6.4-.2-8.1-.6-.7-.2-1.2-.7-1.4-1.4-.3-1.1-.5-3.4-.5-5s.2-3.9.5-5c.2-.7.7-1.2 1.4-1.4C5.6 5.2 9.7 5 12 5s6.4.2 8.1.6c.7.2 1.2.7 1.4 1.4.3 1.1.5 3.4.5 5s-.2 3.9-.5 5c-.2.7-.7 1.2-1.4 1.4-1.7.4-5.8.6-8.1.6 0 0 0 0 0 0z"></path>
-                          <polygon points="10 15 15 12 10 9"></polygon>
-                        </svg>
-                      </div>
+                  <div className="w-full bg-transparent">
+                    {/* YouTube embed */}
+                    <div className="aspect-video">
+                      <iframe 
+                        width="100%" 
+                        height="100%" 
+                        src="https://www.youtube.com/embed/ewRjZoRtu0Y" 
+                        title="YouTube video player" 
+                        frameBorder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                        allowFullScreen
+                        className="rounded-lg"
+                      ></iframe>
                     </div>
                   </div>
                   <div className="py-3">
-                    <h3 className="text-xl font-medium text-white">YouTube Video</h3>
-                  </div>
-                </div>
-                
-                {/* SoundCloud Example */}
-                <div className="rounded-lg overflow-hidden">
-                  <div className="rounded-lg bg-gradient-to-r from-orange-900/30 to-orange-600/20 p-6">
-                    <div className="flex items-center">
-                      <div className="w-12 h-12 rounded-full bg-orange-500/30 flex items-center justify-center mr-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-400">
-                          <path d="M3 6H5"></path>
-                          <path d="M3 12H5"></path>
-                          <path d="M3 18H5"></path>
-                          <path d="M8 6H22"></path>
-                          <path d="M8 12H22"></path>
-                          <path d="M8 18H22"></path>
-                        </svg>
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <div className="h-1 bg-gray-800/50 rounded-full w-2/3"></div>
-                          <div className="h-1 bg-orange-400/50 rounded-full w-1/3"></div>
-                        </div>
-                        <div className="h-1 bg-gray-800/50 rounded-full w-full"></div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="py-3">
-                    <h3 className="text-xl font-medium text-white">SoundCloud Track</h3>
+                    <h3 className="text-xl font-medium text-white">Paper Planes (Live Performance)</h3>
                   </div>
                 </div>
                 
                 {/* Spotify Example */}
                 <div className="rounded-lg overflow-hidden">
-                  <div className="rounded-lg bg-gradient-to-r from-green-900/30 to-green-600/20 p-6">
-                    <div className="flex items-center">
-                      <div className="w-12 h-12 rounded-full bg-green-500/30 flex items-center justify-center mr-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-400">
-                          <circle cx="12" cy="12" r="10"></circle>
-                          <circle cx="12" cy="12" r="4"></circle>
-                          <line x1="12" y1="12" x2="12" y2="16"></line>
-                        </svg>
-                      </div>
-                      <div className="flex-1">
-                        <div className="h-2 bg-gray-800/50 rounded-full w-3/4 mb-2"></div>
-                        <div className="h-2 bg-gray-800/50 rounded-full w-1/2"></div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="py-3">
-                    <h3 className="text-xl font-medium text-white">Spotify Playlist</h3>
+                  <div className="w-full bg-transparent">
+                    {/* Spotify embed */}
+                    <iframe 
+                      src="https://open.spotify.com/embed/playlist/37i9dQZF1DX0XUsuxWHRQd" 
+                      width="100%" 
+                      height="380" 
+                      frameBorder="0" 
+                      allowTransparency={true} 
+                      allow="encrypted-media"
+                      className="rounded-lg"
+                    ></iframe>
                   </div>
                 </div>
               </div>
