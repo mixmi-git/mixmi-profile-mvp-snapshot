@@ -16,6 +16,28 @@ interface ProfileViewProps {
   onEditProfile?: () => void;
 }
 
+// Inline styles for the rotation animation
+const rotationStyle = `
+  @keyframes rotate {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  @keyframes daisy-rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .animate-daisy-rotate {
+    animation: daisy-rotate 10s linear infinite;
+    transform-origin: center;
+  }
+`;
+
 const ProfileView: React.FC<ProfileViewProps> = ({
   profile,
   mediaItems,
@@ -27,6 +49,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
 }) => {
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100">
+      <style jsx global>{rotationStyle}</style>
       <div className="container mx-auto p-4 sm:p-8 md:p-12 lg:p-16">
         {/* Profile section */}
         <div className="flex flex-col lg:flex-row lg:items-center gap-8 lg:gap-16 opacity-0 animate-fadeIn"
@@ -596,9 +619,9 @@ const ProfileView: React.FC<ProfileViewProps> = ({
           // Daisy sticker placeholder
           <div className="mt-24 sm:mt-32 flex justify-center opacity-0 animate-fadeIn mb-16"
                style={{ animationDelay: '350ms', animationFillMode: 'forwards' }}>
-            <div className="w-32 h-32 animate-sticker-rotate">
+            <div className="w-32 h-32 animate-daisy-rotate">
               <Image
-                src="/images/daisy-sticker.png"
+                src="/images/stickers/daisy-blue.png"
                 alt="Daisy sticker"
                 width={128}
                 height={128}
