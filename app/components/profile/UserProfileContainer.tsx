@@ -7,6 +7,38 @@ import ProfileView from './ProfileView';
 import ProfileEditor from './ProfileEditor';
 import { NavbarContainer } from '../NavbarContainer'; // We'll need to create this or import it from elsewhere
 
+// Storage keys for localStorage
+const STORAGE_KEYS = {
+  PROFILE: 'mixmi_profile_data',
+  SPOTLIGHT: 'mixmi_spotlight_items',
+  SHOP: 'mixmi_shop_items',
+  MEDIA: 'mixmi_media_items'
+};
+
+// Helper function to safely get data from localStorage
+const getFromStorage = <T,>(key: string, fallback: T): T => {
+  if (typeof window === 'undefined') return fallback;
+  
+  try {
+    const item = localStorage.getItem(key);
+    return item ? JSON.parse(item) : fallback;
+  } catch (error) {
+    console.error(`Error retrieving ${key} from localStorage:`, error);
+    return fallback;
+  }
+};
+
+// Helper function to safely save data to localStorage
+const saveToStorage = <T,>(key: string, value: T): void => {
+  if (typeof window === 'undefined') return;
+  
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch (error) {
+    console.error(`Error saving ${key} to localStorage:`, error);
+  }
+};
+
 // Define the mode state machine types
 export enum ProfileMode {
   VIEW = 'view',
@@ -125,6 +157,24 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
   // Loading state
   const [isLoading, setIsLoading] = useState<boolean>(false);
   
+  // Load data from localStorage on component mount
+  useEffect(() => {
+    // Only load data if we're in a browser environment
+    if (typeof window !== 'undefined') {
+      const savedProfile = getFromStorage<ProfileData>(STORAGE_KEYS.PROFILE, initialProfile);
+      const savedSpotlightItems = getFromStorage<SpotlightItemType[]>(STORAGE_KEYS.SPOTLIGHT, initialSpotlightItems);
+      const savedShopItems = getFromStorage<ShopItemType[]>(STORAGE_KEYS.SHOP, initialShopItems);
+      const savedMediaItems = getFromStorage<MediaItemType[]>(STORAGE_KEYS.MEDIA, initialMediaItems);
+      
+      setProfile(savedProfile);
+      setSpotlightItems(savedSpotlightItems);
+      setShopItems(savedShopItems);
+      setMediaItems(savedMediaItems);
+      
+      console.log('Loaded profile data from localStorage');
+    }
+  }, [initialProfile, initialSpotlightItems, initialShopItems, initialMediaItems]);
+  
   // Function to handle mode transitions
   const transitionMode = (newMode: ProfileMode) => {
     // Define allowed transitions
@@ -158,6 +208,13 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
   
   // Return to view mode
   const handleDoneEditing = () => {
+    // Save all data to localStorage before returning to view mode
+    saveToStorage(STORAGE_KEYS.PROFILE, profile);
+    saveToStorage(STORAGE_KEYS.SPOTLIGHT, spotlightItems);
+    saveToStorage(STORAGE_KEYS.SHOP, shopItems);
+    saveToStorage(STORAGE_KEYS.MEDIA, mediaItems);
+    console.log('Saved all profile data to localStorage');
+    
     transitionMode(ProfileMode.VIEW);
   };
   
@@ -175,13 +232,20 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
     // For immediate UI updates, apply changes directly to state
     if ('spotlightItems' in updatedProfile) {
       setSpotlightItems(updatedProfile.spotlightItems);
+      saveToStorage(STORAGE_KEYS.SPOTLIGHT, updatedProfile.spotlightItems);
     } else if ('mediaItems' in updatedProfile) {
       setMediaItems(updatedProfile.mediaItems);
+      saveToStorage(STORAGE_KEYS.MEDIA, updatedProfile.mediaItems);
     } else if ('shopItems' in updatedProfile) {
       setShopItems(updatedProfile.shopItems);
+      saveToStorage(STORAGE_KEYS.SHOP, updatedProfile.shopItems);
     } else {
-      setProfile(prev => ({ ...prev, ...updatedProfile }));
+      const updatedProfileData = { ...profile, ...updatedProfile };
+      setProfile(updatedProfileData);
+      saveToStorage(STORAGE_KEYS.PROFILE, updatedProfileData);
     }
+    
+    console.log('Saved changes to localStorage');
     
     // If we wanted to simulate an API call, we could uncomment this:
     // transitionMode(ProfileMode.SAVING);
@@ -229,6 +293,25 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
     );
   };
   
+  // Add a function to reset profile data to defaults
+  const resetToDefaults = () => {
+    if (typeof window === 'undefined') return;
+    
+    // Clear all profile data from localStorage
+    localStorage.removeItem(STORAGE_KEYS.PROFILE);
+    localStorage.removeItem(STORAGE_KEYS.SPOTLIGHT);
+    localStorage.removeItem(STORAGE_KEYS.SHOP);
+    localStorage.removeItem(STORAGE_KEYS.MEDIA);
+    
+    // Reset state to initial values
+    setProfile(initialProfile);
+    setSpotlightItems(initialSpotlightItems);
+    setShopItems(initialShopItems);
+    setMediaItems(initialMediaItems);
+    
+    console.log('Reset profile data to defaults');
+  };
+  
   // Render component based on current mode
   return (
     <div className="dark min-h-screen bg-gray-900 text-gray-100">
@@ -252,6 +335,24 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
       `}</style>
       
       <NavbarContainer />
+      
+      {/* Show a debug control panel in development mode */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="bg-gray-900 p-2 border-b border-gray-800 flex justify-between items-center">
+          <div className="flex items-center space-x-2">
+            <span className="text-xs text-gray-400">Debug Controls:</span>
+            <button 
+              onClick={resetToDefaults}
+              className="text-xs px-2 py-1 bg-red-800 hover:bg-red-700 text-white rounded"
+            >
+              Reset to Defaults
+            </button>
+          </div>
+          <div className="text-xs text-gray-400">
+            Mode: {currentMode}
+          </div>
+        </div>
+      )}
       
       {isLoading ? (
         <div className="flex items-center justify-center min-h-screen">
