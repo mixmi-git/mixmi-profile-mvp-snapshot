@@ -123,7 +123,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
             
             {spotlightItems && spotlightItems.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {spotlightItems.map((item, index) => (
+                {spotlightItems.slice(0, 3).map((item, index) => (
                   <div 
                     key={index}
                     className="group block relative rounded-lg overflow-hidden"
@@ -273,7 +273,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
               mediaItems.length === 1 ? (
                 // Single media item - centered with constrained width
                 <div className="flex justify-center">
-                  <div className="w-full sm:w-[calc(50%-12px)] rounded-lg overflow-hidden">
+                  <div className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] rounded-lg overflow-hidden">
                     <div className="w-full">
                       {/* This would be replaced with an actual embed component */}
                       <div className="flex items-center justify-center bg-transparent min-h-[200px]">
@@ -288,9 +288,9 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                   </div>
                 </div>
               ) : (
-                // Multiple media items - grid layout
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  {mediaItems.map((item, index) => (
+                // Multiple media items - grid layout matching Spotlight
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {mediaItems.slice(0, 3).map((item, index) => (
                     <div key={index} className="rounded-lg overflow-hidden">
                       <div className="w-full">
                         {/* This would be replaced with an actual embed component */}
@@ -308,7 +308,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                 </div>
               )
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {/* YouTube Example */}
                 <div className="rounded-lg overflow-hidden">
                   <div className="w-full bg-transparent">
@@ -364,7 +364,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
             
             {shopItems && shopItems.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {shopItems.map((item, index) => (
+                {shopItems.slice(0, 3).map((item, index) => (
                   <div 
                     key={index}
                     className="group block relative rounded-lg overflow-hidden"
