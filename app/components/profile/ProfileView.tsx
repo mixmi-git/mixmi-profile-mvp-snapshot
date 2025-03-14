@@ -147,13 +147,14 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                       
                       {/* Corner badge - similar to the editor but optimized for viewing */}
                       <div className="absolute bottom-0 left-0 bg-black bg-opacity-70 p-2 
-                        max-w-full transition-all duration-300 rounded-tr-md">
+                        max-w-[90%] md:max-w-[80%] transition-all duration-300 
+                        md:group-hover:max-w-full rounded-tr-md">
                         <div className="border-l-2 border-cyan-400 pl-2">
                           <div className="flex items-center gap-2">
                             <h4 className="text-white text-sm font-medium truncate">{item.title || "Untitled"}</h4>
-                            {item.link && <ExternalLink className="h-3 w-3 text-cyan-400 flex-shrink-0" />}
+                            {item.link && <ExternalLink className="h-3 w-3 text-white flex-shrink-0" />}
                           </div>
-                          <p className="text-xs text-gray-300 mt-1 line-clamp-2">{item.description}</p>
+                          <p className="text-xs text-gray-300 mt-1 line-clamp-2 hidden md:group-hover:block md:hidden">{item.description}</p>
                         </div>
                       </div>
                       
@@ -168,7 +169,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {/* Example cards showing what you can do with Spotlight */}
-                <div className="relative rounded-lg overflow-hidden">
+                <div className="relative rounded-lg overflow-hidden group">
                   <div className="aspect-square relative bg-gray-800/50">
                     <Image
                       src="/images/next-event-placeholder.jpg"
@@ -179,13 +180,14 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                     
                     {/* Corner badge */}
                     <div className="absolute bottom-0 left-0 bg-black bg-opacity-70 p-2 
-                      max-w-full rounded-tr-md">
+                      max-w-[90%] md:max-w-[80%] transition-all duration-300 
+                      md:group-hover:max-w-full rounded-tr-md">
                       <div className="border-l-2 border-cyan-400 pl-2">
                         <div className="flex items-center gap-2">
                           <h4 className="text-white text-sm font-medium truncate">Your Next Event</h4>
-                          <ExternalLink className="h-3 w-3 text-cyan-400 flex-shrink-0" />
+                          <ExternalLink className="h-3 w-3 text-white flex-shrink-0" />
                         </div>
-                        <p className="text-xs text-gray-300 mt-1 line-clamp-2">
+                        <p className="text-xs text-gray-300 mt-1 line-clamp-2 hidden md:group-hover:block md:hidden">
                           Share details about your upcoming shows, releases, or collaborations
                         </p>
                       </div>
@@ -193,7 +195,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                   </div>
                 </div>
                 
-                <div className="relative rounded-lg overflow-hidden">
+                <div className="relative rounded-lg overflow-hidden group">
                   <div className="aspect-square relative bg-gray-800/50">
                     <Image
                       src="/images/featured-artist-placeholder.jpg"
@@ -204,13 +206,14 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                     
                     {/* Corner badge */}
                     <div className="absolute bottom-0 left-0 bg-black bg-opacity-70 p-2 
-                      max-w-full rounded-tr-md">
+                      max-w-[90%] md:max-w-[80%] transition-all duration-300 
+                      md:group-hover:max-w-full rounded-tr-md">
                       <div className="border-l-2 border-cyan-400 pl-2">
                         <div className="flex items-center gap-2">
                           <h4 className="text-white text-sm font-medium truncate">Featured Artist</h4>
-                          <ExternalLink className="h-3 w-3 text-cyan-400 flex-shrink-0" />
+                          <ExternalLink className="h-3 w-3 text-white flex-shrink-0" />
                         </div>
-                        <p className="text-xs text-gray-300 mt-1 line-clamp-2">
+                        <p className="text-xs text-gray-300 mt-1 line-clamp-2 hidden md:group-hover:block md:hidden">
                           Highlight creators and collaborators you want to support
                         </p>
                       </div>
@@ -218,7 +221,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                   </div>
                 </div>
                 
-                <div className="relative rounded-lg overflow-hidden">
+                <div className="relative rounded-lg overflow-hidden group">
                   <div className="aspect-square relative bg-gray-800/50">
                     <Image
                       src="/images/latest-project-placeholder.jpg"
@@ -229,13 +232,14 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                     
                     {/* Corner badge */}
                     <div className="absolute bottom-0 left-0 bg-black bg-opacity-70 p-2 
-                      max-w-full rounded-tr-md">
+                      max-w-[90%] md:max-w-[80%] transition-all duration-300 
+                      md:group-hover:max-w-full rounded-tr-md">
                       <div className="border-l-2 border-cyan-400 pl-2">
                         <div className="flex items-center gap-2">
                           <h4 className="text-white text-sm font-medium truncate">Latest Project</h4>
-                          <ExternalLink className="h-3 w-3 text-cyan-400 flex-shrink-0" />
+                          <ExternalLink className="h-3 w-3 text-white flex-shrink-0" />
                         </div>
-                        <p className="text-xs text-gray-300 mt-1 line-clamp-2">
+                        <p className="text-xs text-gray-300 mt-1 line-clamp-2 hidden md:group-hover:block md:hidden">
                           Showcase your work, ideas, or upcoming releases
                         </p>
                       </div>
