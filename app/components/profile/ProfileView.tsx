@@ -29,10 +29,10 @@ const ProfileView: React.FC<ProfileViewProps> = ({
     <div className="min-h-screen bg-gray-900 text-gray-100">
       <div className="container mx-auto p-4 sm:p-8 md:p-12 lg:p-16">
         {/* Profile section */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8 lg:gap-16 opacity-0 animate-fadeIn"
+        <div className="flex flex-col items-center gap-8 lg:gap-16 opacity-0 animate-fadeIn"
              style={{ animationFillMode: 'forwards' }}>
-          {/* Left column - Profile image */}
-          <div className="w-full lg:w-1/2 max-w-md mx-auto lg:mx-0">
+          {/* Profile image */}
+          <div className="w-full max-w-md mx-auto">
             <div className="relative aspect-square overflow-hidden rounded-xl border-2 border-cyan-600">
               <Image
                 src={profile.image || '/images/placeholder.png'}
@@ -45,9 +45,9 @@ const ProfileView: React.FC<ProfileViewProps> = ({
             </div>
           </div>
 
-          {/* Right column - Profile info */}
-          <div className="w-full lg:w-1/2 flex flex-col items-center lg:items-start text-center lg:text-left">
-            <div className="space-y-6 lg:space-y-8 max-w-lg">
+          {/* Profile info */}
+          <div className="w-full flex flex-col items-center text-center">
+            <div className="space-y-6 max-w-2xl">
               {/* Name and Title */}
               <div>
                 <h1 className="text-3xl sm:text-4xl font-bold text-cyan-300">
@@ -67,8 +67,8 @@ const ProfileView: React.FC<ProfileViewProps> = ({
 
               {/* Wallet Address - only show if visible */}
               {profile.wallet?.visible && profile.wallet?.address && (
-                <div className="bg-gray-800/60 p-3 rounded-lg border border-gray-700">
-                  <div className="flex items-center gap-2">
+                <div className="bg-gray-800/60 p-3 rounded-lg border border-gray-700 max-w-md mx-auto">
+                  <div className="flex items-center gap-2 justify-center">
                     <span className="text-xs text-gray-400">Wallet for tips:</span>
                     <span className="text-xs font-mono text-cyan-300 truncate max-w-[200px] sm:max-w-[300px]">
                       {profile.wallet.address}
@@ -79,7 +79,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
 
               {/* Social Links */}
               {profile.socialLinks && profile.socialLinks.length > 0 && (
-                <div className="flex justify-center lg:justify-start gap-4 flex-wrap">
+                <div className="flex justify-center gap-4 flex-wrap">
                   {profile.socialLinks.map((link, index) => (
                     <a 
                       key={index} 
@@ -99,7 +99,8 @@ const ProfileView: React.FC<ProfileViewProps> = ({
               {isAuthenticated && onEditProfile && (
                 <Button 
                   onClick={onEditProfile}
-                  className="bg-cyan-500 hover:bg-cyan-600 transition-colors"
+                  variant="outline"
+                  className="border-gray-600 text-cyan-300 hover:bg-gray-800 hover:text-cyan-200 transition-colors"
                 >
                   <Edit2 className="mr-2 h-4 w-4" />
                   <span>Edit Profile</span>
