@@ -122,54 +122,108 @@ const ProfileView: React.FC<ProfileViewProps> = ({
             </p>
             
             {spotlightItems && spotlightItems.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {spotlightItems.slice(0, 3).map((item, index) => (
-                  <div 
-                    key={index}
-                    className="group block relative rounded-lg overflow-hidden"
-                  >
-                    <div className="aspect-square relative bg-gray-800">
-                      {item.image ? (
-                        <Image
-                          src={item.image}
-                          alt={item.title}
-                          fill
-                          className="object-cover"
-                        />
-                      ) : (
-                        <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
-                          <p className="text-gray-500">No image</p>
-                        </div>
-                      )}
-                      
-                      {/* Corner badge - similar to the editor but optimized for viewing */}
-                      <div className="absolute bottom-0 left-0 bg-black bg-opacity-70 p-2 
-                        max-w-[90%] md:max-w-[80%] transition-all duration-300 
-                        md:group-hover:max-w-full rounded-tr-md">
-                        <div className="border-l-2 border-cyan-400 pl-2">
-                          {item.link ? (
-                            <a 
-                              href={item.link} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="group/title"
-                            >
+              spotlightItems.length < 3 ? (
+                // 1-2 items - center justified
+                <div className="flex flex-col sm:flex-row justify-center gap-6">
+                  {spotlightItems.slice(0, 3).map((item, index) => (
+                    <div 
+                      key={index}
+                      className="group block relative rounded-lg overflow-hidden w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)]"
+                    >
+                      <div className="aspect-square relative bg-gray-800">
+                        {item.image ? (
+                          <Image
+                            src={item.image}
+                            alt={item.title}
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
+                            <p className="text-gray-500">No image</p>
+                          </div>
+                        )}
+                        
+                        {/* Corner badge - similar to the editor but optimized for viewing */}
+                        <div className="absolute bottom-0 left-0 bg-black bg-opacity-70 p-2 
+                          max-w-[90%] md:max-w-[80%] transition-all duration-300 
+                          md:group-hover:max-w-full rounded-tr-md">
+                          <div className="border-l-2 border-cyan-400 pl-2">
+                            {item.link ? (
+                              <a 
+                                href={item.link} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="group/title"
+                              >
+                                <div className="flex items-center gap-2">
+                                  <h4 className="text-white text-sm font-medium truncate group-hover/title:underline">{item.title || "Untitled"}</h4>
+                                </div>
+                              </a>
+                            ) : (
                               <div className="flex items-center gap-2">
-                                <h4 className="text-white text-sm font-medium truncate group-hover/title:underline">{item.title || "Untitled"}</h4>
+                                <h4 className="text-white text-sm font-medium truncate">{item.title || "Untitled"}</h4>
                               </div>
-                            </a>
-                          ) : (
-                            <div className="flex items-center gap-2">
-                              <h4 className="text-white text-sm font-medium truncate">{item.title || "Untitled"}</h4>
-                            </div>
-                          )}
-                          <p className="text-xs text-gray-300 mt-1 line-clamp-2 hidden md:group-hover:block md:hidden">{item.description}</p>
+                            )}
+                            <p className="text-xs text-gray-300 mt-1 line-clamp-2 hidden md:group-hover:block md:hidden">{item.description}</p>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                // 3 items - grid layout
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {spotlightItems.slice(0, 3).map((item, index) => (
+                    <div 
+                      key={index}
+                      className="group block relative rounded-lg overflow-hidden"
+                    >
+                      {/* Same content as above */}
+                      <div className="aspect-square relative bg-gray-800">
+                        {item.image ? (
+                          <Image
+                            src={item.image}
+                            alt={item.title}
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
+                            <p className="text-gray-500">No image</p>
+                          </div>
+                        )}
+                        
+                        {/* Corner badge - similar to the editor but optimized for viewing */}
+                        <div className="absolute bottom-0 left-0 bg-black bg-opacity-70 p-2 
+                          max-w-[90%] md:max-w-[80%] transition-all duration-300 
+                          md:group-hover:max-w-full rounded-tr-md">
+                          <div className="border-l-2 border-cyan-400 pl-2">
+                            {item.link ? (
+                              <a 
+                                href={item.link} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="group/title"
+                              >
+                                <div className="flex items-center gap-2">
+                                  <h4 className="text-white text-sm font-medium truncate group-hover/title:underline">{item.title || "Untitled"}</h4>
+                                </div>
+                              </a>
+                            ) : (
+                              <div className="flex items-center gap-2">
+                                <h4 className="text-white text-sm font-medium truncate">{item.title || "Untitled"}</h4>
+                              </div>
+                            )}
+                            <p className="text-xs text-gray-300 mt-1 line-clamp-2 hidden md:group-hover:block md:hidden">{item.description}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {/* Example cards showing what you can do with Spotlight */}
@@ -287,8 +341,27 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                     )}
                   </div>
                 </div>
+              ) : mediaItems.length === 2 ? (
+                // Two media items - centered with constrained width
+                <div className="flex flex-col sm:flex-row justify-center gap-6">
+                  {mediaItems.slice(0, 2).map((item, index) => (
+                    <div key={index} className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] rounded-lg overflow-hidden">
+                      <div className="w-full">
+                        {/* This would be replaced with an actual embed component */}
+                        <div className="flex items-center justify-center bg-transparent min-h-[200px]">
+                          <p className="text-cyan-400">Media embed from {item.embedUrl || "external platform"}</p>
+                        </div>
+                      </div>
+                      {item.title && (
+                        <div className="py-3">
+                          <h3 className="text-xl font-medium text-white">{item.title}</h3>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               ) : (
-                // Multiple media items - grid layout matching Spotlight
+                // Three media items - grid layout
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {mediaItems.slice(0, 3).map((item, index) => (
                     <div key={index} className="rounded-lg overflow-hidden">
@@ -340,7 +413,6 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                       width="100%" 
                       height="380" 
                       frameBorder="0" 
-                      allowTransparency={true} 
                       allow="encrypted-media"
                       className="rounded-lg"
                     ></iframe>
@@ -363,57 +435,114 @@ const ProfileView: React.FC<ProfileViewProps> = ({
             </p>
             
             {shopItems && shopItems.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {shopItems.slice(0, 3).map((item, index) => (
-                  <div 
-                    key={index}
-                    className="group block relative rounded-lg overflow-hidden"
-                  >
-                    <div className="aspect-square relative bg-gray-800">
-                      {item.image ? (
-                        <Image
-                          src={item.image}
-                          alt={item.title}
-                          fill
-                          className="object-cover"
-                        />
-                      ) : (
-                        <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
-                          <p className="text-gray-500">No image</p>
-                        </div>
-                      )}
-                      
-                      {/* Corner badge - similar to the editor but optimized for viewing */}
-                      <div className="absolute bottom-0 left-0 bg-black bg-opacity-70 p-2 
-                        max-w-[90%] md:max-w-[80%] transition-all duration-300 
-                        md:group-hover:max-w-full rounded-tr-md">
-                        <div className="border-l-2 border-cyan-400 pl-2">
-                          {item.link ? (
-                            <a 
-                              href={item.link} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="group/title"
-                            >
+              shopItems.length < 3 ? (
+                // 1-2 items - center justified 
+                <div className="flex flex-col sm:flex-row justify-center gap-6">
+                  {shopItems.slice(0, 3).map((item, index) => (
+                    <div 
+                      key={index}
+                      className="group block relative rounded-lg overflow-hidden w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)]"
+                    >
+                      <div className="aspect-square relative bg-gray-800">
+                        {item.image ? (
+                          <Image
+                            src={item.image}
+                            alt={item.title}
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
+                            <p className="text-gray-500">No image</p>
+                          </div>
+                        )}
+                        
+                        {/* Corner badge - similar to the editor but optimized for viewing */}
+                        <div className="absolute bottom-0 left-0 bg-black bg-opacity-70 p-2 
+                          max-w-[90%] md:max-w-[80%] transition-all duration-300 
+                          md:group-hover:max-w-full rounded-tr-md">
+                          <div className="border-l-2 border-cyan-400 pl-2">
+                            {item.link ? (
+                              <a 
+                                href={item.link} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="group/title"
+                              >
+                                <div className="flex items-center gap-2">
+                                  <h4 className="text-white text-sm font-medium truncate group-hover/title:underline">{item.title || "Untitled"}</h4>
+                                </div>
+                              </a>
+                            ) : (
                               <div className="flex items-center gap-2">
-                                <h4 className="text-white text-sm font-medium truncate group-hover/title:underline">{item.title || "Untitled"}</h4>
+                                <h4 className="text-white text-sm font-medium truncate">{item.title || "Untitled"}</h4>
                               </div>
-                            </a>
-                          ) : (
-                            <div className="flex items-center gap-2">
-                              <h4 className="text-white text-sm font-medium truncate">{item.title || "Untitled"}</h4>
-                            </div>
-                          )}
-                          <p className="text-xs text-gray-300 mt-1 line-clamp-2 hidden md:group-hover:block md:hidden">
-                            {item.description}
-                            {item.price && <span className="ml-1 text-cyan-300">{item.price}</span>}
-                          </p>
+                            )}
+                            <p className="text-xs text-gray-300 mt-1 line-clamp-2 hidden md:group-hover:block md:hidden">
+                              {item.description}
+                              {item.price && <span className="ml-1 text-cyan-300">{item.price}</span>}
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                // 3 items - grid layout
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {shopItems.slice(0, 3).map((item, index) => (
+                    <div 
+                      key={index}
+                      className="group block relative rounded-lg overflow-hidden"
+                    >
+                      {/* Same content as above */}
+                      <div className="aspect-square relative bg-gray-800">
+                        {item.image ? (
+                          <Image
+                            src={item.image}
+                            alt={item.title}
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
+                            <p className="text-gray-500">No image</p>
+                          </div>
+                        )}
+                        
+                        {/* Corner badge - similar to the editor but optimized for viewing */}
+                        <div className="absolute bottom-0 left-0 bg-black bg-opacity-70 p-2 
+                          max-w-[90%] md:max-w-[80%] transition-all duration-300 
+                          md:group-hover:max-w-full rounded-tr-md">
+                          <div className="border-l-2 border-cyan-400 pl-2">
+                            {item.link ? (
+                              <a 
+                                href={item.link} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="group/title"
+                              >
+                                <div className="flex items-center gap-2">
+                                  <h4 className="text-white text-sm font-medium truncate group-hover/title:underline">{item.title || "Untitled"}</h4>
+                                </div>
+                              </a>
+                            ) : (
+                              <div className="flex items-center gap-2">
+                                <h4 className="text-white text-sm font-medium truncate">{item.title || "Untitled"}</h4>
+                              </div>
+                            )}
+                            <p className="text-xs text-gray-300 mt-1 line-clamp-2 hidden md:group-hover:block md:hidden">
+                              {item.description}
+                              {item.price && <span className="ml-1 text-cyan-300">{item.price}</span>}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )
             ) : (
               <div className="text-center text-gray-400 py-16 border border-dashed border-gray-700 rounded-lg">
                 No shop items yet
