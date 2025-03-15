@@ -3,7 +3,15 @@
 import React from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { Edit2, ExternalLink } from 'lucide-react';
+import { 
+  Edit2, 
+  ExternalLink,
+  Instagram 
+} from 'lucide-react';
+// Import brand icons from React Icons
+import { FaYoutube, FaSpotify, FaSoundcloud, FaLinkedinIn } from 'react-icons/fa';
+import { FaXTwitter } from 'react-icons/fa6';
+import { SiTiktok } from 'react-icons/si';
 import { ProfileData, MediaItemType, SpotlightItemType, ShopItemType } from './UserProfileContainer';
 
 interface ProfileViewProps {
@@ -47,6 +55,31 @@ const ProfileView: React.FC<ProfileViewProps> = ({
   isTransitioning = false,
   onEditProfile,
 }) => {
+  // Helper function to return the appropriate icon for each social platform
+  const getSocialIcon = (platform: string) => {
+    const iconSize = 18;
+    const iconStyle = { color: '#67e8f9' }; // Tailwind cyan-300 equivalent
+    
+    switch (platform.toLowerCase()) {
+      case 'youtube':
+        return <FaYoutube size={iconSize} style={iconStyle} />;
+      case 'instagram':
+        return <Instagram size={iconSize} className="text-cyan-300" />;
+      case 'twitter':
+        return <FaXTwitter size={iconSize} style={iconStyle} />;
+      case 'linkedin':
+        return <FaLinkedinIn size={iconSize} style={iconStyle} />;
+      case 'spotify':
+        return <FaSpotify size={iconSize} style={iconStyle} />;
+      case 'soundcloud':
+        return <FaSoundcloud size={iconSize} style={iconStyle} />;
+      case 'tiktok':
+        return <SiTiktok size={iconSize} style={iconStyle} />;
+      default:
+        return <span className="text-xs text-cyan-300">{platform[0].toUpperCase()}</span>;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100">
       <style jsx global>{rotationStyle}</style>
@@ -138,9 +171,9 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                       target="_blank"
                       rel="noopener noreferrer"
                       className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-gray-700 transition-colors"
+                      title={link.platform}
                     >
-                      {/* We'll implement proper social icons later */}
-                      <span className="text-xs text-cyan-300">{link.platform[0]}</span>
+                      {getSocialIcon(link.platform)}
                     </a>
                   ))}
                 </div>
