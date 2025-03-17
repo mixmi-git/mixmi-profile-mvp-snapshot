@@ -1,49 +1,44 @@
-import { useState, useCallback } from 'react'
-import { useAuth } from '@/lib/auth'
-import { Profile } from '@/types/content'
+import { useState, useCallback, useEffect } from 'react';
+import { useAuth } from '@/lib/auth';
 
-/**
- * Custom hook to manage authentication state and login/logout functionality
- * 
- * @param onConnect - Optional callback function that runs when user connects wallet
- * @param onDisconnect - Optional callback function that runs when user disconnects wallet
- * @returns Authentication state and methods
- */
-export function useAuthState(
-  onConnect?: (savedData?: any) => void,
-  onDisconnect?: () => void
-) {
-  const { isAuthenticated, connectWallet, disconnectWallet } = useAuth()
-  const [isTransitioning, setIsTransitioning] = useState(false)
+export const useAuthState = (onConnect?: (address: string) => void) => {
+  const { 
+    isAuthenticated, 
+    userAddress, 
+    connectWallet, 
+    disconnectWallet,
+    isInitialized
+  } = useAuth();
+  
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
-  /**
-   * Toggle between connecting and disconnecting wallet
-   */
-  const handleLoginToggle = useCallback(async () => {
-    setIsTransitioning(true)
-    
-    try {
-      if (isAuthenticated) {
-        await disconnectWallet()
-        if (onDisconnect) {
-          onDisconnect()
-        }
-      } else {
-        await connectWallet()
-        if (onConnect) {
-          onConnect()
-        }
-      }
-    } catch (error) {
-      console.error('Error handling login toggle:', error)
-    } finally {
-      setIsTransitioning(false)
+  // Effect to call onConnect when authentication state changes
+  useEffect(() => {
+    if (isAuthenticated && userAddress && onConnect) {
+      onConnect(userAddress);
     }
-  }, [isAuthenticated, connectWallet, disconnectWallet, onConnect, onDisconnect])
+  }, [isAuthenticated, userAddress, onConnect]);
+
+  const handleLoginToggle = useCallback(() => {
+    setIsTransitioning(true);
+    
+    if (isAuthenticated) {
+      disconnectWallet();
+      setTimeout(() => setIsTransitioning(false), 500);
+    } else {
+      connectWallet();
+      
+      // Set a timeout to reset the transitioning state in case connection takes too long
+      // This prevents the button from being disabled indefinitely
+      setTimeout(() => setIsTransitioning(false), 3000);
+    }
+  }, [isAuthenticated, connectWallet, disconnectWallet]);
 
   return {
     isAuthenticated,
+    userAddress,
     isTransitioning,
+    isInitialized,
     handleLoginToggle
-  }
-} 
+  };
+}; 

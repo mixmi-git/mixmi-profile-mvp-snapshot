@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { Button } from '@/components/ui/button';
+import { Button } from '../ui/button';
 import { 
   Edit2, 
   ExternalLink,
@@ -135,6 +135,15 @@ const ProfileView: React.FC<ProfileViewProps> = ({
   isTransitioning = false,
   onEditProfile,
 }) => {
+  // Add debug log for authentication status
+  React.useEffect(() => {
+    console.log("Profile View Authentication State:", {
+      isAuthenticated,
+      isTransitioning,
+      hasEditCallback: !!onEditProfile
+    });
+  }, [isAuthenticated, isTransitioning, onEditProfile]);
+
   // Helper function to return the appropriate icon for each social platform
   const getSocialIcon = (platform: string) => {
     const iconSize = 18;

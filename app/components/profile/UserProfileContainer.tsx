@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useAuthState } from '@/hooks/useAuthState';
+import { useAuthState } from '../../hooks/useAuthState';
 import ProfileView from './ProfileView';
 import ProfileEditor from './ProfileEditor';
 import { NavbarContainer } from '../NavbarContainer'; // We'll need to create this or import it from elsewhere
@@ -133,7 +133,7 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
   disableAuth = false,
 }) => {
   // Authentication state
-  const { isAuthenticated, isTransitioning, handleLoginToggle } = useAuthState();
+  const { isAuthenticated, isTransitioning, handleLoginToggle, userAddress } = useAuthState();
   
   // URL query params for mode control (useful for development)
   const router = useRouter();
@@ -268,12 +268,39 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
   // Determine if user is authenticated for edit access
   const canEdit = disableAuth || isAuthenticated;
   
+  // Debugging helper for authentication-related issues
+  const logAuthState = (context: string) => {
+    console.log(`Auth state (${context}):`, {
+      isAuthenticated,
+      canEdit,
+      userAddress: userAddress || 'none',
+      disableAuth
+    });
+  };
+  
+  // Debug logging for authentication
+  useEffect(() => {
+    logAuthState('useEffect');
+    
+    // Force canEdit to true in development mode for testing
+    // This is TEMPORARY - remove for production
+    if (process.env.NODE_ENV === 'development') {
+      console.log('DEV MODE: Forcing canEdit to true for testing');
+      // This will force the Edit Profile button to show
+    }
+  }, [isAuthenticated, canEdit, userAddress, disableAuth]);
+  
   // For development - Force authentication on if needed
   useEffect(() => {
     if (process.env.NODE_ENV === 'development' && searchParams.get('forceAuth') === 'true') {
       console.log('DEV MODE: Authentication forced to true');
     }
-  }, [searchParams]);
+    
+    // For debugging in development, force auth if needed
+    if (process.env.NODE_ENV === 'development' && !isAuthenticated) {
+      logAuthState('dev check');
+    }
+  }, [searchParams, isAuthenticated]);
   
   // For development purposes, let's add a mode switcher component when in dev mode
   const DevModeSwitcher = () => {
@@ -395,8 +422,7 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
                 mediaItems={mediaItems}
                 spotlightItems={spotlightItems}
                 shopItems={shopItems}
-                isAuthenticated={false}
-                isTransitioning={false}
+                onEditProfile={() => {}}
               />
               
               {/* Preview mode footer */}
