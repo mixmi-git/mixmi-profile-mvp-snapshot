@@ -14,6 +14,86 @@ import { FaXTwitter } from 'react-icons/fa6';
 import { SiTiktok } from 'react-icons/si';
 import { ProfileData, MediaItemType, SpotlightItemType, ShopItemType } from './UserProfileContainer';
 
+// Media embed component for rendering different types of media
+const MediaEmbed = ({ item }: { item: MediaItemType }) => {
+  if (!item.embedUrl) return null;
+
+  // Detect YouTube embed URL
+  if (item.type === 'youtube') {
+    return (
+      <div className="aspect-video w-full rounded-lg overflow-hidden">
+        <iframe 
+          src={item.embedUrl}
+          title={item.title || "YouTube video"}
+          width="100%" 
+          height="100%" 
+          frameBorder="0" 
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+          allowFullScreen
+          className="w-full h-full"
+        ></iframe>
+      </div>
+    );
+  }
+
+  // Spotify embed
+  if (item.type.includes('spotify')) {
+    return (
+      <div className={item.type === 'spotify-playlist' ? "h-[380px]" : "h-[152px]"}>
+        <iframe 
+          src={item.embedUrl}
+          width="100%" 
+          height="100%" 
+          frameBorder="0" 
+          allow="encrypted-media"
+          className="rounded-lg"
+        ></iframe>
+      </div>
+    );
+  }
+
+  // SoundCloud embed
+  if (item.type.includes('soundcloud')) {
+    return (
+      <div className={item.type === 'soundcloud-playlist' ? "h-[300px]" : "h-[166px]"}>
+        <iframe 
+          width="100%" 
+          height="100%" 
+          scrolling="no" 
+          frameBorder="no" 
+          allow="autoplay" 
+          src={item.embedUrl}
+          className="rounded-lg"
+        ></iframe>
+      </div>
+    );
+  }
+
+  // Apple Music embed
+  if (item.type.includes('apple-music')) {
+    return (
+      <div className={item.type === 'apple-music-playlist' ? "h-[450px]" : "h-[175px]"}>
+        <iframe 
+          allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" 
+          frameBorder="0" 
+          height="100%" 
+          width="100%" 
+          sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation" 
+          src={item.embedUrl}
+          className="rounded-lg"
+        ></iframe>
+      </div>
+    );
+  }
+
+  // Default fallback for unsupported media types
+  return (
+    <div className="flex items-center justify-center bg-transparent min-h-[200px] rounded-lg bg-gray-800/30 p-4">
+      <p className="text-cyan-400">Media from {item.embedUrl || "external platform"}</p>
+    </div>
+  );
+};
+
 interface ProfileViewProps {
   profile: ProfileData;
   mediaItems: MediaItemType[];
@@ -436,10 +516,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                 <div className="flex justify-center">
                   <div className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] rounded-lg overflow-hidden">
                     <div className="w-full">
-                      {/* This would be replaced with an actual embed component */}
-                      <div className="flex items-center justify-center bg-transparent min-h-[200px]">
-                        <p className="text-cyan-400">Media embed from {mediaItems[0].embedUrl || "external platform"}</p>
-                      </div>
+                      <MediaEmbed item={mediaItems[0]} />
                     </div>
                     {mediaItems[0].title && (
                       <div className="py-3">
@@ -454,10 +531,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                   {mediaItems.slice(0, 2).map((item, index) => (
                     <div key={index} className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] rounded-lg overflow-hidden">
                       <div className="w-full">
-                        {/* This would be replaced with an actual embed component */}
-                        <div className="flex items-center justify-center bg-transparent min-h-[200px]">
-                          <p className="text-cyan-400">Media embed from {item.embedUrl || "external platform"}</p>
-                        </div>
+                        <MediaEmbed item={item} />
                       </div>
                       {item.title && (
                         <div className="py-3">
@@ -468,15 +542,12 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                   ))}
                 </div>
               ) : (
-                // Three media items - grid layout
+                // 3-6 items - grid layout
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {mediaItems.slice(0, 3).map((item, index) => (
+                  {mediaItems.slice(0, 6).map((item, index) => (
                     <div key={index} className="rounded-lg overflow-hidden">
                       <div className="w-full">
-                        {/* This would be replaced with an actual embed component */}
-                        <div className="flex items-center justify-center bg-transparent min-h-[200px]">
-                          <p className="text-cyan-400">Media embed from {item.embedUrl || "external platform"}</p>
-                        </div>
+                        <MediaEmbed item={item} />
                       </div>
                       {item.title && (
                         <div className="py-3">
