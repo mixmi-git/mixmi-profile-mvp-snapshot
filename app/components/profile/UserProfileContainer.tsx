@@ -329,12 +329,11 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
         }
         
         @keyframes sticker-rotate {
-          0% { transform: rotate(-5deg); }
-          50% { transform: rotate(5deg); }
-          100% { transform: rotate(-5deg); }
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
         }
         .animate-sticker-rotate {
-          animation: sticker-rotate 6s ease-in-out infinite;
+          animation: sticker-rotate 12s linear infinite;
         }
       `}</style>
       
