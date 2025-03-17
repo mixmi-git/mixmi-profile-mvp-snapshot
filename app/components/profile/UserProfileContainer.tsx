@@ -231,8 +231,12 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
   const handleSave = async (updatedProfile: Partial<ProfileData> | { spotlightItems: SpotlightItemType[] } | { mediaItems: MediaItemType[] } | { shopItems: ShopItemType[] }) => {
     // For immediate UI updates, apply changes directly to state
     if ('spotlightItems' in updatedProfile) {
-      setSpotlightItems(updatedProfile.spotlightItems);
-      saveToStorage(STORAGE_KEYS.SPOTLIGHT, updatedProfile.spotlightItems);
+      // Filter out empty spotlight items
+      const filteredItems = updatedProfile.spotlightItems.filter(
+        item => item.title.trim() || item.description.trim()
+      );
+      setSpotlightItems(filteredItems);
+      saveToStorage(STORAGE_KEYS.SPOTLIGHT, filteredItems);
     } else if ('mediaItems' in updatedProfile) {
       setMediaItems(updatedProfile.mediaItems);
       saveToStorage(STORAGE_KEYS.MEDIA, updatedProfile.mediaItems);

@@ -469,6 +469,27 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
   
   // Handle adding a new spotlight item
   const handleAddSpotlight = () => {
+    // Check if there's already an empty item
+    const hasEmptyItem = localSpotlightItems.some(
+      item => !item.title.trim() && !item.description.trim()
+    );
+    
+    // If there's already an empty item, don't add another one
+    if (hasEmptyItem) {
+      // Focus on the first empty item instead
+      const emptyItemIndex = localSpotlightItems.findIndex(
+        item => !item.title.trim() && !item.description.trim()
+      );
+      
+      // Scroll to the empty item - this is optional but helpful UX
+      const emptyItemElement = document.getElementById(`spotlight-item-${emptyItemIndex}`);
+      if (emptyItemElement) {
+        emptyItemElement.scrollIntoView({ behavior: 'smooth' });
+      }
+      
+      return;
+    }
+    
     const newItem: SpotlightItemType = {
       id: `spotlight-${Date.now()}`,
       title: '',
@@ -548,7 +569,13 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
     };
     
     return (
-      <AccordionItem value={`spotlight-${index}`} className="border border-gray-700 rounded-md overflow-hidden">
+      <AccordionItem 
+        value={`spotlight-${index}`}
+        className={`relative border-2 border-gray-700 rounded-md ${
+          !localTitle.trim() && !localDescription.trim() ? 'border-cyan-800' : ''
+        }`}
+        id={`spotlight-item-${index}`}
+      >
         <AccordionTrigger className="px-4 py-3 bg-gray-800 hover:bg-gray-750 hover:no-underline">
           <div className="flex items-center gap-2 text-left">
             <span className="font-medium text-gray-200">
@@ -832,7 +859,10 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
     };
     
     const handleBioChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      setLocalBio(e.target.value);
+      // Limit bio to 300 characters
+      if (e.target.value.length <= 300) {
+        setLocalBio(e.target.value);
+      }
     };
 
     const handleWalletChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1044,9 +1074,18 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
             
             {/* Bio field - Shortened from 5 to 4 rows */}
             <div>
-              <label htmlFor="bio" className="block text-sm font-medium text-gray-300 mb-2">
-                Bio
-              </label>
+              <div className="flex justify-between items-center mb-2">
+                <label htmlFor="bio" className="block text-sm font-medium text-gray-300">
+                  Bio
+                </label>
+                <span className={`text-xs ${
+                  localBio.length > 250 ? (
+                    localBio.length > 280 ? 'text-red-400' : 'text-yellow-400'
+                  ) : 'text-gray-400'
+                }`}>
+                  {localBio.length}/300 characters
+                </span>
+              </div>
               <textarea
                 id="bio"
                 name="bio"
@@ -1056,6 +1095,7 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
                 className="w-full p-3 bg-gray-900 border border-gray-700 rounded-md text-gray-100 resize-y"
                 rows={4}
                 placeholder="Tell your story here..."
+                maxLength={300}
               />
             </div>
 
@@ -1129,9 +1169,22 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
             Add your social media links to help people find you across platforms.
           </p>
           
-          <div className="space-y-4">
+          <div 
+            className="space-y-4"
+            onSubmit={(e) => {
+              e.preventDefault();
+              return false;
+            }}
+          >
             {formValues.socialLinks.map((link, index) => (
-              <div key={index} className="flex items-center space-x-2">
+              <div 
+                key={index} 
+                className="flex items-center space-x-2"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  return false;
+                }}
+              >
                 <div className="w-[180px]">
                   <select
                     value={link.platform}
@@ -1153,20 +1206,47 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
                 </div>
                 
                 <div className="flex-grow">
-                  <input
-                    type="text"
-                    value={link.url}
-                    onChange={(e) => handleSocialLinkChange(index, 'url', e.target.value)}
-                    placeholder="https://..."
-                    className={`w-full p-3 bg-gray-900 border ${
-                      socialLinkErrors[index]?.url ? 'border-red-500' : 'border-gray-700'
-                    } rounded-md text-gray-100`}
-                  />
-                  {socialLinkErrors[index]?.url && (
-                    <p className="text-sm text-red-500 mt-1">
-                      {socialLinkErrors[index].url}
-                    </p>
-                  )}
+                  {(() => {
+                    // Create an inline component to manage local state
+                    const [localUrl, setLocalUrl] = useState(link.url);
+                    
+                    // Keep local state in sync with parent state
+                    useEffect(() => {
+                      setLocalUrl(link.url);
+                    }, [link.url]);
+                    
+                    const commitUrlChange = () => {
+                      if (localUrl !== link.url) {
+                        handleSocialLinkChange(index, 'url', localUrl);
+                      }
+                    };
+                    
+                    return (
+                      <>
+                        <input
+                          type="text"
+                          value={localUrl}
+                          onChange={(e) => setLocalUrl(e.target.value)}
+                          onBlur={commitUrlChange}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              e.currentTarget.blur();
+                            }
+                          }}
+                          placeholder="https://..."
+                          className={`w-full p-3 bg-gray-900 border ${
+                            socialLinkErrors[index]?.url ? 'border-red-500' : 'border-gray-700'
+                          } rounded-md text-gray-100`}
+                        />
+                        {socialLinkErrors[index]?.url && (
+                          <p className="text-sm text-red-500 mt-1">
+                            {socialLinkErrors[index].url}
+                          </p>
+                        )}
+                      </>
+                    );
+                  })()}
                 </div>
                 
                 <button
@@ -1915,7 +1995,18 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
 
   // Handle save
   const handleSave = () => {
-    onSave(formValues);
+    // Filter out empty spotlight items before saving
+    const filteredSpotlightItems = localSpotlightItems.filter(
+      item => item.title.trim() || item.description.trim()
+    );
+    
+    // Save the filtered spotlight items
+    if (filteredSpotlightItems.length !== localSpotlightItems.length) {
+      setLocalSpotlightItems(filteredSpotlightItems);
+      onSave({ spotlightItems: filteredSpotlightItems });
+    } else {
+      onSave(formValues);
+    }
   };
 
   return (
