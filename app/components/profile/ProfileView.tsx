@@ -135,14 +135,24 @@ const ProfileView: React.FC<ProfileViewProps> = ({
   isTransitioning = false,
   onEditProfile,
 }) => {
+  // Add dev controls to force authentication for testing UI
+  const [devForceAuth, setDevForceAuth] = React.useState(false);
+  const effectiveAuth = devForceAuth || isAuthenticated;
+
   // Add debug log for authentication status
   React.useEffect(() => {
-    console.log("Profile View Authentication State:", {
-      isAuthenticated,
-      isTransitioning,
-      hasEditCallback: !!onEditProfile
-    });
-  }, [isAuthenticated, isTransitioning, onEditProfile]);
+    const debugEnabled = process.env.NODE_ENV === 'development' || (typeof window !== 'undefined' && (window as any).toggleAuthDebug);
+    
+    if (debugEnabled) {
+      console.group("🖼️ Profile View Auth State:");
+      console.log('isAuthenticated (prop):', isAuthenticated);
+      console.log('devForceAuth:', devForceAuth);
+      console.log('effectiveAuth:', effectiveAuth);
+      console.log('isTransitioning:', isTransitioning);
+      console.log('hasEditCallback:', !!onEditProfile);
+      console.groupEnd();
+    }
+  }, [isAuthenticated, devForceAuth, effectiveAuth, isTransitioning, onEditProfile]);
 
   // Helper function to return the appropriate icon for each social platform
   const getSocialIcon = (platform: string) => {
@@ -169,8 +179,72 @@ const ProfileView: React.FC<ProfileViewProps> = ({
     }
   };
 
+  // Dev mode toggle - only in development
+  const DevControls = () => {
+    if (process.env.NODE_ENV !== 'development') return null;
+    
+    // Local state to track if debug is enabled
+    const [debugEnabled, setDebugEnabled] = React.useState(false);
+    
+    // Function to toggle auth debugging
+    const toggleDebug = () => {
+      if (typeof window !== 'undefined') {
+        const newState = !(window as any).DEBUG_AUTH;
+        (window as any).DEBUG_AUTH = newState;
+        setDebugEnabled(newState);
+        console.log(`Auth debugging ${newState ? 'enabled' : 'disabled'}`);
+      }
+    };
+    
+    return (
+      <div className="fixed top-20 right-4 bg-black/80 p-3 rounded z-50 text-xs">
+        <h3 className="font-bold text-white mb-2">Dev Controls</h3>
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-gray-300">Force Auth:</span>
+          <button
+            onClick={() => setDevForceAuth(!devForceAuth)}
+            className={`px-2 py-1 rounded ${devForceAuth ? 'bg-green-500' : 'bg-red-500'}`}
+          >
+            {devForceAuth ? 'ON' : 'OFF'}
+          </button>
+        </div>
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-gray-300">Debug Mode:</span>
+          <button
+            onClick={toggleDebug}
+            className={`px-2 py-1 rounded ${debugEnabled ? 'bg-green-500' : 'bg-red-500'}`}
+          >
+            {debugEnabled ? 'ON' : 'OFF'}
+          </button>
+        </div>
+        <div className="text-gray-400 text-[10px]">
+          Auth State: {effectiveAuth ? 'Authenticated' : 'Not Authenticated'}
+        </div>
+      </div>
+    );
+  };
+
+  // For debugging
+  const handleEditClick = () => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🖋️ Edit profile clicked:', {
+        isAuthenticated: effectiveAuth,
+        hasCallback: !!onEditProfile
+      });
+    }
+    
+    if (onEditProfile) {
+      onEditProfile();
+    } else {
+      console.warn('Edit profile clicked but no callback provided!');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100">
+      {/* Add dev controls in development */}
+      {process.env.NODE_ENV === 'development' && <DevControls />}
+      
       <style jsx global>{rotationStyle}</style>
       <div className="container mx-auto p-4 sm:p-8 md:p-12 lg:p-16">
         {/* Profile section */}
@@ -269,9 +343,9 @@ const ProfileView: React.FC<ProfileViewProps> = ({
               )}
 
               {/* Edit Profile button (if authenticated) */}
-              {isAuthenticated && onEditProfile && (
+              {effectiveAuth && onEditProfile && (
                 <Button 
-                  onClick={onEditProfile}
+                  onClick={handleEditClick}
                   variant="outline"
                   className="border-gray-600 text-cyan-300 hover:bg-gray-800 hover:text-cyan-200 transition-colors"
                 >
@@ -293,6 +367,15 @@ const ProfileView: React.FC<ProfileViewProps> = ({
             <p className="text-sm text-gray-400 text-center mb-12">
               Share your work and favorite projects
             </p>
+            
+            {/* Add debugging info for spotlight items */}
+            {process.env.NODE_ENV === 'development' && (
+              <div className="mb-4 p-2 bg-gray-800 text-xs text-gray-300 rounded">
+                <p>Debug: {spotlightItems?.length || 0} spotlight items</p>
+                <p>Filtered items: {spotlightItems?.filter(item => item.title.trim() || item.description.trim()).length || 0}</p>
+                <pre className="overflow-auto max-h-20">{JSON.stringify(spotlightItems, null, 2)}</pre>
+              </div>
+            )}
             
             {spotlightItems && spotlightItems.filter(item => item.title.trim() || item.description.trim()).length > 0 ? (
               spotlightItems.filter(item => item.title.trim() || item.description.trim()).length < 3 ? (
@@ -620,132 +703,142 @@ const ProfileView: React.FC<ProfileViewProps> = ({
             </p>
             
             {shopItems && shopItems.length > 0 ? (
-              shopItems.length < 3 ? (
-                // 1-2 items - center justified 
-                <div className="flex flex-col sm:flex-row justify-center gap-6">
-                  {shopItems.slice(0, 3).map((item, index) => (
-                    <div 
-                      key={index}
-                      className="group block relative rounded-lg overflow-hidden w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)]"
-                    >
-                      <div className="aspect-square relative bg-gray-800">
-                        {item.image ? (
-                          item.image.startsWith('data:') ? (
-                            <img
-                              src={item.image}
-                              alt={item.title}
-                              className="absolute w-full h-full object-cover"
-                              style={{ imageRendering: 'auto' }} // Ensures GIFs animate properly
-                            />
-                          ) : (
-                            <Image
-                              src={item.image}
-                              alt={item.title}
-                              fill
-                              className="object-cover"
-                            />
-                          )
-                        ) : (
-                          <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
-                            <p className="text-gray-500">No image</p>
-                          </div>
-                        )}
-                        
-                        {/* Corner badge - similar to the editor but optimized for viewing */}
-                        <div className="absolute bottom-0 left-0 bg-black bg-opacity-70 p-2 
-                          max-w-[90%] md:max-w-[80%] transition-all duration-300 
-                          md:group-hover:max-w-full rounded-tr-md">
-                          <div className="border-l-2 border-cyan-400 pl-2">
-                            {item.link ? (
-                              <a 
-                                href={item.link} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="group/title"
-                              >
-                                <div className="flex items-center gap-2">
-                                  <h4 className="text-white text-sm font-medium truncate group-hover/title:underline">{item.title || "Untitled"}</h4>
-                                </div>
-                              </a>
+              <>
+                {/* Add debugging info */}
+                {process.env.NODE_ENV === 'development' && (
+                  <div className="mb-4 p-2 bg-gray-800 text-xs text-gray-300 rounded">
+                    <p>Debug: {shopItems.length} shop items</p>
+                    <pre className="overflow-auto max-h-20">{JSON.stringify(shopItems, null, 2)}</pre>
+                  </div>
+                )}
+                
+                {shopItems.length < 3 ? (
+                  // 1-2 items - center justified 
+                  <div className="flex flex-col sm:flex-row justify-center gap-6">
+                    {shopItems.slice(0, 3).map((item, index) => (
+                      <div 
+                        key={index}
+                        className="group block relative rounded-lg overflow-hidden w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)]"
+                      >
+                        <div className="aspect-square relative bg-gray-800">
+                          {item.image ? (
+                            item.image.startsWith('data:') ? (
+                              <img
+                                src={item.image}
+                                alt={item.title}
+                                className="absolute w-full h-full object-cover"
+                                style={{ imageRendering: 'auto' }} // Ensures GIFs animate properly
+                              />
                             ) : (
-                              <div className="flex items-center gap-2">
-                                <h4 className="text-white text-sm font-medium truncate">{item.title || "Untitled"}</h4>
-                              </div>
-                            )}
-                            <p className="text-xs text-gray-300 mt-1 line-clamp-2 hidden md:group-hover:block md:hidden">
-                              {item.description}
-                              {item.price && <span className="ml-1 text-cyan-300">{item.price}</span>}
-                            </p>
+                              <Image
+                                src={item.image}
+                                alt={item.title}
+                                fill
+                                className="object-cover"
+                              />
+                            )
+                          ) : (
+                            <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
+                              <p className="text-gray-500">No image</p>
+                            </div>
+                          )}
+                          
+                          {/* Corner badge - similar to the editor but optimized for viewing */}
+                          <div className="absolute bottom-0 left-0 bg-black bg-opacity-70 p-2 
+                            max-w-[90%] md:max-w-[80%] transition-all duration-300 
+                            md:group-hover:max-w-full rounded-tr-md">
+                            <div className="border-l-2 border-cyan-400 pl-2">
+                              {item.link ? (
+                                <a 
+                                  href={item.link} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="group/title"
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <h4 className="text-white text-sm font-medium truncate group-hover/title:underline">{item.title || "Untitled"}</h4>
+                                  </div>
+                                </a>
+                              ) : (
+                                <div className="flex items-center gap-2">
+                                  <h4 className="text-white text-sm font-medium truncate">{item.title || "Untitled"}</h4>
+                                </div>
+                              )}
+                              <p className="text-xs text-gray-300 mt-1 line-clamp-2 hidden md:group-hover:block md:hidden">
+                                {item.description}
+                                {item.price && <span className="ml-1 text-cyan-300">{item.price}</span>}
+                              </p>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                // 3 items - grid layout
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {shopItems.slice(0, 3).map((item, index) => (
-                    <div 
-                      key={index}
-                      className="group block relative rounded-lg overflow-hidden"
-                    >
-                      {/* Same content as above */}
-                      <div className="aspect-square relative bg-gray-800">
-                        {item.image ? (
-                          item.image.startsWith('data:') ? (
-                            <img
-                              src={item.image}
-                              alt={item.title}
-                              className="absolute w-full h-full object-cover"
-                              style={{ imageRendering: 'auto' }} // Ensures GIFs animate properly
-                            />
-                          ) : (
-                            <Image
-                              src={item.image}
-                              alt={item.title}
-                              fill
-                              className="object-cover"
-                            />
-                          )
-                        ) : (
-                          <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
-                            <p className="text-gray-500">No image</p>
-                          </div>
-                        )}
-                        
-                        {/* Corner badge - similar to the editor but optimized for viewing */}
-                        <div className="absolute bottom-0 left-0 bg-black bg-opacity-70 p-2 
-                          max-w-[90%] md:max-w-[80%] transition-all duration-300 
-                          md:group-hover:max-w-full rounded-tr-md">
-                          <div className="border-l-2 border-cyan-400 pl-2">
-                            {item.link ? (
-                              <a 
-                                href={item.link} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="group/title"
-                              >
-                                <div className="flex items-center gap-2">
-                                  <h4 className="text-white text-sm font-medium truncate group-hover/title:underline">{item.title || "Untitled"}</h4>
-                                </div>
-                              </a>
+                    ))}
+                  </div>
+                ) : (
+                  // 3 items - grid layout
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {shopItems.slice(0, 3).map((item, index) => (
+                      <div 
+                        key={index}
+                        className="group block relative rounded-lg overflow-hidden"
+                      >
+                        {/* Same content as above */}
+                        <div className="aspect-square relative bg-gray-800">
+                          {item.image ? (
+                            item.image.startsWith('data:') ? (
+                              <img
+                                src={item.image}
+                                alt={item.title}
+                                className="absolute w-full h-full object-cover"
+                                style={{ imageRendering: 'auto' }} // Ensures GIFs animate properly
+                              />
                             ) : (
-                              <div className="flex items-center gap-2">
-                                <h4 className="text-white text-sm font-medium truncate">{item.title || "Untitled"}</h4>
-                              </div>
-                            )}
-                            <p className="text-xs text-gray-300 mt-1 line-clamp-2 hidden md:group-hover:block md:hidden">
-                              {item.description}
-                              {item.price && <span className="ml-1 text-cyan-300">{item.price}</span>}
-                            </p>
+                              <Image
+                                src={item.image}
+                                alt={item.title}
+                                fill
+                                className="object-cover"
+                              />
+                            )
+                          ) : (
+                            <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
+                              <p className="text-gray-500">No image</p>
+                            </div>
+                          )}
+                          
+                          {/* Corner badge - similar to the editor but optimized for viewing */}
+                          <div className="absolute bottom-0 left-0 bg-black bg-opacity-70 p-2 
+                            max-w-[90%] md:max-w-[80%] transition-all duration-300 
+                            md:group-hover:max-w-full rounded-tr-md">
+                            <div className="border-l-2 border-cyan-400 pl-2">
+                              {item.link ? (
+                                <a 
+                                  href={item.link} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="group/title"
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <h4 className="text-white text-sm font-medium truncate group-hover/title:underline">{item.title || "Untitled"}</h4>
+                                  </div>
+                                </a>
+                              ) : (
+                                <div className="flex items-center gap-2">
+                                  <h4 className="text-white text-sm font-medium truncate">{item.title || "Untitled"}</h4>
+                                </div>
+                              )}
+                              <p className="text-xs text-gray-300 mt-1 line-clamp-2 hidden md:group-hover:block md:hidden">
+                                {item.description}
+                                {item.price && <span className="ml-1 text-cyan-300">{item.price}</span>}
+                              </p>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              )
+                    ))}
+                  </div>
+                )}
+              </>
             ) : (
               // Shop placeholder - center justified like other sections
               <div className="flex justify-center">

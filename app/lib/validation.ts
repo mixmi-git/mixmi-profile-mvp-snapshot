@@ -123,9 +123,40 @@ export const validateShopItem = (field: string, value: string): { isValid: boole
       }
       return { isValid: true, message: '' };
 
+    case 'link':
     case 'storeUrl':
-      if (value.trim() && !value.startsWith('http')) {
-        return { isValid: false, message: 'Please enter a valid URL starting with http:// or https://' };
+      if (value.trim()) {
+        try {
+          // First, try to parse as a standard URL
+          try {
+            new URL(value);
+            return { isValid: true, message: '' };
+          } catch (e) {
+            // If that fails, check if it's a valid URL with the http:// prefix added
+            if (!/^https?:\/\//i.test(value)) {
+              try {
+                new URL(`https://${value}`);
+                // It's valid with prefix, so accept it but suggest the proper format
+                console.log(`URL validation: accepting url without protocol: ${value}`);
+                return { 
+                  isValid: true, 
+                  message: 'Consider adding https:// for proper URL format' 
+                };
+              } catch {
+                // It's not a valid URL even with prefix
+                console.log(`URL validation: invalid url: ${value}`);
+                return { isValid: false, message: 'Please enter a valid URL (e.g., https://example.com)' };
+              }
+            } else {
+              // Has prefix but still not valid
+              console.log(`URL validation: invalid url with protocol: ${value}`);
+              return { isValid: false, message: 'Please enter a valid URL (e.g., https://example.com)' };
+            }
+          }
+        } catch (e) {
+          console.log(`URL validation error: ${e}`);
+          return { isValid: false, message: 'Please enter a valid URL (e.g., https://example.com)' };
+        }
       }
       return { isValid: true, message: '' };
 

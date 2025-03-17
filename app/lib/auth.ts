@@ -198,6 +198,11 @@ export function useAuth() {
   const connectWallet = useCallback(() => {
     console.log('Auth: Connecting wallet...')
     
+    // Check if Stacks Leather Wallet is installed
+    if (checkHasStacksWallet()) {
+      console.log('Auth: Using Stacks Leather Wallet for connection');
+    }
+    
     // Check if already signed in first
     if (userSession.isUserSignedIn()) {
       console.log('Auth: User is already signed in')
@@ -284,4 +289,10 @@ export function useAuth() {
     refreshAuthState,
     isInitialized
   }
+}
+
+// Function to check if the user has Stacks Leather Wallet installed
+export function checkHasStacksWallet() {
+  if (typeof window === 'undefined') return false;
+  return !!(window as any).StacksProvider;
 }

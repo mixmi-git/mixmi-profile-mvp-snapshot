@@ -340,6 +340,7 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
   
   // Handle spotlight item changes
   const handleSpotlightChange = (index: number, field: string, value: string) => {
+    console.log(`Spotlight change - index: ${index}, field: ${field}, value: ${value}`);
     const updatedItems = [...localSpotlightItems];
     
     // Validate the field (simple validation)
@@ -373,7 +374,7 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
     if (!errorMessage || field === 'link') {
       // Handle special case for link which is not in the type
       if (field === 'link') {
-        (updatedItems[index] as any).link = value;
+        updatedItems[index].link = value;
       } else {
         updatedItems[index] = {
           ...updatedItems[index],
@@ -381,6 +382,7 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
         };
       }
       
+      console.log('Updated spotlight items:', updatedItems);
       setLocalSpotlightItems(updatedItems);
       onSave({ spotlightItems: updatedItems });
     }
@@ -469,27 +471,37 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
   
   // Handle adding a new spotlight item
   const handleAddSpotlight = () => {
+    // Add debugging information
+    console.log('Adding spotlight item. Current items:', localSpotlightItems);
+    
     // Check if there's already an empty item
     const hasEmptyItem = localSpotlightItems.some(
-      item => !item.title.trim() && !item.description.trim()
+      item => !item.title.trim() && !item.description.trim() && !item.image
     );
     
-    // If there's already an empty item, don't add another one
+    // Show more detailed information about empty items
     if (hasEmptyItem) {
-      // Focus on the first empty item instead
+      console.log('Found empty spotlight item, not adding a new one');
+      // Find the first empty item
       const emptyItemIndex = localSpotlightItems.findIndex(
-        item => !item.title.trim() && !item.description.trim()
+        item => !item.title.trim() && !item.description.trim() && !item.image
       );
+      console.log('Empty item index:', emptyItemIndex);
+      console.log('Empty item:', localSpotlightItems[emptyItemIndex]);
       
       // Scroll to the empty item - this is optional but helpful UX
       const emptyItemElement = document.getElementById(`spotlight-item-${emptyItemIndex}`);
       if (emptyItemElement) {
+        console.log('Scrolling to empty spotlight item');
         emptyItemElement.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        console.log('Unable to find empty spotlight item element to scroll to');
       }
       
       return;
     }
     
+    // Create a new spotlight item
     const newItem: SpotlightItemType = {
       id: `spotlight-${Date.now()}`,
       title: '',
@@ -497,9 +509,34 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
       image: ''
     };
     
-    const updatedItems = [...localSpotlightItems, newItem];
+    // Add link property to match expected structure
+    const newItemWithLink = {
+      ...newItem,
+      link: ''
+    };
+    
+    console.log('Creating new spotlight item:', newItemWithLink);
+    
+    const updatedItems = [...localSpotlightItems, newItemWithLink];
     setLocalSpotlightItems(updatedItems);
+    
+    // Save the updated items
+    console.log('Saving updated spotlight items:', updatedItems);
     onSave({ spotlightItems: updatedItems });
+    
+    // Force open the new item's accordion (will execute on next render)
+    setTimeout(() => {
+      const newItemElement = document.getElementById(`spotlight-item-${localSpotlightItems.length}`);
+      if (newItemElement) {
+        console.log('Opening new spotlight item accordion');
+        newItemElement.scrollIntoView({ behavior: 'smooth' });
+        // Try to focus on the title input
+        const titleInput = newItemElement.querySelector('input[placeholder*="title"]');
+        if (titleInput) {
+          (titleInput as HTMLInputElement).focus();
+        }
+      }
+    }, 100);
   };
   
   // Handle removing a spotlight item
@@ -570,10 +607,8 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
     
     return (
       <AccordionItem 
-        value={`spotlight-${index}`}
-        className={`relative border-2 border-gray-700 rounded-md ${
-          !localTitle.trim() && !localDescription.trim() ? 'border-cyan-800' : ''
-        }`}
+        value={`item-${index}`}
+        className="border border-gray-700 rounded-lg overflow-hidden"
         id={`spotlight-item-${index}`}
       >
         <AccordionTrigger className="px-4 py-3 bg-gray-800 hover:bg-gray-750 hover:no-underline">
@@ -1605,13 +1640,21 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
 
   // Handle shop item changes
   const handleShopChange = (index: number, field: keyof ShopItemType | 'link', value: string) => {
-    // Validate the field
+    console.log(`Shop change - index: ${index}, field: ${field}, value: ${value}`);
+    
+    // Validate the field using our more lenient validation now
     let errorMessage = '';
-    if (field === 'title' && !value.trim()) {
-      errorMessage = 'Shop name is required';
+    if (field === 'title' && value.trim() && value.length > 80) {
+      errorMessage = 'Title must be less than 80 characters';
     } else if (field === 'link' && value.trim()) {
+      // Link validation is handled by validateShopItem but we'll be more lenient
       try {
-        new URL(value);
+        if (value.includes('.')) {
+          // Allow any URL-like string with a dot (domain)
+          errorMessage = '';
+        } else {
+          errorMessage = 'Please enter a valid URL';
+        }
       } catch (e) {
         errorMessage = 'Please enter a valid URL';
       }
@@ -1633,12 +1676,13 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
       
       if (field === 'link') {
         // Handle link separately since it's not in the type
-        (updatedItems[index] as any).link = value;
+        updatedItems[index].link = value;
       } else {
         // Only update the specific field that changed
         updatedItems[index][field] = value;
       }
       
+      console.log('Updated shop items:', updatedItems);
       setLocalShopItems(updatedItems);
       onSave({ shopItems: updatedItems });
     }
@@ -1721,6 +1765,31 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
   
   // Handle adding a new shop item
   const handleAddShop = () => {
+    console.log('Adding new shop item');
+    
+    // Check if there's an empty shop item already
+    const hasEmptyItem = localShopItems.some(
+      item => !item.title.trim() && !item.description.trim() && !item.image
+    );
+    
+    if (hasEmptyItem) {
+      console.log('Found empty shop item, not adding a new one');
+      const emptyItemIndex = localShopItems.findIndex(
+        item => !item.title.trim() && !item.description.trim() && !item.image
+      );
+      
+      console.log('Empty shop item index:', emptyItemIndex);
+      console.log('Empty shop item:', localShopItems[emptyItemIndex]);
+      
+      // Try to scroll to the empty item
+      const emptyItemElement = document.getElementById(`shop-item-${emptyItemIndex}`);
+      if (emptyItemElement) {
+        emptyItemElement.scrollIntoView({ behavior: 'smooth' });
+      }
+      
+      return;
+    }
+    
     const newItem: ShopItemType = {
       id: `shop-${Date.now()}`,
       title: '',
@@ -1735,9 +1804,26 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
       link: ''
     };
     
+    console.log('Created new shop item:', newItemWithLink);
+    
     const updatedItems = [...localShopItems, newItemWithLink as ShopItemType];
     setLocalShopItems(updatedItems);
+    
+    console.log('Saving updated shop items:', updatedItems);
     onSave({ shopItems: updatedItems });
+    
+    // Scroll to the new item (will execute on next render)
+    setTimeout(() => {
+      const newItemElement = document.getElementById(`shop-item-${localShopItems.length}`);
+      if (newItemElement) {
+        newItemElement.scrollIntoView({ behavior: 'smooth' });
+        // Try to focus on the title input
+        const titleInput = newItemElement.querySelector('input[placeholder*="shop name" i]');
+        if (titleInput) {
+          (titleInput as HTMLInputElement).focus();
+        }
+      }
+    }, 100);
   };
   
   // Handle removing a shop item
@@ -1777,13 +1863,15 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
     const [localTitle, setLocalTitle] = useState(item.title || '');
     const [localDescription, setLocalDescription] = useState(item.description || '');
     const [localLink, setLocalLink] = useState((item as any).link || '');
+    const [localPrice, setLocalPrice] = useState(item.price || '');
     
     // Update local state if parent state changes
     useEffect(() => {
       setLocalTitle(item.title || '');
       setLocalDescription(item.description || '');
       setLocalLink((item as any).link || '');
-    }, [item.title, item.description, (item as any).link]);
+      setLocalPrice(item.price || '');
+    }, [item.title, item.description, (item as any).link, item.price]);
     
     // Update title in parent state on blur or Enter key
     const handleTitleBlur = () => {
@@ -1800,8 +1888,17 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
       handleShopChange(index, 'link', localLink);
     };
     
+    // Update price in parent state on blur or Enter key
+    const handlePriceBlur = () => {
+      handleShopChange(index, 'price', localPrice);
+    };
+    
     return (
-      <AccordionItem value={`shop-${index}`} className="border border-gray-700 rounded-md overflow-hidden">
+      <AccordionItem 
+        value={`shop-${index}`} 
+        className="border border-gray-700 rounded-lg overflow-hidden"
+        id={`shop-item-${index}`}
+      >
         <AccordionTrigger className="px-4 py-3 bg-gray-800 hover:bg-gray-750 hover:no-underline">
           <div className="flex items-center gap-2 text-left">
             <span className="font-medium text-gray-200">
@@ -1978,6 +2075,34 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
               </p>
             </div>
             
+            {/* Price field - using local state */}
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Price
+              </label>
+              <input
+                type="text"
+                value={localPrice}
+                onChange={(e) => setLocalPrice(e.target.value)}
+                onBlur={handlePriceBlur}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handlePriceBlur();
+                  }
+                }}
+                className={`w-full p-3 bg-gray-900 border ${
+                  shopErrors[index]?.price ? 'border-red-500' : 'border-gray-700'
+                } rounded-md text-gray-100`}
+                placeholder="Enter the price"
+              />
+              {shopErrors[index]?.price && (
+                <p className="text-sm text-red-500 mt-1">
+                  {shopErrors[index].price}
+                </p>
+              )}
+            </div>
+            
             {/* Remove button */}
             <button
               type="button"
@@ -1993,20 +2118,20 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
     );
   };
 
-  // Handle save
-  const handleSave = () => {
-    // Filter out empty spotlight items before saving
-    const filteredSpotlightItems = localSpotlightItems.filter(
-      item => item.title.trim() || item.description.trim()
-    );
+  // Add a new function to handle saving and returning to profile
+  const handleSaveAndReturn = () => {
+    // Call the regular save function first
+    handleSave();
     
-    // Save the filtered spotlight items
-    if (filteredSpotlightItems.length !== localSpotlightItems.length) {
-      setLocalSpotlightItems(filteredSpotlightItems);
-      onSave({ spotlightItems: filteredSpotlightItems });
-    } else {
-      onSave(formValues);
-    }
+    // Then call the done editing function to return to profile view
+    onDoneEditing();
+  };
+  
+  // Handle save button click
+  const handleSave = () => {
+    // This is left as a placeholder but doesn't need to do anything special
+    // since each section auto-saves as changes are made
+    console.log('Save button clicked - all changes have already been auto-saved');
   };
 
   return (
@@ -2047,13 +2172,28 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
         )}
         
         <div className="container mx-auto p-4 sm:p-8 md:p-12 lg:p-16">
-          {/* Profile Edit Form - Updated to match screenshot */}
+          {/* Profile Section */}
           <div className="rounded-lg overflow-hidden bg-gray-800/50 mb-12 p-6">
-            <ProfileSection 
+            <div className="flex items-center gap-4 mb-4">
+              <h2 className="text-2xl font-bold text-cyan-300">Profile</h2>
+              <div className="flex-grow border-t border-gray-700" />
+              <button
+                type="button"
+                onClick={() => handleSave()}
+                className="px-4 py-2 rounded bg-gray-700 text-gray-200 hover:bg-gray-600 transition-colors flex items-center"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h-2v5.586l-1.293-1.293z" />
+                </svg>
+                Save Profile
+              </button>
+            </div>
+            
+            <ProfileSection
               formValues={formValues}
               handleInputChange={handleInputChange}
               fileInputRef={fileInputRef}
-              handleDragOver={handleDragOver}
+              handleDragOver={handleDragOver} 
               handleDrop={handleDrop}
               handleFileChange={handleFileChange}
               handleAddSocialLink={handleAddSocialLink}
@@ -2064,46 +2204,21 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
             />
           </div>
           
-          {/* Section Visibility Controls */}
-          <div className="rounded-lg overflow-hidden bg-gray-800/50 mb-12 p-6">
-            <div className="flex items-center gap-4 mb-4">
-              <h2 className="text-2xl font-bold text-cyan-300">Section Visibility</h2>
-              <div className="flex-grow border-t border-gray-700" />
-            </div>
-            
-            <p className="text-sm text-gray-400 mb-6">
-              Choose which sections to display on your profile
-            </p>
-            
-            <div className="space-y-4">
-              <Checkbox 
-                id="spotlight-visible" 
-                checked={formValues.sectionVisibility?.spotlight !== false} 
-                onChange={() => handleSectionVisibilityToggle('spotlight')}
-                label="Show Spotlight section"
-              />
-              
-              <Checkbox 
-                id="media-visible" 
-                checked={formValues.sectionVisibility?.media !== false} 
-                onChange={() => handleSectionVisibilityToggle('media')}
-                label="Show Media section"
-              />
-              
-              <Checkbox 
-                id="shop-visible" 
-                checked={formValues.sectionVisibility?.shop !== false} 
-                onChange={() => handleSectionVisibilityToggle('shop')}
-                label="Show Shop section"
-              />
-            </div>
-          </div>
-          
-          {/* Spotlight Section - Implemented with full functionality */}
+          {/* Spotlight Section */}
           <div className="rounded-lg overflow-hidden bg-gray-800/50 mb-12 p-6">
             <div className="flex items-center gap-4 mb-4">
               <h2 className="text-2xl font-bold text-cyan-300">Spotlight</h2>
               <div className="flex-grow border-t border-gray-700" />
+              <button
+                type="button"
+                onClick={() => handleSave()}
+                className="px-4 py-2 rounded bg-gray-700 text-gray-200 hover:bg-gray-600 transition-colors flex items-center"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h-2v5.586l-1.293-1.293z" />
+                </svg>
+                Save Spotlight
+              </button>
             </div>
             
             <p className="text-sm text-gray-400 mb-6">
@@ -2138,15 +2253,25 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
             </div>
           </div>
           
-          {/* Media Section - Now below Spotlight */}
+          {/* Media Section */}
           <div className="rounded-lg overflow-hidden bg-gray-800/50 mb-12 p-6">
             <div className="flex items-center gap-4 mb-4">
               <h2 className="text-2xl font-bold text-cyan-300">Media</h2>
               <div className="flex-grow border-t border-gray-700" />
+              <button
+                type="button"
+                onClick={() => handleSave()}
+                className="px-4 py-2 rounded bg-gray-700 text-gray-200 hover:bg-gray-600 transition-colors flex items-center"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h-2v5.586l-1.293-1.293z" />
+                </svg>
+                Save Media
+              </button>
             </div>
             
             <p className="text-sm text-gray-400 mb-6">
-              Share your music, videos, DJ mixes, and playlists from YouTube, SoundCloud, Spotify and Apple Music. Supports all formats.
+              Share your music, videos, playlists, and more from platforms like YouTube, Spotify, SoundCloud, etc.
             </p>
             
             <div className="space-y-4">
@@ -2182,6 +2307,16 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
             <div className="flex items-center gap-4 mb-4">
               <h2 className="text-2xl font-bold text-cyan-300">Shop</h2>
               <div className="flex-grow border-t border-gray-700" />
+              <button
+                type="button"
+                onClick={() => handleSave()}
+                className="px-4 py-2 rounded bg-gray-700 text-gray-200 hover:bg-gray-600 transition-colors flex items-center"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h-2v5.586l-1.293-1.293z" />
+                </svg>
+                Save Shop
+              </button>
             </div>
             
             <p className="text-sm text-gray-400 mb-6">
@@ -2334,15 +2469,26 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
         
         {/* Sticky Footer */}
         <div className="fixed bottom-0 left-0 right-0 bg-gray-800 border-t border-gray-700 shadow-lg z-50">
-          <div className="max-w-4xl mx-auto px-4 py-3 flex justify-end">
+          <div className="max-w-4xl mx-auto px-4 py-3 flex justify-between">
             <button
-              onClick={handleSave}
+              onClick={onPreviewToggle}
+              className="px-6 py-2 rounded-lg font-medium border border-gray-500 text-gray-300 hover:bg-gray-700 transition-colors duration-200 flex items-center gap-2"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
+              </svg>
+              Preview
+            </button>
+            
+            <button
+              onClick={handleSaveAndReturn}
               className="bg-cyan-600 hover:bg-cyan-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center gap-2"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h-2v5.586l-1.293-1.293z" />
+                <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
               </svg>
-              Save Changes
+              Save &amp; Return to Profile
             </button>
           </div>
         </div>

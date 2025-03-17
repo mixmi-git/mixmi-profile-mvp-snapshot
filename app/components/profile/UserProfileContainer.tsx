@@ -229,21 +229,27 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
   
   // Handle saving profile changes
   const handleSave = async (updatedProfile: Partial<ProfileData> | { spotlightItems: SpotlightItemType[] } | { mediaItems: MediaItemType[] } | { shopItems: ShopItemType[] }) => {
+    console.log('handleSave called with:', updatedProfile);
+    
     // For immediate UI updates, apply changes directly to state
     if ('spotlightItems' in updatedProfile) {
       // Filter out empty spotlight items
       const filteredItems = updatedProfile.spotlightItems.filter(
         item => item.title.trim() || item.description.trim()
       );
+      console.log('Saving spotlight items:', filteredItems);
       setSpotlightItems(filteredItems);
       saveToStorage(STORAGE_KEYS.SPOTLIGHT, filteredItems);
     } else if ('mediaItems' in updatedProfile) {
+      console.log('Saving media items:', updatedProfile.mediaItems);
       setMediaItems(updatedProfile.mediaItems);
       saveToStorage(STORAGE_KEYS.MEDIA, updatedProfile.mediaItems);
     } else if ('shopItems' in updatedProfile) {
+      console.log('Saving shop items:', updatedProfile.shopItems);
       setShopItems(updatedProfile.shopItems);
       saveToStorage(STORAGE_KEYS.SHOP, updatedProfile.shopItems);
     } else {
+      console.log('Saving profile data:', updatedProfile);
       const updatedProfileData = { ...profile, ...updatedProfile };
       setProfile(updatedProfileData);
       saveToStorage(STORAGE_KEYS.PROFILE, updatedProfileData);
@@ -268,39 +274,35 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
   // Determine if user is authenticated for edit access
   const canEdit = disableAuth || isAuthenticated;
   
-  // Debugging helper for authentication-related issues
+  // Enhanced debugging helper for authentication-related issues
   const logAuthState = (context: string) => {
-    console.log(`Auth state (${context}):`, {
-      isAuthenticated,
-      canEdit,
-      userAddress: userAddress || 'none',
-      disableAuth
-    });
+    // Only log in development or if auth debugging is enabled
+    const debugEnabled = process.env.NODE_ENV === 'development' || (typeof window !== 'undefined' && (window as any).toggleAuthDebug);
+    
+    if (debugEnabled) {
+      console.group(`🔑 Profile Auth State [${context}]`);
+      console.log('isAuthenticated:', isAuthenticated);
+      console.log('canEdit:', canEdit);
+      console.log('userAddress:', userAddress || 'none');
+      console.log('disableAuth:', disableAuth);
+      console.groupEnd();
+    }
   };
   
   // Debug logging for authentication
   useEffect(() => {
-    logAuthState('useEffect');
+    logAuthState('auth-change');
     
-    // Force canEdit to true in development mode for testing
-    // This is TEMPORARY - remove for production
-    if (process.env.NODE_ENV === 'development') {
-      console.log('DEV MODE: Forcing canEdit to true for testing');
-      // This will force the Edit Profile button to show
-    }
-  }, [isAuthenticated, canEdit, userAddress, disableAuth]);
-  
-  // For development - Force authentication on if needed
-  useEffect(() => {
+    // For testing in development only - remove for production
     if (process.env.NODE_ENV === 'development' && searchParams.get('forceAuth') === 'true') {
-      console.log('DEV MODE: Authentication forced to true');
+      console.log('🔧 DEV MODE: Authentication forced to true via URL param');
     }
-    
-    // For debugging in development, force auth if needed
-    if (process.env.NODE_ENV === 'development' && !isAuthenticated) {
-      logAuthState('dev check');
-    }
-  }, [searchParams, isAuthenticated]);
+  }, [isAuthenticated, canEdit, userAddress, disableAuth, searchParams]);
+  
+  // Handle initial page load authentication
+  useEffect(() => {
+    logAuthState('component-mount');
+  }, []);
   
   // For development purposes, let's add a mode switcher component when in dev mode
   const DevModeSwitcher = () => {
