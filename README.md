@@ -12,6 +12,7 @@ This repository contains a refactored version of the MixMi profile component wit
 - ✅ Full Edit mode functionality restored
 - ✅ Proper section visibility controls
 - ✅ All profile sections properly rendering (ProfileDetails, Spotlight, Media, Shop)
+- ✅ Spotlight section now correctly saves and displays images (including GIFs) and text content
 
 ## Components
 
@@ -28,6 +29,11 @@ The application is structured around several key components:
   - `VisibilitySection`: Controls for showing/hiding different sections
 
 ## Recent Fixes
+
+### v3.0.1 (March 26, 2025)
+- 🖼️ Fixed Spotlight section saving functionality - now properly saves images (including GIFs) and text content
+- 🔄 Corrected data flow between editor components and parent container
+- 📝 Fixed state management in UserProfileContainer's handleSave function
 
 ### v3.0.0 (March 25, 2025)
 - 🛠️ Fixed critical infinite loop bug by replacing Radix UI Checkbox component with custom HTML implementation
