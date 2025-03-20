@@ -1,106 +1,105 @@
-# Refactoring Documentation
+# Profile App Refactoring Documentation
 
-## Project Overview
+## Current State
 
-This document tracks the refactoring progress for the MiXMi Profile Editor application. The goal is to break down the monolithic `UserProfile.tsx` component into smaller, more manageable pieces and implement proper separation of concerns.
+### Component Structure
+- `UserProfile.tsx` (30 lines) - Main wrapper component
+- `UserProfileContainer.tsx` (484 lines) - Container component managing state and modes
+- `ProfileView.tsx` (930 lines) - View mode component
+- `ProfileEditor.tsx` (2,609 lines) - Edit mode component
+- Supporting components in `app/components/profile/`:
+  - `Navbar.tsx` (59 lines)
+  - `NavbarContainer.tsx` (133 lines)
+  - `StickerSection.tsx` (123 lines)
+  - `SocialLinks.tsx` (107 lines)
+  - `ShopSection.tsx` (150 lines)
+  - `SpotlightSection.tsx` (258 lines)
+  - `MediaSection.tsx` (147 lines)
 
-## Completed Refactorings
+### Recent Improvements
+1. Successfully separated the monolithic UserProfile.tsx into smaller components
+2. Implemented proper component hierarchy with container pattern
+3. Added helper text visibility toggle based on user edits
+4. Improved save button placement and styling
+5. Enhanced preview mode navigation
 
-### Authentication Logic
+## Refactoring Plan
 
-- Created `useAuthState.tsx` hook to centralize authentication state management
-- Separated the Navbar into `NavbarContainer.tsx` and `Navbar.tsx` components
-- Fixed authentication state detection and visibility of UI elements based on auth state
-- Added timeout mechanisms to prevent UI from getting stuck in loading states
+### 1. Section-Specific Editor Components
+Create new directory: `app/components/profile/editors/`
+- `ProfileDetailsEditor.tsx` - Name, title, bio, profile image
+- `SocialLinksEditor.tsx` - Social media links management
+- `SpotlightEditor.tsx` - Spotlight items management
+- `MediaEditor.tsx` - Media items management
+- `ShopEditor.tsx` - Shop items management
 
-### Type Compatibility
+### 2. Form Validation Logic
+Create new directory: `app/lib/validation/`
+- `profileValidation.ts` - Profile fields validation
+- `socialValidation.ts` - Social links validation
+- `mediaValidation.ts` - Media items validation
+- `shopValidation.ts` - Shop items validation
 
-- Fixed type compatibility issues between different versions of interfaces
-- Ensured consistent type usage across components
-- Created type aliases to maintain backward compatibility
-- Added type assertions to handle edge cases
+### 3. Custom Hooks
+Create in `app/hooks/`
+- `useProfileForm.ts` - Profile form state and validation
+- `useSocialLinks.ts` - Social links management
+- `useSpotlightItems.ts` - Spotlight items management
+- `useMediaItems.ts` - Media items management
+- `useShopItems.ts` - Shop items management
+- `useImageCropper.ts` - Image cropping functionality
 
-### Media Section Extraction
+### 4. Shared UI Components
+Create in `app/components/ui/`
+- `SectionHeader.tsx` - Reusable section header with save button
+- `ItemCard.tsx` - Reusable card component for items
+- `MediaPreview.tsx` - Media preview component
+- `ErrorMessage.tsx` - Standardized error message display
 
-- Integrated the existing `useMediaState.tsx` hook in `UserProfile.tsx`
-- Removed direct media state management from the main component
-- Ensured MediaSection component receives properly typed props
-- Maintained all functionality while simplifying the main component
+### 5. ProfileEditor.tsx Updates
+- Convert to coordinator component
+- Implement new section editors
+- Handle top-level state and callbacks
+- Manage section visibility
 
-### Code Stability Improvements (Latest)
+## Implementation Strategy
 
-- Fixed duplicate variable declarations (`setCropState`, `imageError`, `imageLoading`, etc.)
-- Resolved conflicts between imported functions and local declarations (`addMedia`, `removeMedia`)
-- Added proper type casting to handle type compatibility for data structures (`SpotlightItem`, `ShopItem`)
-- Fixed build environment issues with the `.next` directory
-- Created a stable checkpoint (`UserProfile.stable_checkpoint.tsx`)
-- **Temporarily reverted to stable checkpoint** while fixing integration issues with new components
+1. Start with foundation:
+   - Set up validation library
+   - Create custom hooks
+   - Implement shared UI components
 
-### Component Structure Refactoring (Complete)
+2. Implement section editors one at a time:
+   - Begin with ProfileDetailsEditor
+   - Test thoroughly before moving to next section
+   - Maintain working application throughout
 
-- Created separate view-only component (`ProfileView.tsx`) that matches the original styling exactly
-- Created editing component (`ProfileEditor.tsx`) with proper styling and preview mode
-- Created container component (`UserProfileContainer.tsx`) to manage state and mode switching
-- Created type definition files for spotlight and shop items
-- Created example data files to decouple from the main component
-- Added sticky footer for editing mode and preview mode
-- Implemented proper animations for fade-in effects
-- Maintained identical styling and layout as the original component
-- Restored full functionality including profile editing, media management, and section visibility controls
+3. Update ProfileEditor.tsx gradually:
+   - Replace sections one at a time
+   - Verify functionality after each replacement
+   - Clean up unused code
 
-## Planned Refactorings
+## Known Issues to Address
 
-### State Management Enhancements
+1. Wallet Authentication:
+   - Need to implement account-specific authentication
+   - Add proper session management
+   - Ensure separation between different accounts in same wallet
 
-- Create useSpotlightState hook for better organization
-- Create useShopState hook for better organization
-- Enhance useProfileState with better validation
-- Add proper loading states for asynchronous operations
+2. Performance Optimization:
+   - Reduce component re-renders
+   - Optimize image handling
+   - Improve form validation efficiency
 
-### Form Component Extraction
+## Progress Tracking
 
-- Extract BasicInfoForm into a separate component
-- Extract SocialLinksForm into a dedicated component
-- Create reusable FormSection wrapper
-- Implement more robust validation patterns
-
-### Performance Optimization
-
-- Memoize expensive components with React.memo
-- Optimize state updates with useReducer where appropriate
-- Implement proper React.Suspense for async operations
-- Add proper skeletons for loading states
-
-### Profile View Component
-
-- Extract the view-only mode into a separate component
-- Separate display logic from editing functionality
-- Maintain consistent styling between view and edit modes
-
-### Edit Form Modularization
-
-- Start with extracting the basic information section (name, title, bio)
-- Create reusable form components for each section
-- Implement proper validation and error handling
-
-### Spotlight/Projects Section Extraction
-
-- Create a dedicated hook for managing spotlight/projects state
-- Move related handlers to the hook
-- Simplify the UI component to focus on rendering
-
-### Shop Section Extraction
-
-- Create a dedicated hook for managing shop items state
-- Move related handlers to the hook
-- Simplify the UI component to focus on rendering
-
-## Benefits Achieved
-
-- Improved code maintainability and readability
-- Better separation of concerns
-- Reduced component complexity
-- Enhanced type safety
-- More focused components with clearer responsibilities
-- Better testability for isolated pieces 
-- More stable development environment with fewer runtime errors 
+- [ ] Set up validation library
+- [ ] Create custom hooks
+- [ ] Implement shared UI components
+- [ ] Create ProfileDetailsEditor
+- [ ] Create SocialLinksEditor
+- [ ] Create SpotlightEditor
+- [ ] Create MediaEditor
+- [ ] Create ShopEditor
+- [ ] Update main ProfileEditor
+- [ ] Final testing and optimization 

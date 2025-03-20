@@ -1,9 +1,13 @@
-import UserProfile from './components/UserProfile'
+import { UserProfile } from "@/components/UserProfile";
+import ResetProfileButton from './resetProfileButton';
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-background">
+    <>
       <UserProfile />
-    </main>
-  )
+      {process.env.NODE_ENV === 'development' && (
+        <ResetProfileButton />
+      )}
+    </>
+  );
 }

@@ -6,13 +6,18 @@ import { MediaItem } from '@/types/media'
 export const MediaEmbed = memo(({ item }: { item: MediaItem }) => {
   console.log('MediaEmbed received item:', item);
   console.log('MediaEmbed type:', item.type);
-  console.log('MediaEmbed id:', item.id);
+  console.log('MediaEmbed embedUrl:', item.embedUrl);
+
+  if (!item.embedUrl) {
+    console.log('No embedUrl provided');
+    return null;
+  }
 
   switch (item.type) {
     case 'youtube':
-      const videoId = item.id.includes('embed/') 
-        ? item.id.split('embed/')[1]
-        : item.id.replace('https://www.youtube.com/embed/', '');
+      const videoId = item.embedUrl.includes('embed/') 
+        ? item.embedUrl.split('embed/')[1]
+        : item.embedUrl.replace('https://www.youtube.com/embed/', '');
       
       const embedUrl = `https://www.youtube.com/embed/${videoId}`;
       
@@ -42,7 +47,7 @@ export const MediaEmbed = memo(({ item }: { item: MediaItem }) => {
               scrolling="no"
               frameBorder="no"
               allow="autoplay"
-              src={item.id}
+              src={item.embedUrl}
               style={{ background: 'transparent' }}
             />
           </div>
@@ -56,7 +61,7 @@ export const MediaEmbed = memo(({ item }: { item: MediaItem }) => {
           <div style={{ height: spotifyHeight + 'px' }}>
             <iframe
               className="w-full h-full"
-              src={item.id}
+              src={item.embedUrl}
               allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
               loading="lazy"
               style={{ 
@@ -87,7 +92,7 @@ export const MediaEmbed = memo(({ item }: { item: MediaItem }) => {
                 borderRadius: '10px'
               }}
               sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
-              src={item.id}
+              src={item.embedUrl}
             />
           </div>
         </div>
@@ -98,7 +103,7 @@ export const MediaEmbed = memo(({ item }: { item: MediaItem }) => {
           <div style={{ height: '180px' }}>
             <iframe
               className="w-full h-full"
-              src={item.id}
+              src={item.embedUrl}
               frameBorder="0"
               allow="autoplay"
               loading="lazy"
@@ -112,6 +117,7 @@ export const MediaEmbed = memo(({ item }: { item: MediaItem }) => {
         </div>
       )
     default:
+      console.log('Unsupported media type:', item.type);
       return null
   }
 })

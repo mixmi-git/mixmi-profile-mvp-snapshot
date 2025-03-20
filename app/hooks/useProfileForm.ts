@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ProfileData, MediaItemType, SpotlightItemType, ShopItemType } from '../components/profile/UserProfileContainer';
 import { SocialLinkError } from '../components/profile/editor/types/EditorTypes';
 
@@ -20,6 +20,12 @@ export function useProfileForm(
   const [shopItems, setShopItems] = useState<ShopItemType[]>(initialShopItems);
   const [isDirty, setIsDirty] = useState(false);
   const [socialLinkErrors, setSocialLinkErrors] = useState<SocialLinkError[]>([]);
+  const [sticker, setSticker] = useState<{visible: boolean; image: string}>(
+    profile.sticker || { 
+      visible: false, 
+      image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/daisy-blue-1sqZRfemKwLyREL0Eo89EfmQUT5wst.png" 
+    }
+  );
 
   // Debug logging for initialization
   useEffect(() => {
@@ -170,9 +176,21 @@ export function useProfileForm(
     setIsDirty(true);
   };
 
+  // Sticker handlers
+  const handleStickerEnabledChange = useCallback((visible: boolean) => {
+    setSticker(prev => ({ ...prev, visible }));
+    setIsDirty(true);
+  }, []);
+
+  const handleStickerImageChange = useCallback((image: string) => {
+    setSticker(prev => ({ ...prev, image }));
+    setIsDirty(true);
+  }, []);
+
   const saveAll = async () => {
     const updatedProfile = {
       ...formData,
+      sticker,
       spotlightItems,
       mediaItems,
       shopItems
@@ -192,6 +210,8 @@ export function useProfileForm(
     handleMediaChange,
     handleShopChange,
     handleShopImageUpload,
+    handleStickerEnabledChange,
+    handleStickerImageChange,
     addSpotlightItem,
     removeSpotlightItem,
     addMediaItem,
@@ -203,6 +223,7 @@ export function useProfileForm(
     socialLinkErrors,
     spotlightItems,
     mediaItems,
-    shopItems
+    shopItems,
+    sticker
   };
 }

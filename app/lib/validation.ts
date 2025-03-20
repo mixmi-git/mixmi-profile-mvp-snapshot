@@ -1,56 +1,55 @@
-export const validateSocialUrl = (platform: string, url: string): { isValid: boolean; message: string } => {
-  // Basic URL validation
-  if (!url.trim()) {
+export function validateSocialUrl(platform: string, url: string) {
+  if (!url) {
     return { isValid: false, message: 'URL is required' };
   }
 
   try {
-    new URL(url); // Basic URL format check
+    new URL(url);
   } catch {
-    return { isValid: false, message: 'Please enter a valid URL' };
+    return { isValid: false, message: 'Invalid URL format' };
   }
 
   // Platform-specific validation
-  switch (platform) {
-    case 'youtube':
-      if (!url.includes('youtube.com') && !url.includes('youtu.be')) {
-        return { isValid: false, message: 'Please enter a valid YouTube URL' };
-      }
-      break;
-    case 'spotify':
-      if (!url.includes('spotify.com')) {
-        return { isValid: false, message: 'Please enter a valid Spotify URL' };
-      }
-      break;
-    case 'soundcloud':
-      if (!url.includes('soundcloud.com')) {
-        return { isValid: false, message: 'Please enter a valid SoundCloud URL' };
-      }
-      break;
+  switch (platform.toLowerCase()) {
     case 'twitter':
       if (!url.includes('twitter.com') && !url.includes('x.com')) {
-        return { isValid: false, message: 'Please enter a valid Twitter/X URL' };
+        return { isValid: false, message: 'Must be a Twitter/X URL' };
       }
       break;
     case 'instagram':
       if (!url.includes('instagram.com')) {
-        return { isValid: false, message: 'Please enter a valid Instagram URL' };
+        return { isValid: false, message: 'Must be an Instagram URL' };
+      }
+      break;
+    case 'facebook':
+      if (!url.includes('facebook.com')) {
+        return { isValid: false, message: 'Must be a Facebook URL' };
       }
       break;
     case 'linkedin':
       if (!url.includes('linkedin.com')) {
-        return { isValid: false, message: 'Please enter a valid LinkedIn URL' };
+        return { isValid: false, message: 'Must be a LinkedIn URL' };
       }
       break;
-    case 'tiktok':
-      if (!url.includes('tiktok.com')) {
-        return { isValid: false, message: 'Please enter a valid TikTok URL' };
+    case 'youtube':
+      if (!url.includes('youtube.com')) {
+        return { isValid: false, message: 'Must be a YouTube URL' };
       }
       break;
+    case 'github':
+      if (!url.includes('github.com')) {
+        return { isValid: false, message: 'Must be a GitHub URL' };
+      }
+      break;
+    case 'website':
+      // No specific validation for personal websites
+      break;
+    default:
+      return { isValid: false, message: 'Invalid platform' };
   }
 
   return { isValid: true, message: '' };
-};
+}
 
 export const validateSpotlightItem = (field: string, value: string): { isValid: boolean; message: string } => {
   switch (field) {

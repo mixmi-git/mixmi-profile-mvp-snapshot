@@ -1,22 +1,30 @@
 import React, { useRef, useState } from 'react';
 import { Upload } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import Image from 'next/image';
+import { cn } from '@/lib/utils';
 
 interface ImageUploadProps {
-  onImageUploaded: (file: File) => void;
+  onUpload: (file: File) => void;
   currentImage?: string;
   className?: string;
+  aspectRatio?: 'square' | '16:9';
+  showPreview?: boolean;
 }
 
-export default function ImageUpload({ onImageUploaded, currentImage, className }: ImageUploadProps) {
+export default function ImageUpload({ 
+  onUpload, 
+  currentImage, 
+  className,
+  aspectRatio = 'square',
+  showPreview = false
+}: ImageUploadProps) {
   const [isDragActive, setIsDragActive] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (e.type === "dragenter" || e.type === "dragover") {
       setIsDragActive(true);
     } else if (e.type === "dragleave") {
@@ -28,10 +36,10 @@ export default function ImageUpload({ onImageUploaded, currentImage, className }
     e.preventDefault();
     e.stopPropagation();
     setIsDragActive(false);
-    
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      const file = e.dataTransfer.files[0];
-      handleFile(file);
+
+    const files = e.dataTransfer.files;
+    if (files && files[0]) {
+      handleFile(files[0]);
     }
   };
 
@@ -43,29 +51,78 @@ export default function ImageUpload({ onImageUploaded, currentImage, className }
   };
 
   const handleFile = (file: File) => {
-    const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-    const maxSize = 5 * 1024 * 1024; // 5MB
-
-    if (!validTypes.includes(file.type)) {
-      alert('Please upload an image file (JPEG, PNG, GIF, or WebP)');
+    // Check file type
+    if (!file.type.startsWith('image/')) {
+      console.error('File must be an image');
       return;
     }
 
-    if (file.size > maxSize) {
-      alert('File size must be less than 5MB');
-      return;
+    // Check if it's a GIF and under 5MB, or any other image
+    if ((file.type === 'image/gif' && file.size <= 5 * 1024 * 1024) || 
+        (file.type !== 'image/gif' && file.type.startsWith('image/'))) {
+      onUpload(file);
+    } else if (file.type === 'image/gif' && file.size > 5 * 1024 * 1024) {
+      console.error('GIF files must be under 5MB');
     }
-
-    onImageUploaded(file);
   };
+
+  const containerClasses = cn(
+    "relative border-2 border-dashed rounded-lg cursor-pointer transition-colors",
+    "bg-gray-800/50 border-gray-600 hover:border-gray-500",
+    isDragActive && "border-cyan-500 bg-gray-800/70",
+    aspectRatio === 'square' ? "aspect-square" : "aspect-video",
+    className
+  );
+
+  const previewContainerClasses = cn(
+    "relative rounded-lg overflow-hidden bg-gray-800/50",
+    aspectRatio === 'square' ? "aspect-square" : "aspect-video",
+    className
+  );
+
+  if (showPreview && currentImage) {
+    return (
+      <div className="space-y-4 relative z-10">
+        <div className={previewContainerClasses}>
+          <Image
+            src={currentImage}
+            alt="Preview"
+            fill
+            className="object-cover"
+          />
+        </div>
+        <div 
+          className={containerClasses}
+          onDragEnter={handleDrag}
+          onDragOver={handleDrag}
+          onDragLeave={handleDrag}
+          onDrop={handleDrop}
+          onClick={() => inputRef.current?.click()}
+        >
+          <input
+            ref={inputRef}
+            type="file"
+            className="hidden"
+            onChange={handleChange}
+            accept="image/jpeg,image/png,image/gif,image/webp"
+          />
+          <div className="absolute inset-0 flex flex-col items-center justify-center p-6">
+            <Upload className="h-8 w-8 text-gray-400 mb-2" />
+            <p className="text-sm text-gray-400">
+              Drag & drop an image here, or click to select one
+            </p>
+            <p className="mt-1 text-xs text-gray-500">
+              Supports JPG, PNG, GIF, and WebP under 5MB
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div 
-      className={cn(
-        "relative flex items-center justify-center w-full min-h-[200px] border-2 border-dashed rounded-lg cursor-pointer bg-gray-800/50 border-gray-600 hover:border-gray-500",
-        isDragActive && "border-blue-500",
-        className
-      )}
+      className={containerClasses}
       onDragEnter={handleDrag}
       onDragOver={handleDrag}
       onDragLeave={handleDrag}
@@ -81,21 +138,30 @@ export default function ImageUpload({ onImageUploaded, currentImage, className }
       />
       
       {currentImage ? (
-        <Image
-          src={currentImage}
-          alt="Uploaded preview"
-          className="object-cover rounded-lg"
-          fill
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-        />
+        <div className="absolute inset-0">
+          <Image
+            src={currentImage}
+            alt="Uploaded"
+            fill
+            className="object-cover rounded-lg"
+          />
+          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+            <div className="text-center p-6">
+              <Upload className="mx-auto h-8 w-8 text-white mb-2" />
+              <p className="text-sm text-white">
+                Drop new image or click to replace
+              </p>
+            </div>
+          </div>
+        </div>
       ) : (
-        <div className="text-center p-6">
-          <Upload className="mx-auto h-8 w-8 text-gray-400" />
-          <p className="mt-2 text-sm text-gray-400">
-            Drop image here or click to upload
+        <div className="absolute inset-0 flex flex-col items-center justify-center p-6">
+          <Upload className="h-8 w-8 text-gray-400 mb-2" />
+          <p className="text-sm text-gray-400">
+            Drag & drop an image here, or click to select one
           </p>
           <p className="mt-1 text-xs text-gray-500">
-            JPEG, PNG, GIF, or WebP up to 5MB
+            Supports JPG, PNG, GIF, and WebP under 5MB
           </p>
         </div>
       )}

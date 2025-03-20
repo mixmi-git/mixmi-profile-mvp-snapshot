@@ -3,111 +3,54 @@
 import React, { useState, useCallback } from 'react';
 import Cropper from 'react-easy-crop';
 import { Point, Area } from 'react-easy-crop/types';
+import { Button } from '@/components/ui/button';
 
 interface ImageCropperProps {
   image: string;
-  aspectRatio?: number;
-  onCropComplete: (croppedImage: string) => void;
+  onCrop: (croppedImage: string) => void;
   onCancel: () => void;
 }
 
-const ImageCropper: React.FC<ImageCropperProps> = ({
-  image,
-  aspectRatio = 1,
-  onCropComplete,
-  onCancel
-}) => {
+const ImageCropper: React.FC<ImageCropperProps> = ({ image, onCrop, onCancel }) => {
   const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
 
-  const onCropChange = (newCrop: Point) => {
-    setCrop(newCrop);
+  const onCropComplete = (croppedArea: Area, croppedAreaPixels: Area) => {
+    setCroppedAreaPixels(croppedAreaPixels);
   };
 
-  const onZoomChange = (newZoom: number) => {
-    setZoom(newZoom);
-  };
-
-  const onCropCompleteHandler = useCallback(
-    (croppedArea: Area, croppedAreaPixels: Area) => {
-      setCroppedAreaPixels(croppedAreaPixels);
-    },
-    []
-  );
-
-  const createCroppedImage = async () => {
-    if (!croppedAreaPixels) return;
-
+  const handleCrop = async () => {
     try {
-      const croppedImage = await getCroppedImg(image, croppedAreaPixels);
-      onCropComplete(croppedImage);
+      if (croppedAreaPixels) {
+        const croppedImage = await getCroppedImg(image, croppedAreaPixels);
+        onCrop(croppedImage);
+      }
     } catch (e) {
-      console.error('Error creating cropped image:', e);
+      console.error(e);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75">
-      <div className="bg-gray-800 rounded-lg overflow-hidden w-11/12 max-w-2xl">
-        <div className="px-6 py-4 border-b border-gray-700">
-          <h3 className="text-xl font-medium text-white">Crop Image</h3>
-          <p className="text-gray-400 text-sm">
-            Drag to reposition. Use the slider to zoom in or out.
-            <span className="ml-1 text-cyan-400">We recommend square images for best display across your profile.</span>
-          </p>
-        </div>
-
-        <div className="relative h-72 md:h-96">
-          <Cropper
-            image={image}
-            crop={crop}
-            zoom={zoom}
-            aspect={aspectRatio}
-            onCropChange={onCropChange}
-            onZoomChange={onZoomChange}
-            onCropComplete={onCropCompleteHandler}
-            classes={{
-              containerClassName: 'h-full',
-              cropAreaClassName: 'border-2 border-white'
-            }}
-          />
-        </div>
-
-        <div className="px-6 py-4 bg-gray-900">
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Zoom
-            </label>
-            <input
-              type="range"
-              value={zoom}
-              min={1}
-              max={3}
-              step={0.1}
-              aria-labelledby="Zoom"
-              onChange={(e) => setZoom(Number(e.target.value))}
-              className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
-            />
-          </div>
-
-          <div className="flex justify-end gap-3">
-            <button
-              type="button"
-              onClick={onCancel}
-              className="px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-600 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={createCroppedImage}
-              className="px-4 py-2 bg-cyan-600 text-white rounded-md hover:bg-cyan-500 transition-colors"
-            >
-              Apply
-            </button>
-          </div>
-        </div>
+    <div className="flex flex-col space-y-4">
+      <div className="relative h-96">
+        <Cropper
+          image={image}
+          crop={crop}
+          zoom={zoom}
+          aspect={1}
+          onCropChange={setCrop}
+          onCropComplete={onCropComplete}
+          onZoomChange={setZoom}
+        />
+      </div>
+      <div className="flex justify-end space-x-4">
+        <Button onClick={onCancel} variant="ghost">
+          Cancel
+        </Button>
+        <Button onClick={handleCrop} variant="default">
+          Crop & Save
+        </Button>
       </div>
     </div>
   );

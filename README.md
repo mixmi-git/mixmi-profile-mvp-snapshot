@@ -1,93 +1,67 @@
-# Mixmi Profile Media
+# MixMi Profile Component
 
-A Next.js + TypeScript implementation for embedding and displaying media content from multiple platforms in a customizable profile page.
+A modern, customizable profile component for MixMi platform users.
 
-## Features
+## Current Status - v3.0.0 (March 25, 2025)
 
-### Media Platform Support
-- ✅ YouTube videos
-- ✅ SoundCloud tracks and playlists
-- ✅ Apple Music playlists and albums
-- ✅ Mixcloud shows
-- ✅ Spotify tracks and playlists
+This repository contains a refactored version of the MixMi profile component with the following improvements:
 
-### URL Sharing Guide
-For adding media content, use direct URLs from supported platforms:
-- YouTube: Use the video URL (e.g., https://youtube.com/watch?v=...)
-- SoundCloud: Use track or playlist URL (e.g., https://soundcloud.com/...)
-- Spotify: Use track or playlist URL (e.g., https://open.spotify.com/...)
-- Apple Music: Use album or playlist URL
-- Mixcloud: Use show URL
+- ✅ Fixed infinite update loop in Checkbox components
+- ✅ Implemented custom HTML checkbox to replace problematic Radix UI components
+- ✅ Improved state management in form components
+- ✅ Full Edit mode functionality restored
+- ✅ Proper section visibility controls
+- ✅ All profile sections properly rendering (ProfileDetails, Spotlight, Media, Shop)
 
-Note: Please use direct URLs rather than embed codes for all platforms.
+## Components
 
-### Profile Features
-- 🎨 Customizable profile sections
-- 🖼️ Spotlight projects showcase with image upload support
-- 🛍️ Shop integration
-- 🎯 Section visibility controls
-- 🌟 Custom profile stickers
-- 📱 Responsive design
-- 🎨 Dark mode UI
-- 💾 Local storage for profile data
+The application is structured around several key components:
 
-### Technical Features
-- 🔒 Wallet connection support
-- 📱 Responsive design
-- 🎯 TypeScript implementation
-- ⚡ Next.js for optimal performance
-- 💾 Tailwind CSS for styling
-- 🧩 ShadCN UI components
-- 💾 Local storage for profile data
+- `UserProfileContainer`: Main container component that manages profile state and mode switching
+- `ProfileView`: Responsible for displaying the read-only view of a user's profile
+- `ProfileEditor`: Handles the edit mode with form controls for modifying profile data
+- Various section components:
+  - `ProfileDetailsSection`: Basic profile info (name, bio, image)
+  - `SpotlightSection`: Featured content section
+  - `MediaSection`: Embedded media from various platforms
+  - `ShopSection`: Products or services for sale
+  - `VisibilitySection`: Controls for showing/hiding different sections
 
-## Development
+## Recent Fixes
 
-This is a Next.js project bootstrapped with `create-next-app`.
+### v3.0.0 (March 25, 2025)
+- 🛠️ Fixed critical infinite loop bug by replacing Radix UI Checkbox component with custom HTML implementation
+- 🔄 Improved state management in form components to prevent React state cycling
+- 🎛️ Enhanced section visibility controls with improved state handling
 
-### Prerequisites
-- Node.js 16.8 or later
-- npm or yarn
+## Development Notes
 
-### Getting Started
+### Known Issues
+- Styling and UI refinements needed
+- StickerSection temporarily removed due to rendering issues (backed up in repo history)
 
-1. Clone the repository:
+### Upcoming Work
+- UI/UX improvements
+- Additional profile section features
+- Improved responsive design
+
+## Version Control Strategy
+
+We maintain a strict versioning approach:
+1. Working milestones are tagged with version numbers
+2. Detailed commit messages explain changes and fixes
+3. We never overwrite or force push to working versions
+4. Checkpoint branches preserve key functionality points
+
+## Setup and Development
+
 ```bash
-git clone [repository-url]
-cd mixmi-profile-media
-```
-
-2. Install dependencies:
-```bash
+# Install dependencies
 npm install
-# or
-yarn install
-```
 
-3. Run the development server:
-```bash
+# Run development server
 npm run dev
-# or
-yarn dev
 ```
-
-4. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-### Project Structure
-```
-mixmi-profile-media/
-├── app/                    # Next.js app directory
-│   ├── components/        # React components
-│   │   ├── ui/           # Reusable UI components
-│   │   ├── profile/      # Profile-specific components
-│   │   └── media/        # Media embedding components
-│   ├── lib/              # Utility functions
-│   └── types/            # TypeScript type definitions
-├── public/               # Static files
-└── styles/              # Global styles
-```
-
-## Contributing
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
 ## License
-[MIT](https://choosealicense.com/licenses/mit/)
+Proprietary - All rights reserved

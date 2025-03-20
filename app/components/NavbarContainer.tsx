@@ -1,39 +1,57 @@
 'use client';
 
-import React from 'react';
-import StacksConnect from './StacksConnect';
-import { useAuthState } from '../hooks/useAuthState';
+import { useCallback, useEffect, useState } from 'react'
+import { Navbar } from '@/components/Navbar'
+import { useAuth } from '@/lib/auth'
 
-export const NavbarContainer: React.FC = () => {
-  // For backward compatibility and logging, we'll keep the useAuthState hook
-  // but use StacksConnect for the UI
-  const { isAuthenticated, userAddress } = useAuthState();
+/**
+ * NavbarContainer handles authentication logic and renders the Navbar
+ * This pattern helps isolate auth logic from the main profile component
+ */
+export function NavbarContainer() {
+  const { isAuthenticated, connectWallet, disconnectWallet, refreshAuthState, isInitialized } = useAuth()
+  const [isLoading, setIsLoading] = useState(true)
   
-  // Development-only logging
-  React.useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('NavbarContainer - Auth state:', { isAuthenticated, userAddress });
+  // Add debug logging for authentication state
+  useEffect(() => {
+    console.log('NavbarContainer auth state:', { isAuthenticated, isInitialized })
+    
+    // If auth is initialized or we have a definitive auth state, we can stop loading
+    if (isInitialized || isAuthenticated !== undefined) {
+      setIsLoading(false)
     }
-  }, [isAuthenticated, userAddress]);
-
+  }, [isAuthenticated, isInitialized])
+  
+  // Add a timeout to clear loading state even if auth initialization takes too long
+  useEffect(() => {
+    // Force loading to stop after 3 seconds maximum, regardless of auth state
+    const timeout = setTimeout(() => {
+      if (isLoading) {
+        console.log('NavbarContainer: Forcing loading state to end after timeout')
+        setIsLoading(false)
+      }
+    }, 3000)
+    
+    return () => clearTimeout(timeout)
+  }, [isLoading])
+  
+  // Poll for auth state changes
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (isInitialized) {
+        refreshAuthState()
+      }
+    }, 2000) // Check every 2 seconds
+    
+    return () => clearInterval(interval)
+  }, [refreshAuthState, isInitialized])
+  
   return (
-    <header className="bg-gray-900 border-b border-gray-800 p-4">
-      <div className="container mx-auto flex justify-between items-center">
-        <div className="flex items-center">
-          <a href="/" className="h-8 w-auto relative">
-            <img
-              src="/images/logos/Logotype_Main.svg"
-              alt="mixmi"
-              className="h-8 w-auto"
-            />
-          </a>
-        </div>
-        
-        <div>
-          {/* Replace previous wallet connect UI with StacksConnect */}
-          <StacksConnect />
-        </div>
-      </div>
-    </header>
-  );
-}; 
+    <Navbar
+      isAuthenticated={isAuthenticated}
+      isLoading={isLoading}
+      onConnect={connectWallet}
+      onDisconnect={disconnectWallet}
+    />
+  )
+} 

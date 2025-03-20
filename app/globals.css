@@ -12,6 +12,22 @@ body {
   }
 }
 
+/* Sticker Animation */
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.sticker-rotate {
+  animation: rotate 30s linear infinite;
+  transform-origin: center;
+  display: inline-block;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

@@ -17,6 +17,7 @@ import { MediaEmbed } from "@/components/media/MediaEmbed";
 import { MediaItemType } from '../../UserProfileContainer';
 import { MediaType, MediaItem } from '@/types/media';
 
+// Simplified interface with clear props
 interface MediaSectionProps {
   items: MediaItemType[];
   onChange: (index: number, field: keyof MediaItemType, value: any) => void;
@@ -33,50 +34,22 @@ export default function MediaSection({
   // Ensure items is always an array
   const safeItems = Array.isArray(items) ? items : [];
   
-  // Debug logging
+  // Debug logging on mount
   useEffect(() => {
-    console.log('🎵 MediaSection mounted with items:', {
-      itemsLength: safeItems.length,
-      isArray: Array.isArray(items),
-      items: safeItems,
-      firstItem: safeItems[0],
-      componentStack: new Error().stack
+    console.log('MediaSection mounted with items:', {
+      count: safeItems.length,
+      items: safeItems
     });
-  }, [items]);
+  }, []);
 
-  useEffect(() => {
-    console.log('🎵 MediaSection items updated:', {
-      itemsLength: safeItems.length,
-      isArray: Array.isArray(items),
-      items: safeItems,
-      firstItem: safeItems[0]
-    });
-  }, [items]);
-
+  // Handle URL and field changes with appropriate transformations
   const handleMediaChange = useCallback((index: number, field: keyof MediaItemType, value: string) => {
-    console.log('🎵 Handling media change:', { index, field, value });
+    console.log('Handling media change:', { index, field, value });
     
     if (field === 'id') {
-      console.log('Processing URL:', value); // Debug log
-      
-      const cleanValue = value.trim().replace(/^h+ttps:\/\//, 'https://');
-      console.log('2. Cleaned value:', cleanValue);
-      
+      const cleanValue = value.trim();
       let transformedUrl = cleanValue;
       let mediaType = detectMediaType(cleanValue);
-      console.log('3. Initial media type:', mediaType);
-
-      // Check for iframe code first
-      if (cleanValue.includes('<iframe')) {
-        console.log('4. Found iframe code');
-        const srcMatch = cleanValue.match(/src="([^"]+)"/);
-        if (srcMatch) {
-          transformedUrl = srcMatch[1];
-          console.log('5. Extracted src URL:', transformedUrl);
-          mediaType = detectMediaType(transformedUrl);
-          console.log('6. Updated media type:', mediaType);
-        }
-      }
 
       // Transform URL based on detected type
       if (mediaType.includes('soundcloud')) {
@@ -93,9 +66,6 @@ export default function MediaSection({
         transformedUrl = transformYouTubeUrl(cleanValue);
       }
 
-      console.log('7. Final mediaType:', mediaType);
-      console.log('8. Final transformedUrl:', transformedUrl);
-
       // Update the media item with all the new values
       onChange(index, 'id', transformedUrl);
       onChange(index, 'type', mediaType);
@@ -109,7 +79,7 @@ export default function MediaSection({
   const convertToMediaItem = (item: MediaItemType): MediaItem => ({
     ...item,
     type: item.type as MediaType,
-    embedUrl: item.id, // Use the id as the embedUrl
+    embedUrl: item.id,
     rawUrl: item.rawUrl || item.id
   });
 
@@ -120,7 +90,7 @@ export default function MediaSection({
           <div>
             <h2 className="text-2xl font-bold">Media</h2>
             <p className="text-sm text-gray-400 mt-2">
-              Share your music, videos, DJ mixes, and playlists from YouTube, SoundCloud, Mixcloud, Spotify and Apple Music. Supports all formats.
+              Share your music, videos, DJ mixes, and playlists from YouTube, SoundCloud, Mixcloud, Spotify and Apple Music.
             </p>
           </div>
           <Button onClick={onAdd} variant="outline" size="sm">
@@ -129,6 +99,7 @@ export default function MediaSection({
           </Button>
         </div>
 
+        {/* Simple Accordion for Media Items */}
         <Accordion type="single" collapsible className="w-full space-y-2">
           {safeItems.map((item, index) => (
             <AccordionItem key={index} value={`item-${index}`}>
@@ -139,6 +110,7 @@ export default function MediaSection({
               </AccordionTrigger>
               <AccordionContent>
                 <div className="space-y-4 pt-4">
+                  {/* URL Input */}
                   <div>
                     <Label htmlFor={`media-url-${index}`}>Media URL</Label>
                     <div className="space-y-2">
@@ -147,7 +119,6 @@ export default function MediaSection({
                         value={item.rawUrl || item.id || ''}
                         onChange={(e) => handleMediaChange(index, 'id', e.target.value)}
                         placeholder="Paste URL from YouTube, SoundCloud, Spotify, or Apple Music"
-                        onFocus={(e) => e.target.select()}
                       />
                       <p className="text-sm text-gray-400">
                         Supports: YouTube, Spotify, SoundCloud, Apple Music, and Mixcloud
@@ -155,6 +126,7 @@ export default function MediaSection({
                     </div>
                   </div>
                   
+                  {/* Title Input */}
                   <div>
                     <Label>Title (Optional)</Label>
                     <Input
@@ -164,12 +136,14 @@ export default function MediaSection({
                     />
                   </div>
                   
+                  {/* Preview Embed (only show if we have a valid URL) */}
                   {item.id && (
                     <div className="mt-4 overflow-hidden">
                       <MediaEmbed item={convertToMediaItem(item)} />
                     </div>
                   )}
                   
+                  {/* Remove Button */}
                   <Button
                     onClick={() => onRemove(index)}
                     variant="destructive"
@@ -185,6 +159,7 @@ export default function MediaSection({
           ))}
         </Accordion>
         
+        {/* Empty State */}
         {safeItems.length === 0 && (
           <div className="text-center py-8">
             <p className="text-gray-400">No media items yet. Add one to get started!</p>

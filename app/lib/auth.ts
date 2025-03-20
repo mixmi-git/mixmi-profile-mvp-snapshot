@@ -26,22 +26,31 @@ declare module '@stacks/connect' {
 const appConfig = new AppConfig(['store_write'])
 const userSession = new UserSession({ appConfig })
 
-// Simplified function to check local storage for session data
-function checkLocalStorageForSession() {
+// Helper function to check for session data in localStorage
+const checkLocalStorageForSession = () => {
   if (typeof window === 'undefined') return false;
   
   try {
     const sessionData = localStorage.getItem('blockstack-session');
-    if (sessionData) {
-      console.log('Auth: Found session data in localStorage');
-      return true;
-    }
-    return false;
-  } catch (e) {
-    console.error('Auth: Error checking localStorage', e);
+    return !!sessionData;
+  } catch (error) {
+    console.error('Error checking localStorage for session:', error);
     return false;
   }
-}
+};
+
+// Helper function to check if Stacks wallet is installed
+const checkHasStacksWallet = () => {
+  if (typeof window === 'undefined') return false;
+  
+  try {
+    // @ts-ignore - window.StacksProvider is added by the Stacks wallet
+    return !!window.StacksProvider;
+  } catch (error) {
+    console.error('Error checking for Stacks wallet:', error);
+    return false;
+  }
+};
 
 // Global state to track connection attempts
 let connectionInProgress = false;
@@ -289,10 +298,4 @@ export function useAuth() {
     refreshAuthState,
     isInitialized
   }
-}
-
-// Function to check if the user has Stacks Leather Wallet installed
-export function checkHasStacksWallet() {
-  if (typeof window === 'undefined') return false;
-  return !!(window as any).StacksProvider;
 }

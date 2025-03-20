@@ -1,12 +1,43 @@
 import { useState, useCallback } from "react"
-import { Profile, SocialLink, SectionVisibility, FormError, FormErrors } from "../types/content"
 
 // Types
-// interfaces moved to ../types/content.ts
+export interface SocialLink {
+  platform: string
+  url: string
+}
+
+export interface SectionVisibility {
+  projects: boolean
+  media: boolean
+  shop: boolean
+}
+
+export interface Profile {
+  name: string
+  title: string
+  bio: string
+  image: string
+  socialLinks: SocialLink[]
+  sectionVisibility: SectionVisibility
+  spotlightDescription: string
+  hasEditedProfile: boolean
+}
+
+interface FormError {
+  message: string
+  isValid: boolean
+}
+
+export interface FormErrors {
+  name: FormError
+  title: FormError
+  bio: FormError
+  socialLinks: FormError[]
+}
 
 const defaultProfile: Profile = {
   name: "Your Name",
-  title: "Your Role / Title",
+  title: "What you do",
   bio: "Tell your story here...",
   image: "/images/placeholder.png",
   socialLinks: [
@@ -20,7 +51,8 @@ const defaultProfile: Profile = {
     media: true,
     shop: true
   },
-  spotlightDescription: ""
+  spotlightDescription: "",
+  hasEditedProfile: false
 }
 
 export function useProfileState() {
@@ -39,7 +71,8 @@ export function useProfileState() {
   const handleProfileChange = useCallback((field: keyof Profile, value: any) => {
     setProfile(prev => ({
       ...prev,
-      [field]: value
+      [field]: value,
+      hasEditedProfile: field === 'hasEditedProfile' ? value : true
     }))
   }, [])
 
@@ -50,7 +83,8 @@ export function useProfileState() {
       sectionVisibility: {
         ...prev.sectionVisibility,
         [section]: !prev.sectionVisibility[section]
-      }
+      },
+      hasEditedProfile: true
     }))
   }, [])
 
@@ -64,14 +98,18 @@ export function useProfileState() {
       }
       return {
         ...prev,
-        socialLinks: updatedLinks
+        socialLinks: updatedLinks,
+        hasEditedProfile: true
       }
     })
   }, [])
 
   // Reset profile to default
   const resetProfile = useCallback(() => {
-    setProfile(defaultProfile)
+    setProfile({
+      ...defaultProfile,
+      hasEditedProfile: false
+    })
     setFormErrors({
       name: { message: '', isValid: true },
       title: { message: '', isValid: true },
