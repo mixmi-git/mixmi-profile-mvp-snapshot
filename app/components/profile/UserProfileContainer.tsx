@@ -118,11 +118,20 @@ export interface UserProfileContainerProps {
 // Initial profile data
 const defaultProfile: ProfileData = {
   id: Date.now().toString(),
-  name: '',
-  title: '',
-  bio: '',
-  image: '',
-  socialLinks: [],
+  name: 'Your Name',
+  title: 'Artist / Producer / DJ',
+  bio: 'Tell your story here! Share what makes you unique as an artist. This is where fans can learn more about your journey, inspirations, and creative process.',
+  image: '/images/placeholder.png',
+  socialLinks: [
+    {
+      platform: 'twitter',
+      url: 'https://twitter.com/example'
+    },
+    {
+      platform: 'instagram',
+      url: 'https://instagram.com/example'
+    }
+  ],
   sectionVisibility: {
     spotlight: true,
     media: true,
@@ -216,7 +225,8 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
         console.log('🎉 First-time user detected! Loading example content');
         
         const profileWithDefaults = {
-          ...savedProfile,
+          ...defaultProfile,
+          id: Date.now().toString(),
           sectionVisibility: {
             spotlight: true,
             media: true,
