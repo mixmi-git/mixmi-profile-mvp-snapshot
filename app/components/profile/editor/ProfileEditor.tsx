@@ -55,6 +55,13 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
 
   const handleSaveAll = async () => {
     const updatedProfile = await saveAll();
+    console.log('ProfileEditor - handleSaveAll - updatedProfile:', {
+      updatedProfile,
+      hasSpotlightItems: !!updatedProfile.spotlightItems,
+      spotlightItemsCount: updatedProfile.spotlightItems?.length || 0,
+      spotlightItems: updatedProfile.spotlightItems
+    });
+    
     if (updatedProfile && onSave) {
       await onSave(updatedProfile);
     }

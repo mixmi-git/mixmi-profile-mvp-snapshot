@@ -212,7 +212,11 @@ export const useProfileForm = (
         mediaItems,
         shopItems
       };
-      console.log('Save successful');
+      console.log('useProfileForm - saveAll success, returning:', {
+        updatedProfile,
+        spotlightItemsCount: spotlightItems?.length || 0,
+        spotlightItems
+      });
       setIsDirty(false);
       return updatedProfile;
     }
@@ -220,12 +224,18 @@ export const useProfileForm = (
     console.warn('Save cancelled due to validation errors');
     // Return the current profile even if there are validation errors
     // This ensures we don't return null
-    return {
+    const fallbackProfile = {
       ...formData,
       spotlightItems,
       mediaItems,
       shopItems
     };
+    console.log('useProfileForm - saveAll with validation errors, returning fallback:', {
+      fallbackProfile,
+      spotlightItemsCount: spotlightItems?.length || 0,
+      spotlightItems
+    });
+    return fallbackProfile;
   }, [formData, spotlightItems, mediaItems, shopItems]);
 
   return {

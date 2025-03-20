@@ -302,26 +302,34 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
   const handleSave = async (updatedProfile: ProfileData) => {
     console.log('📦 Saving profile data:', updatedProfile);
     
+    // Extract items from the updatedProfile if they exist
+    const updatedSpotlightItems = updatedProfile.spotlightItems || spotlightItems;
+    const updatedMediaItems = updatedProfile.mediaItems || mediaItems;
+    const updatedShopItems = updatedProfile.shopItems || shopItems;
+    
     // Create a complete profile object with all data
     const completeProfile = {
       ...updatedProfile,
       hasEditedProfile: true,
-      // Explicitly include items arrays from state to ensure they're saved
-      spotlightItems: spotlightItems,
-      mediaItems: mediaItems,
-      shopItems: shopItems
+      // Use the updated items
+      spotlightItems: updatedSpotlightItems,
+      mediaItems: updatedMediaItems,
+      shopItems: updatedShopItems
     };
     
     // Save all data to localStorage
     saveToStorage(STORAGE_KEYS.PROFILE, completeProfile);
-    saveToStorage(STORAGE_KEYS.SPOTLIGHT, spotlightItems);
-    saveToStorage(STORAGE_KEYS.MEDIA, mediaItems);
-    saveToStorage(STORAGE_KEYS.SHOP, shopItems);
+    saveToStorage(STORAGE_KEYS.SPOTLIGHT, updatedSpotlightItems);
+    saveToStorage(STORAGE_KEYS.MEDIA, updatedMediaItems);
+    saveToStorage(STORAGE_KEYS.SHOP, updatedShopItems);
     
     console.log('📦 Saved complete profile:', completeProfile);
     
-    // Update state
+    // Update state with the new items
     setProfile(completeProfile);
+    setSpotlightItems(updatedSpotlightItems);
+    setMediaItems(updatedMediaItems);
+    setShopItems(updatedShopItems);
     
     // Transition to view mode
     transitionMode(ProfileMode.VIEW);
