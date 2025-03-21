@@ -19,7 +19,11 @@ export const useAuthState = (onConnect?: (address: string) => void) => {
     userAddress, 
     connectWallet, 
     disconnectWallet,
-    isInitialized
+    isInitialized,
+    availableAccounts,
+    currentAccount,
+    switchAccount,
+    getProfileIdForAddress
   } = useAuth();
   
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -30,6 +34,8 @@ export const useAuthState = (onConnect?: (address: string) => void) => {
       console.group(`🔐 Auth State [${context}]`);
       console.log('isAuthenticated:', isAuthenticated);
       console.log('userAddress:', userAddress);
+      console.log('currentAccount:', currentAccount);
+      console.log('availableAccounts:', availableAccounts);
       console.log('isTransitioning:', isTransitioning);
       console.log('isInitialized:', isInitialized);
       console.groupEnd();
@@ -39,7 +45,7 @@ export const useAuthState = (onConnect?: (address: string) => void) => {
   // Log initial state and any changes
   useEffect(() => {
     logAuthState('state-change');
-  }, [isAuthenticated, userAddress, isTransitioning, isInitialized]);
+  }, [isAuthenticated, userAddress, isTransitioning, isInitialized, currentAccount, availableAccounts]);
 
   // Effect to call onConnect when authentication state changes
   useEffect(() => {
@@ -72,6 +78,10 @@ export const useAuthState = (onConnect?: (address: string) => void) => {
     userAddress,
     isTransitioning,
     isInitialized,
-    handleLoginToggle
+    handleLoginToggle,
+    availableAccounts,
+    currentAccount,
+    switchAccount,
+    getProfileIdForAddress
   };
 }; 

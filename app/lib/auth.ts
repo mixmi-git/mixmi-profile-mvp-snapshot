@@ -8,6 +8,8 @@ interface StacksUserData {
       mainnet: string;
       testnet: string;
     };
+    // Add a property to store the currently selected account
+    currentAccount?: string;
   };
 }
 
@@ -56,11 +58,146 @@ const checkHasStacksWallet = () => {
 let connectionInProgress = false;
 let connectionAttemptTimestamp = 0;
 
-export function useAuth() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [userAddress, setUserAddress] = useState<string | null>(null)
-  const [isInitialized, setIsInitialized] = useState(false)
-  // Force component to re-render when needed
+// Helper function to get the current account from the Stacks wallet
+const getCurrentAccount = async (userSession: UserSession): Promise<string[]> => {
+  if (typeof window === 'undefined') return [];
+  
+  try {
+    // @ts-ignore - window.StacksProvider is added by the Stacks wallet
+    if (window.StacksProvider) {
+      // @ts-ignore
+      const accounts = await window.StacksProvider.getAccounts?.();
+      return accounts && accounts.length > 0 ? accounts : [];
+    }
+    return [];
+  } catch (error) {
+    console.error('Error getting current account from Stacks wallet:', error);
+    return [];
+  }
+};
+
+// Add storage key for account profile mapping
+const ACCOUNT_PROFILE_MAP_KEY = 'mixmi_account_profile_map';
+
+// Helper function to get the profile ID for a specific wallet address
+export const getProfileIdForAddress = (address: string): string | null => {
+  if (typeof window === 'undefined') return null;
+  
+  try {
+    // Get the account-to-profile mapping from localStorage
+    const mapString = localStorage.getItem(ACCOUNT_PROFILE_MAP_KEY);
+    const map = mapString ? JSON.parse(mapString) : {};
+    
+    // Return the profile ID for this address, or null if not found
+    return map[address] || null;
+  } catch (error) {
+    console.error('Error getting profile ID for address:', error);
+    return null;
+  }
+};
+
+// Helper function to associate a wallet address with a profile ID
+export const setProfileIdForAddress = (address: string, profileId: string): void => {
+  if (typeof window === 'undefined') return;
+  
+  try {
+    // Get the current mapping
+    const mapString = localStorage.getItem(ACCOUNT_PROFILE_MAP_KEY);
+    const map = mapString ? JSON.parse(mapString) : {};
+    
+    // Add or update the mapping
+    map[address] = profileId;
+    
+    // Save back to localStorage
+    localStorage.setItem(ACCOUNT_PROFILE_MAP_KEY, JSON.stringify(map));
+  } catch (error) {
+    console.error('Error setting profile ID for address:', error);
+  }
+};
+
+export const useAuth = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userAddress, setUserAddress] = useState<string | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [availableAccounts, setAvailableAccounts] = useState<string[]>([]);
+  const [currentAccount, setCurrentAccount] = useState<string | null>(null);
+
+  const connectWallet = useCallback(async () => {
+    try {
+      console.log("🔌 Connecting wallet...");
+      
+      // Check if already signed in
+      if (userSession.isUserSignedIn()) {
+        console.log("👤 User already signed in");
+        userSession.signUserOut('');
+      }
+
+      // Use showConnect from @stacks/connect instead of openSTXConnect
+      showConnect({
+        appDetails: {
+          name: 'Mixmi',
+          icon: window.location.origin + '/favicon.ico',
+        },
+        redirectTo: window.location.origin,
+        onFinish: () => {
+          console.log('Auth: onFinish callback triggered');
+          
+          // Allow time for the session to be fully established
+          setTimeout(() => {
+            try {
+              // Check if the user is now signed in
+              if (userSession.isUserSignedIn()) {
+                const userData = userSession.loadUserData();
+                console.log('✅ Wallet connected:', userData);
+                setIsAuthenticated(true);
+                setUserAddress(userData.profile.stxAddress.mainnet);
+                
+                // Try to get available accounts from the wallet
+                try {
+                  // @ts-ignore
+                  if (window?.StacksProvider?.getAccounts) {
+                    // @ts-ignore
+                    const accounts = window.StacksProvider.getAccounts();
+                    if (accounts && accounts.length > 0) {
+                      setAvailableAccounts(accounts);
+                      setCurrentAccount(accounts[0]);
+                    } else {
+                      setAvailableAccounts([userData.profile.stxAddress.mainnet]);
+                      setCurrentAccount(userData.profile.stxAddress.mainnet);
+                    }
+                  } else {
+                    setAvailableAccounts([userData.profile.stxAddress.mainnet]);
+                    setCurrentAccount(userData.profile.stxAddress.mainnet);
+                  }
+                } catch (error) {
+                  console.error('Error getting accounts from provider:', error);
+                  setAvailableAccounts([userData.profile.stxAddress.mainnet]);
+                  setCurrentAccount(userData.profile.stxAddress.mainnet);
+                }
+              }
+            } catch (error) {
+              console.error('Error in onFinish timeout handler', error);
+            }
+          }, 500);
+        },
+        userSession,
+      });
+    } catch (error) {
+      console.error("Error connecting wallet:", error);
+    }
+  }, []);
+
+  // Make sure to console log when authentication state changes
+  useEffect(() => {
+    console.log("🔐 Auth state changed:", { 
+      isAuthenticated, 
+      userAddress,
+      availableAccounts,
+      currentAccount
+    });
+  }, [isAuthenticated, userAddress, availableAccounts, currentAccount]);
+
+  // Add state for available accounts
   const [refreshCounter, setRefreshCounter] = useState(0)
 
   // Function to check auth status and update state
@@ -71,8 +208,24 @@ export function useAuth() {
         const userData = userSession.loadUserData()
         console.log('Auth: User is signed in via session', userData)
         setIsAuthenticated(true)
-        setUserAddress(userData.profile.stxAddress.mainnet)
-        return;
+        
+        // Get the mainnet address from user data
+        const mainnetAddress = userData.profile.stxAddress.mainnet
+        setUserAddress(mainnetAddress)
+        
+        // Try to get the current account from the wallet
+        const account = getCurrentAccount(userSession)
+        setCurrentAccount(account && account.length > 0 ? account[0] : null)
+        
+        // Update the profile ID mapping if needed
+        const profileId = getProfileIdForAddress(mainnetAddress)
+        if (!profileId) {
+          // Create a new profile ID and associate it with this address
+          const newProfileId = `profile_${Date.now()}`
+          setProfileIdForAddress(mainnetAddress, newProfileId)
+        }
+        
+        return
       }
       
       // Second check: If we see session data in localStorage but userSession doesn't recognize it
@@ -92,6 +245,7 @@ export function useAuth() {
               const address = parsedSession.userData.profile?.stxAddress?.mainnet;
               if (address) {
                 setUserAddress(address);
+                setCurrentAccount(address);
                 return;
               }
             }
@@ -106,6 +260,7 @@ export function useAuth() {
       if (userAddress) {
         console.log('Auth: User address exists but session not detected, keeping authenticated state');
         setIsAuthenticated(true);
+        setCurrentAccount(userAddress);
         return;
       }
       
@@ -113,10 +268,12 @@ export function useAuth() {
       console.log('Auth: User is NOT signed in')
       setIsAuthenticated(false)
       setUserAddress(null)
+      setCurrentAccount(null)
     } catch (error) {
       console.error('Auth: Error checking auth status', error)
       setIsAuthenticated(false)
       setUserAddress(null)
+      setCurrentAccount(null)
     }
     setIsInitialized(true)
   }, [userAddress])
@@ -146,6 +303,7 @@ export function useAuth() {
           console.log('Auth: Successfully handled pending sign-in', userData)
           setIsAuthenticated(true)
           setUserAddress(userData.profile.stxAddress.mainnet)
+          setCurrentAccount(userData.profile.stxAddress.mainnet)
           setIsInitialized(true)
           clearTimeout(initTimeout)
         })
@@ -189,12 +347,13 @@ export function useAuth() {
           console.log('Auth: Polling detected successful sign-in!', userData);
           setIsAuthenticated(true);
           setUserAddress(userData.profile.stxAddress.mainnet);
+          setCurrentAccount(userData.profile.stxAddress.mainnet);
           connectionInProgress = false;
           clearInterval(pollInterval);
         } else if (checkLocalStorageForSession()) {
           console.log('Auth: Polling found session data in localStorage');
           // Force a refresh to trigger a re-render and state re-check
-          forceRefresh();
+          forceRefresh()
         }
       } catch (error) {
         console.error('Auth: Error during auth polling', error);
@@ -204,79 +363,13 @@ export function useAuth() {
     return () => clearInterval(pollInterval);
   }, [checkAuthStatus, forceRefresh, refreshCounter]);
 
-  const connectWallet = useCallback(() => {
-    console.log('Auth: Connecting wallet...')
-    
-    // Check if Stacks Leather Wallet is installed
-    if (checkHasStacksWallet()) {
-      console.log('Auth: Using Stacks Leather Wallet for connection');
-    }
-    
-    // Check if already signed in first
-    if (userSession.isUserSignedIn()) {
-      console.log('Auth: User is already signed in')
-      checkAuthStatus() // Update state to reflect this
-      return
-    }
-    
-    // Mark that we're attempting a connection
-    connectionInProgress = true;
-    connectionAttemptTimestamp = Date.now();
-    
-    // Attempt to show the connect dialog
-    try {
-      showConnect({
-        appDetails: {
-          name: 'Mixmi',
-          icon: window.location.origin + '/favicon.ico',
-        },
-        redirectTo: window.location.origin,
-        onFinish: () => {
-          console.log('Auth: onFinish callback triggered')
-          
-          // Allow time for the session to be fully established
-          setTimeout(() => {
-            try {
-              // Check if the user is now signed in
-              if (userSession.isUserSignedIn()) {
-                const userData = userSession.loadUserData()
-                console.log('Auth: User signed in via onFinish:', userData)
-                setIsAuthenticated(true)
-                setUserAddress(userData.profile.stxAddress.mainnet)
-              } else {
-                console.log('Auth: User still not signed in after onFinish')
-                // Check if we have session data in localStorage that the userSession doesn't recognize
-                if (checkLocalStorageForSession()) {
-                  console.log('Auth: Found session in localStorage after onFinish')
-                  // Force a refresh to trigger a component update
-                  forceRefresh()
-                }
-              }
-            } catch (error) {
-              console.error('Auth: Error in onFinish timeout handler', error)
-            } finally {
-              // We're done with this connection attempt regardless of result
-              connectionInProgress = false
-            }
-          }, 500)
-        },
-        userSession,
-      })
-      
-      // After showing connect, trigger a state refresh to start polling
-      forceRefresh()
-    } catch (error) {
-      console.error('Auth: Error showing connect dialog', error)
-      connectionInProgress = false
-    }
-  }, [checkAuthStatus, forceRefresh])
-
   const disconnectWallet = useCallback(() => {
     console.log('Auth: Disconnecting wallet...')
     try {
       userSession.signUserOut('')  // Pass an empty string to prevent redirection issues
       setIsAuthenticated(false)
       setUserAddress(null)
+      setCurrentAccount(null)
       console.log('Auth: Wallet disconnected!')
       forceRefresh() // Ensure UI updates after disconnect
     } catch (error) {
@@ -290,12 +383,87 @@ export function useAuth() {
     checkAuthStatus()
   }, [checkAuthStatus])
 
+  // Function to switch between accounts
+  const switchAccount = useCallback((accountAddress: string) => {
+    console.log('Auth: Switching to account', accountAddress);
+    
+    if (isAuthenticated && userAddress) {
+      // Update the current account in state
+      setCurrentAccount(accountAddress);
+      
+      // Check if this account has a profile ID
+      const profileId = getProfileIdForAddress(accountAddress);
+      if (!profileId) {
+        // Create a new profile ID for this account
+        const newProfileId = `profile_${Date.now()}`;
+        setProfileIdForAddress(accountAddress, newProfileId);
+      }
+      
+      // Force a refresh to update the UI
+      forceRefresh();
+    }
+  }, [isAuthenticated, userAddress, forceRefresh]);
+
+  // Update available accounts when authenticated
+  useEffect(() => {
+    if (isAuthenticated && userAddress) {
+      try {
+        // Try to get available accounts from the wallet
+        // @ts-ignore
+        if (window.StacksProvider && window.StacksProvider.getAccounts) {
+          // @ts-ignore
+          const accounts = window.StacksProvider.getAccounts();
+          if (accounts && accounts.length > 0) {
+            setAvailableAccounts(accounts);
+            
+            // Set current account if not already set
+            if (!currentAccount) {
+              setCurrentAccount(accounts[0]);
+            }
+          } else {
+            // Fallback to just the main address
+            setAvailableAccounts([userAddress]);
+            
+            // Set current account if not already set
+            if (!currentAccount) {
+              setCurrentAccount(userAddress);
+            }
+          }
+        } else {
+          // Fallback to just the main address
+          setAvailableAccounts([userAddress]);
+          
+          // Set current account if not already set
+          if (!currentAccount) {
+            setCurrentAccount(userAddress);
+          }
+        }
+      } catch (error) {
+        console.error('Auth: Error getting available accounts', error);
+        // Fallback to just the main address
+        setAvailableAccounts([userAddress]);
+        
+        // Set current account if not already set
+        if (!currentAccount) {
+          setCurrentAccount(userAddress);
+        }
+      }
+    } else {
+      setAvailableAccounts([]);
+      setCurrentAccount(null);
+    }
+  }, [isAuthenticated, userAddress, currentAccount]);
+
   return {
     isAuthenticated,
     userAddress,
     connectWallet,
     disconnectWallet,
     refreshAuthState,
-    isInitialized
+    isInitialized,
+    availableAccounts,
+    currentAccount,
+    switchAccount,
+    getProfileIdForAddress,
   }
 }

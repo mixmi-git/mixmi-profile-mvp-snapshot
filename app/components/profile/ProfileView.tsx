@@ -141,14 +141,32 @@ const ProfileView: React.FC<ProfileViewProps> = ({
   // For development, enable editing by default
   const isDev = process.env.NODE_ENV === 'development';
   
-  // Authentication handling
-  const [devForceAuth, setDevForceAuth] = useState(() => {
-    // In development mode, let's default to being able to edit
-    return isDev;
-  });
+  // Authentication handling - no longer rely on devForceAuth
+  const [devForceAuth, setDevForceAuth] = useState(false);
   
   // Use either real auth or dev-forced auth
-  const effectiveAuth = devForceAuth || isAuthenticated;
+  const effectiveAuth = isAuthenticated;
+  
+  // Debug authentication state
+  useEffect(() => {
+    console.log('ProfileView full auth state:', {
+      isAuthenticated,
+      effectiveAuth,
+      devForceAuth,
+      isDev,
+      onEditProfile: !!onEditProfile
+    });
+  }, [isAuthenticated, effectiveAuth, devForceAuth, isDev, onEditProfile]);
+
+  // Debug authentication state
+  useEffect(() => {
+    console.log('ProfileView auth state:', {
+      isAuthenticated,
+      effectiveAuth,
+      devForceAuth,
+      isDev
+    });
+  }, [isAuthenticated, effectiveAuth, devForceAuth, isDev]);
 
   // Debug tracking for UI elements
   const getSocialIcon = (platform: string) => {
@@ -182,26 +200,6 @@ const ProfileView: React.FC<ProfileViewProps> = ({
       console.warn('Edit profile clicked but no callback provided!');
     }
   }, [onEditProfile]);
-
-  // Enhanced edit button display logic
-  const renderEditButton = () => {
-    const showEditButton = effectiveAuth || isDev;
-    
-    if (!showEditButton) return null;
-    
-    return (
-      <div className="mt-6">
-        <Button 
-          onClick={handleEditProfile}
-          variant="outline"
-          className="border-gray-600 text-cyan-300 hover:bg-gray-800 hover:text-cyan-200 transition-colors"
-        >
-          <Edit2 className="mr-2 h-4 w-4" />
-          <span>Edit Profile</span>
-        </Button>
-      </div>
-    );
-  };
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
@@ -292,9 +290,6 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                     </div>
                   </div>
                 )}
-
-                {/* Edit Profile button */}
-                {renderEditButton()}
               </div>
             </div>
           </div>

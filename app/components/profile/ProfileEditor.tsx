@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useRef, useImperativeHandle, forwardRef } from 'react';
 import { ProfileData, MediaItemType, SpotlightItemType, ShopItemType } from './UserProfileContainer';
 import { useProfileForm } from './editor/hooks/useProfileForm';
 import ProfileDetailsSection from './editor/sections/ProfileDetailsSection';
@@ -31,7 +31,18 @@ const devLog = (...args: any[]) => {
   }
 };
 
-const ProfileEditor: React.FC<ProfileEditorProps> = ({
+// Define a type for the form data ref
+export interface ProfileEditorRefType {
+  getCurrentFormData: () => {
+    profile: ProfileData;
+    spotlightItems: SpotlightItemType[];
+    mediaItems: MediaItemType[];
+    shopItems: ShopItemType[];
+    hasEdited: boolean;
+  };
+}
+
+const ProfileEditor = forwardRef<ProfileEditorRefType, ProfileEditorProps>(({
   profile,
   mediaItems,
   spotlightItems,
@@ -39,18 +50,25 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
   onSave,
   onPreview,
   onCancel,
-  isPreviewMode,
-}) => {
-  // Debug log on mount
+  isPreviewMode
+}, ref) => {
+  // Form state
+  const [formData, setFormData] = useState<Partial<ProfileData>>({});
+  const [currentMediaItems, setCurrentMediaItems] = useState<MediaItemType[]>([...mediaItems]);
+  const [currentSpotlightItems, setCurrentSpotlightItems] = useState<SpotlightItemType[]>([...spotlightItems]);
+  const [currentShopItems, setCurrentShopItems] = useState<ShopItemType[]>([...shopItems]);
+  
+  // Debug logging
   useEffect(() => {
-    devLog('🎨 ProfileEditor mounted with:', {
-      profile,
-      mediaItems,
-      spotlightItems,
-      shopItems
+    console.log('🔄 ProfileEditor - Initial state loaded:', {
+      profileName: profile.name,
+      mediaCount: mediaItems.length,
+      spotlightCount: spotlightItems.length,
+      shopCount: shopItems.length,
     });
   }, [profile, mediaItems, spotlightItems, shopItems]);
 
+  // Get the profile form data and hooks from useProfileForm
   const {
     formProfile,
     formMediaItems,
@@ -69,11 +87,65 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
     onSave,
   });
 
+  // Expose methods to parent component via ref
+  useImperativeHandle(ref, () => ({
+    getCurrentFormData: () => ({
+      profile: formProfile,
+      spotlightItems: formSpotlightItems,
+      mediaItems: formMediaItems,
+      shopItems: formShopItems,
+      hasEdited: true, // In a real implementation, you'd track edit state
+    })
+  }), [formProfile, formSpotlightItems, formMediaItems, formShopItems]);
+
+  // Debug log on mount
+  useEffect(() => {
+    devLog('🎨 ProfileEditor mounted with:', {
+      profile,
+      mediaItems,
+      spotlightItems,
+      shopItems
+    });
+  }, [profile, mediaItems, spotlightItems, shopItems]);
+
   // Debug log form state after updates
   devLog('📝 Form state updated:', {
     spotlightItemsCount: formSpotlightItems?.length || 0,
     formDataFields: Object.keys(formProfile)
   });
+
+  // Update form state when the user makes changes in the profile form
+  const updateFormData = (newData: Partial<ProfileData>) => {
+    setFormData(prev => ({ ...prev, ...newData }));
+  };
+
+  // Update form data when media items change
+  useEffect(() => {
+    setCurrentMediaItems(formMediaItems);
+  }, [formMediaItems]);
+
+  // Update form data when spotlight items change
+  useEffect(() => {
+    setCurrentSpotlightItems(formSpotlightItems);
+  }, [formSpotlightItems]);
+
+  // Update form data when shop items change
+  useEffect(() => {
+    setCurrentShopItems(formShopItems);
+  }, [formShopItems]);
+
+  // Update form data when profile changes
+  useEffect(() => {
+    updateFormData({
+      name: formProfile.name,
+      title: formProfile.title,
+      bio: formProfile.bio,
+      image: formProfile.image,
+      socialLinks: formProfile.socialLinks,
+      sectionVisibility: formProfile.sectionVisibility,
+      sticker: formProfile.sticker
+    });
+  }, [formProfile]);
 
   return (
     <div className="space-y-8 pb-8">
@@ -193,6 +265,6 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
       </div>
     </div>
   );
-};
+});
 
 export default ProfileEditor; 

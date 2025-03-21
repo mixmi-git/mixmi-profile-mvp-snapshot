@@ -7,9 +7,19 @@ import ProfileView from './ProfileView';
 import ProfileEditor from './ProfileEditor';
 import { Edit2 } from 'lucide-react';
 import { exampleMediaItems, exampleSpotlightItems, exampleShopItems } from '@/lib/example-content';
+import { ProfileEditorRefType } from './ProfileEditor';
 
-// Storage keys for localStorage
-const STORAGE_KEYS = {
+// Storage keys for localStorage with dynamic profile ID support
+const getStorageKeys = (profileId: string) => ({
+  PROFILE: `mixmi_profile_data_${profileId}`,
+  SPOTLIGHT: `mixmi_spotlight_items_${profileId}`,
+  SHOP: `mixmi_shop_items_${profileId}`,
+  MEDIA: `mixmi_media_items_${profileId}`,
+  STICKER: `mixmi_sticker_data_${profileId}`
+});
+
+// For backwards compatibility
+const LEGACY_STORAGE_KEYS = {
   PROFILE: 'mixmi_profile_data',
   SPOTLIGHT: 'mixmi_spotlight_items',
   SHOP: 'mixmi_shop_items',
@@ -114,6 +124,9 @@ export interface UserProfileContainerProps {
   // Optional props for testing/development
   initialMode?: ProfileMode;
   disableAuth?: boolean;
+  
+  // Callback for mode changes
+  onModeChange?: (mode: ProfileMode) => void;
 }
 
 // Default profile structure
@@ -161,9 +174,39 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
   initialMediaItems = [],
   initialMode,
   disableAuth = false,
+  onModeChange,
 }) => {
   // Authentication state
-  const { isAuthenticated, isTransitioning, handleLoginToggle, userAddress } = useAuthState();
+  const { 
+    isAuthenticated, 
+    isTransitioning, 
+    handleLoginToggle, 
+    userAddress,
+    currentAccount,
+    availableAccounts,
+    switchAccount,
+    getProfileIdForAddress
+  } = useAuthState();
+  
+  // Profile ID (based on current account)
+  const [profileId, setProfileId] = useState<string>('default');
+  
+  // Setup profile ID when authentication changes
+  useEffect(() => {
+    if (isAuthenticated && currentAccount) {
+      // Get profile ID for this account
+      const accountProfileId = getProfileIdForAddress(currentAccount);
+      if (accountProfileId) {
+        setProfileId(accountProfileId);
+      } else {
+        // Default to the account address as a fallback
+        setProfileId(currentAccount.slice(0, 10)); // Use first 10 chars of address
+      }
+    } else {
+      // Not authenticated, use default profile
+      setProfileId('default');
+    }
+  }, [isAuthenticated, currentAccount, getProfileIdForAddress]);
   
   // URL query params for mode control (useful for development)
   const router = useRouter();
@@ -197,10 +240,15 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
     });
   }, [currentMode, isPreviewMode, disableAuth, isAuthenticated]);
   
-  // Load data from localStorage on component mount
+  // Load data from localStorage on component mount or when profile ID changes
   useEffect(() => {
     // Only load data if we're in a browser environment
     if (typeof window !== 'undefined') {
+      // Get appropriate storage keys based on profile ID
+      const STORAGE_KEYS = profileId !== 'default' 
+        ? getStorageKeys(profileId)
+        : LEGACY_STORAGE_KEYS;
+      
       const savedProfile = getFromStorage<ProfileData>(STORAGE_KEYS.PROFILE, initialProfile);
       const savedSpotlightItems = getFromStorage<SpotlightItemType[]>(STORAGE_KEYS.SPOTLIGHT, initialSpotlightItems);
       const savedShopItems = getFromStorage<ShopItemType[]>(STORAGE_KEYS.SHOP, initialShopItems);
@@ -209,16 +257,16 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
         STORAGE_KEYS.STICKER, 
         { 
           visible: true, 
-          image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/daisy-blue-1sqZRfemKwLyREL0Eo89EfmQUT5wst.png" 
+          image: "/images/stickers/daisy-blue.png" 
         }
       );
       
-      // Check if this is a first-time user
+      // Check if this is a first-time user for this profile
       const isFirstTimeUser = 
         !localStorage.getItem(STORAGE_KEYS.PROFILE) || 
         !savedProfile.hasEditedProfile;
       
-      devLog('📦 Loading data:', {
+      devLog('📦 Loading data for profile ID:', profileId, {
         isFirstTimeUser,
         savedProfile,
         spotlightItems: savedSpotlightItems?.length || 0,
@@ -228,11 +276,11 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
 
       if (isFirstTimeUser) {
         // First time user - set up example content
-        devLog('🎉 First-time user detected! Loading example content');
+        devLog('🎉 First-time user detected for profile ID:', profileId, 'Loading example content');
         
         const profileWithDefaults = {
           ...DEFAULT_PROFILE,
-          id: Date.now().toString(),
+          id: profileId || Date.now().toString(),
           sectionVisibility: {
             spotlight: true,
             media: true,
@@ -240,7 +288,7 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
           },
           sticker: {
             visible: true,
-            image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/daisy-blue-1sqZRfemKwLyREL0Eo89EfmQUT5wst.png"
+            image: "/images/stickers/daisy-blue.png"
           }
         };
         
@@ -256,10 +304,10 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
         saveToStorage(STORAGE_KEYS.MEDIA, exampleMediaItems);
         saveToStorage(STORAGE_KEYS.STICKER, savedSticker);
         
-        devLog('📦 Saved example content for first-time user');
+        devLog('📦 Saved example content for first-time user with profile ID:', profileId);
       } else {
         // Returning user - load their saved content
-        devLog('🔄 Returning user. Loading saved content');
+        devLog('🔄 Returning user with profile ID:', profileId, 'Loading saved content');
         setProfile(savedProfile);
         setSpotlightItems(savedSpotlightItems || []);
         setShopItems(savedShopItems || []);
@@ -270,7 +318,7 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
         }]);
       }
     }
-  }, [initialProfile, initialSpotlightItems, initialShopItems, initialMediaItems]);
+  }, [initialProfile, initialSpotlightItems, initialShopItems, initialMediaItems, profileId]);
   
   // Function to handle mode transitions
   const transitionMode = (newMode: ProfileMode) => {
@@ -292,6 +340,11 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
       // Update preview mode state
       setIsPreviewMode(newMode === ProfileMode.PREVIEW);
       
+      // Call the mode change callback if provided
+      if (onModeChange) {
+        onModeChange(newMode);
+      }
+      
       // Update URL param for dev purposes if we're in development
       if (process.env.NODE_ENV === 'development') {
         const params = new URLSearchParams(searchParams.toString());
@@ -307,7 +360,12 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
   
   // Save profile data to localStorage
   const saveProfileData = (updatedProfile: ProfileData) => {
-    devLog('📦 Saving profile data:', updatedProfile);
+    // Get appropriate storage keys based on profile ID
+    const STORAGE_KEYS = profileId !== 'default' 
+      ? getStorageKeys(profileId)
+      : LEGACY_STORAGE_KEYS;
+      
+    devLog('📦 Saving profile data for profile ID:', profileId, updatedProfile);
     
     // Process media items to ensure they have embedUrl set properly
     if (updatedProfile.mediaItems && updatedProfile.mediaItems.length > 0) {
@@ -346,7 +404,7 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
       saveToStorage(STORAGE_KEYS.STICKER, updatedProfile.sticker);
     }
     
-    devLog('📦 Saved complete profile:', completeProfile);
+    devLog('📦 Saved complete profile for profile ID:', profileId, completeProfile);
     
     // Update state
     setProfile(completeProfile);
@@ -355,6 +413,18 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
     setShopItems(updatedProfile.shopItems || []);
   };
   
+  // Add a reference to access handleSave and handleCancel from outside components
+  const editorActionsRef = useRef<{
+    save: () => void;
+    cancel: () => void;
+  }>({
+    save: () => transitionMode(ProfileMode.VIEW),
+    cancel: () => transitionMode(ProfileMode.VIEW)
+  });
+
+  // Add a reference to access the editor's form data
+  const editorRef = useRef<ProfileEditorRefType>(null);
+
   // Function to handle saving profile data
   const handleSave = async (updatedProfile: ProfileData) => {
     // Saving profile data
@@ -403,8 +473,105 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
     transitionMode(ProfileMode.VIEW);
   };
   
+  // Expose the editor actions through the ref
+  useEffect(() => {
+    // Create a save function that will save data and transition to view mode
+    const saveFunction = () => {
+      console.log('💾 Save triggered from navbar', {
+        profileName: profile.name,
+        mediaItems: mediaItems.length,
+        currentMode
+      });
+      
+      // Get current form data from the editor if in edit mode and ref is available
+      if (currentMode === ProfileMode.EDIT && editorRef.current) {
+        const currentFormData = editorRef.current.getCurrentFormData();
+        console.log('📝 Got current form data from editor', currentFormData);
+        
+        // Create a complete profile object with all form data
+        const completeProfile = {
+          ...currentFormData.profile,
+          hasEditedProfile: true,
+          spotlightItems: currentFormData.spotlightItems,
+          mediaItems: currentFormData.mediaItems,
+          shopItems: currentFormData.shopItems
+        };
+        
+        // Save the data to localStorage
+        saveProfileData(completeProfile);
+      } else {
+        // Fallback to using the current state data if not in edit mode or ref not available
+        const completeProfile = {
+          ...profile,
+          hasEditedProfile: true,
+          spotlightItems,
+          mediaItems,
+          shopItems
+        };
+        
+        // Save the data to localStorage
+        saveProfileData(completeProfile);
+      }
+      
+      // Force transition back to view mode
+      console.log('🔄 Transitioning to view mode after save');
+      setCurrentMode(ProfileMode.VIEW);
+    };
+    
+    // Create a cancel function that will transition to view mode
+    const cancelFunction = () => {
+      console.log('❌ Cancel triggered from navbar');
+      console.log('🔄 Transitioning to view mode after cancel');
+      setCurrentMode(ProfileMode.VIEW);
+    };
+    
+    // Update the ref with the new functions
+    editorActionsRef.current = {
+      save: saveFunction,
+      cancel: cancelFunction
+    };
+    
+    console.log('📝 Editor actions updated with new functions');
+  }, [profile, mediaItems, spotlightItems, shopItems, currentMode]);
+  
+  // Debug changes to current mode
+  useEffect(() => {
+    console.log('🔍 UserProfileContainer mode update:', {
+      mode: currentMode, 
+      initialMode,
+      profile: profile.name,
+      isEditorVisible: currentMode === ProfileMode.EDIT
+    });
+  }, [currentMode, initialMode, profile]);
+
+  // Mode change monitoring
+  useEffect(() => {
+    // When initialMode prop changes, update our internal mode
+    if (initialMode !== undefined && initialMode !== currentMode) {
+      console.log('📢 Updating mode from prop:', initialMode);
+      setCurrentMode(initialMode);
+    }
+  }, [initialMode, currentMode]);
+  
+  // Make the editor actions available to the parent component through both ways
+  useEffect(() => {
+    // Method 1: Use non-standard property on callback
+    if (onModeChange) {
+      // This allows the parent component to access the save/cancel methods
+      (onModeChange as any).editorActions = editorActionsRef.current;
+    }
+    
+    // Method 2: Call the parent directly after a short delay to ensure actions are ready
+    if (currentMode === ProfileMode.EDIT && onModeChange && (onModeChange as any).captureActions) {
+      console.log('🔄 Providing editor actions directly to parent component');
+      setTimeout(() => {
+        (onModeChange as any).captureActions(editorActionsRef.current);
+      }, 100);
+    }
+  }, [onModeChange, editorActionsRef.current, currentMode]);
+  
   // Determine if user is authenticated for edit access
-  const canEdit = disableAuth || isAuthenticated || process.env.NODE_ENV === 'development';
+  const canEdit = disableAuth || isAuthenticated;
   
   // Enhanced debugging helper for authentication-related issues
   const logAuthState = (context: string) => {
@@ -416,6 +583,8 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
       devLog('isAuthenticated:', isAuthenticated);
       devLog('canEdit:', canEdit);
       devLog('userAddress:', userAddress || 'none');
+      devLog('currentAccount:', currentAccount || 'none');
+      devLog('profileId:', profileId);
       devLog('disableAuth:', disableAuth);
       devLog('🔑 Profile Auth State end');
     }
@@ -423,13 +592,15 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
   
   // Debug logging for authentication
   useEffect(() => {
-    logAuthState('auth-change');
-    
-    // For testing in development only - remove for production
-    if (process.env.NODE_ENV === 'development' && searchParams.get('forceAuth') === 'true') {
-      devLog('🔧 DEV MODE: Authentication forced to true via URL param');
-    }
-  }, [isAuthenticated, canEdit, userAddress, disableAuth, searchParams]);
+    console.log('🧩 UserProfileContainer Auth State:', {
+      isAuthenticated,
+      canEdit,
+      userAddress,
+      currentAccount,
+      profileId,
+      availableAccounts: availableAccounts?.length || 0
+    });
+  }, [isAuthenticated, canEdit, userAddress, currentAccount, profileId, availableAccounts]);
   
   // Handle initial page load authentication
   useEffect(() => {
@@ -470,6 +641,11 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
   const resetToDefaults = () => {
     if (typeof window === 'undefined') return;
     
+    // Get appropriate storage keys based on profile ID
+    const STORAGE_KEYS = profileId !== 'default' 
+      ? getStorageKeys(profileId)
+      : LEGACY_STORAGE_KEYS;
+    
     // Clear all profile data from localStorage
     localStorage.removeItem(STORAGE_KEYS.PROFILE);
     localStorage.removeItem(STORAGE_KEYS.SPOTLIGHT);
@@ -498,11 +674,6 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
       mediaItems: exampleMediaItems,
       shopItems: exampleShopItems
     });
-    
-    // Force reload to ensure everything is fresh
-    if (typeof window !== 'undefined') {
-      window.location.reload();
-    }
   };
   
   // Mode change monitoring
@@ -537,13 +708,40 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
         </div>
       ) : (
         <div className="min-h-screen flex flex-col bg-gray-900">
+          {/* Account Switcher for authenticated users */}
+          {isAuthenticated && availableAccounts.length > 1 && (
+            <div className="bg-gray-800 border-b border-gray-700">
+              <div className="container mx-auto px-4 py-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <span className="text-sm text-gray-400">Active Account:</span>
+                    <select 
+                      className="bg-gray-700 text-white rounded px-3 py-1 text-sm"
+                      value={currentAccount || ''}
+                      onChange={(e) => switchAccount(e.target.value)}
+                    >
+                      {availableAccounts.map((account: string) => (
+                        <option key={account} value={account}>
+                          {account.slice(0, 6)}...{account.slice(-4)}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    Profile ID: {profileId}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          
           {currentMode === ProfileMode.VIEW && (
             <ProfileView
               profile={profile}
               mediaItems={mediaItems}
               spotlightItems={spotlightItems}
               shopItems={shopItems}
-              isAuthenticated={canEdit}
+              isAuthenticated={isAuthenticated} 
               isTransitioning={isTransitioning}
               onEditProfile={() => transitionMode(ProfileMode.EDIT)}
             />
@@ -553,6 +751,7 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
             <div className="w-full min-h-screen flex flex-col">
               <div className="flex-1 overflow-y-auto bg-gray-900">
                 <ProfileEditor
+                  ref={editorRef}
                   profile={profile}
                   mediaItems={mediaItems}
                   spotlightItems={spotlightItems}
