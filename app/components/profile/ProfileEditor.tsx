@@ -11,6 +11,7 @@ import VisibilitySection from './editor/sections/VisibilitySection';
 import ImageCropper from '@/components/ui/ImageCropper';
 import { Button } from "@/components/ui/button";
 import { Save, Eye, X } from 'lucide-react';
+import StickerSection from './editor/sections/StickerSection';
 
 interface ProfileEditorProps {
   profile: ProfileData;
@@ -162,6 +163,19 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
           }}
         />
       </div>
+      
+      <StickerSection
+        sticker={formProfile.sticker || {
+          visible: true,
+          image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/daisy-blue-1sqZRfemKwLyREL0Eo89EfmQUT5wst.png"
+        }}
+        onChange={(stickerData) => {
+          updateProfile({
+            ...formProfile,
+            sticker: stickerData
+          });
+        }}
+      />
 
       <div className="flex justify-end gap-4 mt-8">
         <Button variant="outline" onClick={onCancel}>

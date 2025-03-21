@@ -15,6 +15,7 @@ import { FaYoutube, FaSpotify, FaSoundcloud, FaLinkedinIn } from 'react-icons/fa
 import { FaXTwitter } from 'react-icons/fa6';
 import { SiTiktok } from 'react-icons/si';
 import { ProfileData, MediaItemType, SpotlightItemType, ShopItemType } from './UserProfileContainer';
+import StickerDisplay from './StickDisplay';
 
 // Media embed component for rendering different types of media
 const MediaEmbed = ({ item }: { item: MediaItemType }) => {
@@ -805,6 +806,9 @@ const ProfileView: React.FC<ProfileViewProps> = ({
               )}
             </div>
           )}
+          
+          {/* Sticker display - now positioned after the shop section */}
+          <StickerDisplay sticker={profile.sticker} />
         </div>
       </div>
     </div>
