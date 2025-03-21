@@ -46,10 +46,10 @@ export default function MediaSection({
   const handleMediaChange = useCallback((index: number, field: keyof MediaItemType, value: string) => {
     console.log('Handling media change:', { index, field, value });
     
-    if (field === 'id') {
+    if (field === 'id' || field === 'rawUrl') {
       const cleanValue = value.trim();
-      let transformedUrl = cleanValue;
       let mediaType = detectMediaType(cleanValue);
+      let transformedUrl = cleanValue;
 
       // Transform URL based on detected type
       if (mediaType.includes('soundcloud')) {
@@ -66,10 +66,11 @@ export default function MediaSection({
         transformedUrl = transformYouTubeUrl(cleanValue);
       }
 
-      // Update the media item with all the new values
-      onChange(index, 'id', transformedUrl);
-      onChange(index, 'type', mediaType);
-      onChange(index, 'rawUrl', cleanValue); // Store the original URL
+      // Update all related fields
+      onChange(index, 'id', cleanValue);          // Use the original URL as ID
+      onChange(index, 'type', mediaType);         // Set the detected media type
+      onChange(index, 'rawUrl', cleanValue);      // Store the original URL
+      onChange(index, 'embedUrl', transformedUrl); // Store the transformed URL for embedding
     } else {
       onChange(index, field, value);
     }
@@ -79,7 +80,7 @@ export default function MediaSection({
   const convertToMediaItem = (item: MediaItemType): MediaItem => ({
     ...item,
     type: item.type as MediaType,
-    embedUrl: item.id,
+    embedUrl: item.embedUrl || item.id, // Use embedUrl if available, fall back to id
     rawUrl: item.rawUrl || item.id
   });
 

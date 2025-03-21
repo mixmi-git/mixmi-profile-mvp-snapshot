@@ -300,11 +300,23 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
   
   // Function to handle saving profile data
   const handleSave = async (updatedProfile: ProfileData) => {
-    console.log('📦 Saving profile data:', updatedProfile);
+    // Saving profile data
     
     // Extract items from the updatedProfile if they exist
     const updatedSpotlightItems = updatedProfile.spotlightItems || spotlightItems;
-    const updatedMediaItems = updatedProfile.mediaItems || mediaItems;
+    
+    // Process media items to ensure they have proper embed URLs
+    const updatedMediaItems = (updatedProfile.mediaItems || mediaItems).map(item => {
+      // If the item is missing an embedUrl but has an id, use the id as a fallback
+      if (!item.embedUrl && item.id) {
+        return {
+          ...item,
+          embedUrl: item.id
+        };
+      }
+      return item;
+    });
+    
     const updatedShopItems = updatedProfile.shopItems || shopItems;
     
     // Create a complete profile object with all data
@@ -323,7 +335,7 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
     saveToStorage(STORAGE_KEYS.MEDIA, updatedMediaItems);
     saveToStorage(STORAGE_KEYS.SHOP, updatedShopItems);
     
-    console.log('📦 Saved complete profile:', completeProfile);
+    // Complete profile saved
     
     // Update state with the new items
     setProfile(completeProfile);
@@ -408,48 +420,6 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
     );
   };
   
-  // For development purposes, let's add a mode switcher component when in dev mode
-  const DevModeSwitcher = () => {
-    if (process.env.NODE_ENV !== 'development') return null;
-    
-    return (
-      <div className="fixed bottom-20 right-4 bg-black/80 p-2 rounded text-xs z-50 border border-gray-500">
-        <div className="mb-2 text-white font-bold">Dev Controls</div>
-        <div className="flex space-x-2 mb-2">
-          {Object.values(ProfileMode).map(mode => (
-            <button
-              key={mode}
-              onClick={() => transitionMode(mode)}
-              className={`px-2 py-1 rounded text-white ${currentMode === mode ? 'bg-green-500' : 'bg-gray-700'}`}
-            >
-              {mode}
-            </button>
-          ))}
-        </div>
-        <div className="mt-2 space-y-2">
-          <button
-            onClick={loadExampleContent}
-            className="w-full px-2 py-1 rounded bg-blue-600 hover:bg-blue-700 text-white"
-          >
-            Load Examples
-          </button>
-          <button
-            onClick={resetToDefaults}
-            className="w-full px-2 py-1 rounded bg-red-600 hover:bg-red-700 text-white"
-          >
-            Reset with Examples
-          </button>
-          <button
-            onClick={() => transitionMode(ProfileMode.EDIT)}
-            className="w-full px-2 py-1 rounded bg-cyan-600 hover:bg-cyan-700 text-white font-bold"
-          >
-            Force Edit Mode
-          </button>
-        </div>
-      </div>
-    );
-  };
-  
   // Add a function to reset profile data to defaults
   const resetToDefaults = () => {
     if (typeof window === 'undefined') return;
@@ -489,20 +459,14 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
     }
   };
   
+  // Mode change monitoring
+  useEffect(() => {
+    // Removed debug logging
+  }, [currentMode, isPreviewMode, disableAuth, isAuthenticated]);
+  
   // Render component based on current mode
   return (
     <div className="min-h-screen bg-[#0B0F19]">
-      {/* Dev Mode Debug Banner - only shown in development */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="bg-cyan-700 text-white p-2 text-center font-bold">
-          <h2>DEV MODE ACTIVE</h2>
-          <div className="text-xs mt-1">
-            <p>Mode: {currentMode} | Auth: {isAuthenticated ? 'Yes' : 'No'} | Can Edit: {canEdit ? 'Yes' : 'No'}</p>
-            <p>Items: Spotlight ({spotlightItems?.length}), Media ({mediaItems?.length}), Shop ({shopItems?.length})</p>
-          </div>
-        </div>
-      )}
-      
       <style jsx global>{`
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(10px); }
@@ -527,43 +491,20 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
         </div>
       ) : (
         <div className="min-h-screen flex flex-col bg-gray-900">
-          {/* Debug Info */}
-          {process.env.NODE_ENV === 'development' && (
-            <div className="bg-pink-500 text-white p-4 text-center font-bold">
-              DEBUG: Current Mode: {currentMode} | Auth: {isAuthenticated ? 'Yes' : 'No'} | Can Edit: {canEdit ? 'Yes' : 'No'}
-            </div>
-          )}
-
           {currentMode === ProfileMode.VIEW && (
-            <>
-              <div className="bg-blue-500 text-white p-2 mb-4 text-xs rounded">
-                <h3 className="font-bold">ProfileView Data Debug</h3>
-                <p>SpotlightItems: {spotlightItems.length}</p>
-                <p>MediaItems: {mediaItems.length}</p>
-                <p>ShopItems: {shopItems.length}</p>
-                <p>Visibility: {JSON.stringify(profile.sectionVisibility)}</p>
-              </div>
-              
-              <ProfileView
-                profile={profile}
-                mediaItems={mediaItems}
-                spotlightItems={spotlightItems}
-                shopItems={shopItems}
-                isAuthenticated={canEdit}
-                isTransitioning={isTransitioning}
-                onEditProfile={() => transitionMode(ProfileMode.EDIT)}
-              />
-            </>
+            <ProfileView
+              profile={profile}
+              mediaItems={mediaItems}
+              spotlightItems={spotlightItems}
+              shopItems={shopItems}
+              isAuthenticated={canEdit}
+              isTransitioning={isTransitioning}
+              onEditProfile={() => transitionMode(ProfileMode.EDIT)}
+            />
           )}
           
           {currentMode === ProfileMode.EDIT && (
             <div className="w-full min-h-screen flex flex-col">
-              <div className="bg-pink-500 text-white p-4 text-center font-bold">
-                DEBUG: UserProfileContainer is rendering ProfileEditor
-                <div className="text-sm mt-1">
-                  Spotlight Items: {spotlightItems?.length || 0} | Media Items: {mediaItems?.length || 0} | Shop Items: {shopItems?.length || 0}
-                </div>
-              </div>
               <div className="flex-1 overflow-y-auto bg-gray-900">
                 <ProfileEditor
                   profile={profile}
@@ -619,9 +560,6 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
               </div>
             </>
           )}
-          
-          {/* Dev controls */}
-          {process.env.NODE_ENV === 'development' && <DevModeSwitcher />}
         </div>
       )}
     </div>

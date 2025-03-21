@@ -4,29 +4,37 @@ import { memo } from 'react'
 import { MediaItem } from '@/types/media'
 
 export const MediaEmbed = memo(({ item }: { item: MediaItem }) => {
-  console.log('MediaEmbed received item:', item);
   console.log('MediaEmbed type:', item.type);
-  console.log('MediaEmbed embedUrl:', item.embedUrl);
 
-  if (!item.embedUrl) {
-    console.log('No embedUrl provided');
-    return null;
+  if (!item.embedUrl && !item.id) {
+    console.log('No valid media URL provided');
+    return (
+      <div className="p-4 border border-gray-200 rounded bg-gray-50 text-center">
+        <p className="text-gray-500">No valid media URL provided</p>
+      </div>
+    );
   }
+
+  const embedUrl = item.embedUrl || item.id || '';
 
   switch (item.type) {
     case 'youtube':
-      const videoId = item.embedUrl.includes('embed/') 
-        ? item.embedUrl.split('embed/')[1]
-        : item.embedUrl.replace('https://www.youtube.com/embed/', '');
+      let videoId = '';
       
-      const embedUrl = `https://www.youtube.com/embed/${videoId}`;
+      if (embedUrl.includes('embed/')) {
+        videoId = embedUrl.split('embed/')[1];
+      } else if (embedUrl.includes('youtube.com/')) {
+        videoId = embedUrl.replace('https://www.youtube.com/embed/', '');
+      }
+      
+      const youtubeEmbedUrl = `https://www.youtube.com/embed/${videoId}`;
       
       return (
         <div className="max-w-2xl mx-auto">
           <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
             <iframe
               className="absolute top-0 left-0 w-full h-full"
-              src={embedUrl}
+              src={youtubeEmbedUrl}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
               loading="lazy"
@@ -47,7 +55,7 @@ export const MediaEmbed = memo(({ item }: { item: MediaItem }) => {
               scrolling="no"
               frameBorder="no"
               allow="autoplay"
-              src={item.embedUrl}
+              src={embedUrl}
               style={{ background: 'transparent' }}
             />
           </div>
@@ -61,7 +69,7 @@ export const MediaEmbed = memo(({ item }: { item: MediaItem }) => {
           <div style={{ height: spotifyHeight + 'px' }}>
             <iframe
               className="w-full h-full"
-              src={item.embedUrl}
+              src={embedUrl}
               allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
               loading="lazy"
               style={{ 
@@ -92,7 +100,7 @@ export const MediaEmbed = memo(({ item }: { item: MediaItem }) => {
                 borderRadius: '10px'
               }}
               sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
-              src={item.embedUrl}
+              src={embedUrl}
             />
           </div>
         </div>
@@ -103,7 +111,7 @@ export const MediaEmbed = memo(({ item }: { item: MediaItem }) => {
           <div style={{ height: '180px' }}>
             <iframe
               className="w-full h-full"
-              src={item.embedUrl}
+              src={embedUrl}
               frameBorder="0"
               allow="autoplay"
               loading="lazy"
