@@ -23,6 +23,13 @@ interface ProfileEditorProps {
   isPreviewMode: boolean;
 }
 
+// Development-only logging utility
+const devLog = (...args: any[]) => {
+  if (process.env.NODE_ENV === 'development') {
+    console.log(...args);
+  }
+};
+
 const ProfileEditor: React.FC<ProfileEditorProps> = ({
   profile,
   mediaItems,
@@ -33,9 +40,9 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
   onCancel,
   isPreviewMode,
 }) => {
-  // Debug logging
+  // Debug log on mount
   useEffect(() => {
-    console.log('🎨 ProfileEditor mounted with:', {
+    devLog('🎨 ProfileEditor mounted with:', {
       profile,
       mediaItems,
       spotlightItems,
@@ -61,13 +68,11 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
     onSave,
   });
 
-  // Debug logging for form state
-  useEffect(() => {
-    console.log('📝 Form state updated:', {
-      spotlightItemsCount: formSpotlightItems?.length || 0,
-      formDataFields: Object.keys(formProfile)
-    });
-  }, [formProfile, formSpotlightItems]);
+  // Debug log form state after updates
+  devLog('📝 Form state updated:', {
+    spotlightItemsCount: formSpotlightItems?.length || 0,
+    formDataFields: Object.keys(formProfile)
+  });
 
   return (
     <div className="space-y-8 pb-8">

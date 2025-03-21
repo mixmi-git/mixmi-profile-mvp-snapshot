@@ -33,15 +33,6 @@ export default function ShopSection({
 }: ShopSectionProps) {
   // Ensure items is always an array
   const safeItems = Array.isArray(items) ? items : [];
-  
-  // Debug logging
-  useEffect(() => {
-    console.log('🛍️ ShopSection mounted with items:', {
-      itemsLength: safeItems.length,
-      isArray: Array.isArray(items),
-      items: safeItems,
-      firstItem: safeItems[0],
-      componentStack: new Error().stack
     });
   }, [items]);
 

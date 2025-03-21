@@ -34,18 +34,8 @@ export default function MediaSection({
   // Ensure items is always an array
   const safeItems = Array.isArray(items) ? items : [];
   
-  // Debug logging on mount
-  useEffect(() => {
-    console.log('MediaSection mounted with items:', {
-      count: safeItems.length,
-      items: safeItems
-    });
-  }, []);
-
   // Handle URL and field changes with appropriate transformations
   const handleMediaChange = useCallback((index: number, field: keyof MediaItemType, value: string) => {
-    console.log('Handling media change:', { index, field, value });
-    
     if (field === 'id' || field === 'rawUrl') {
       const cleanValue = value.trim();
       let mediaType = detectMediaType(cleanValue);

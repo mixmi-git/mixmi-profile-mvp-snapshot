@@ -44,15 +44,6 @@ export default function SpotlightSection({
   // Ensure items is always an array
   const safeItems = Array.isArray(items) ? items : [];
 
-  // Debug logging
-  useEffect(() => {
-    console.log('🎯 SpotlightSection mounted with items:', {
-      itemsLength: safeItems.length,
-      isArray: Array.isArray(items),
-      items: safeItems,
-      firstItem: safeItems[0],
-      componentStack: new Error().stack
-    });
   }, [items]);
 
   // Validate input fields

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuthState } from '../../hooks/useAuthState';
 import ProfileView from './ProfileView';
@@ -155,6 +155,13 @@ export interface ProfileEditorProps {
   isPreviewMode: boolean;
 }
 
+// Development-only logging utility
+const devLog = (...args: any[]) => {
+  if (process.env.NODE_ENV === 'development') {
+    console.log(...args);
+  }
+};
+
 const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
   initialProfile = defaultProfile,
   initialSpotlightItems = [],
@@ -191,7 +198,7 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
   
   // Debug logging for mode changes
   useEffect(() => {
-    console.log('🔄 Mode changed:', {
+    devLog('🔄 Mode changed:', {
       currentMode,
       isPreviewMode,
       canEdit: disableAuth || isAuthenticated
@@ -212,7 +219,7 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
         !localStorage.getItem(STORAGE_KEYS.PROFILE) || 
         !savedProfile.hasEditedProfile;
       
-      console.log('📦 Loading data:', {
+      devLog('📦 Loading data:', {
         isFirstTimeUser,
         savedProfile,
         spotlightItems: savedSpotlightItems?.length || 0,
@@ -222,7 +229,7 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
 
       if (isFirstTimeUser) {
         // First time user - set up example content
-        console.log('🎉 First-time user detected! Loading example content');
+        devLog('🎉 First-time user detected! Loading example content');
         
         const profileWithDefaults = {
           ...defaultProfile,
@@ -249,10 +256,10 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
         saveToStorage(STORAGE_KEYS.SHOP, exampleShopItems);
         saveToStorage(STORAGE_KEYS.MEDIA, exampleMediaItems);
         
-        console.log('📦 Saved example content for first-time user');
+        devLog('📦 Saved example content for first-time user');
       } else {
         // Returning user - load their saved content
-        console.log('🔄 Returning user. Loading saved content');
+        devLog('🔄 Returning user. Loading saved content');
         setProfile(savedProfile);
         setSpotlightItems(savedSpotlightItems || []);
         setShopItems(savedShopItems || []);
@@ -267,7 +274,7 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
   
   // Function to handle mode transitions
   const transitionMode = (newMode: ProfileMode) => {
-    console.log('🔄 Attempting mode transition:', { from: currentMode, to: newMode });
+    devLog('🔄 Attempting mode transition:', { from: currentMode, to: newMode });
     
     // Define allowed transitions
     const allowedTransitions: Record<ProfileMode, ProfileMode[]> = {
@@ -292,9 +299,9 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
         router.replace(`?${params.toString()}`);
       }
       
-      console.log('✅ Mode transition successful');
+      devLog('✅ Mode transition successful');
     } else {
-      console.error('❌ Invalid mode transition:', { from: currentMode, to: newMode });
+      devLog('❌ Invalid mode transition:', { from: currentMode, to: newMode });
     }
   };
   
@@ -366,12 +373,12 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
     const debugEnabled = process.env.NODE_ENV === 'development' || (typeof window !== 'undefined' && (window as any).toggleAuthDebug);
     
     if (debugEnabled) {
-      console.group(`🔑 Profile Auth State [${context}]`);
-      console.log('isAuthenticated:', isAuthenticated);
-      console.log('canEdit:', canEdit);
-      console.log('userAddress:', userAddress || 'none');
-      console.log('disableAuth:', disableAuth);
-      console.groupEnd();
+      devLog('🔑 Profile Auth State [', context, ']');
+      devLog('isAuthenticated:', isAuthenticated);
+      devLog('canEdit:', canEdit);
+      devLog('userAddress:', userAddress || 'none');
+      devLog('disableAuth:', disableAuth);
+      devLog('🔑 Profile Auth State end');
     }
   };
   
@@ -381,7 +388,7 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
     
     // For testing in development only - remove for production
     if (process.env.NODE_ENV === 'development' && searchParams.get('forceAuth') === 'true') {
-      console.log('🔧 DEV MODE: Authentication forced to true via URL param');
+      devLog('🔧 DEV MODE: Authentication forced to true via URL param');
     }
   }, [isAuthenticated, canEdit, userAddress, disableAuth, searchParams]);
   
@@ -406,7 +413,7 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
       hasEditedProfile: false
     };
     
-    console.log('📦 Loading example content');
+    devLog('📦 Loading example content');
     
     // Update state with example content
     setProfile(profileWithExamples);
@@ -414,7 +421,7 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
     setShopItems(exampleShopItems);
     setMediaItems(exampleMediaItems);
     
-    console.log('Example content loaded:',
+    devLog('Example content loaded:',
       { profile: profileWithExamples, spotlight: exampleSpotlightItems.length, 
         media: exampleMediaItems.length, shop: exampleShopItems.length }
     );
@@ -446,7 +453,7 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
     setShopItems(exampleShopItems);
     setMediaItems(exampleMediaItems);
     
-    console.log('Profile data reset with example content', {
+    devLog('Profile data reset with example content', {
       profile: resetProfile,
       spotlightItems: exampleSpotlightItems,
       mediaItems: exampleMediaItems,

@@ -4,10 +4,8 @@ import { memo } from 'react'
 import { MediaItem } from '@/types/media'
 
 export const MediaEmbed = memo(({ item }: { item: MediaItem }) => {
-  console.log('MediaEmbed type:', item.type);
-
+  // Ensure we have a valid URL to embed
   if (!item.embedUrl && !item.id) {
-    console.log('No valid media URL provided');
     return (
       <div className="p-4 border border-gray-200 rounded bg-gray-50 text-center">
         <p className="text-gray-500">No valid media URL provided</p>
@@ -15,6 +13,7 @@ export const MediaEmbed = memo(({ item }: { item: MediaItem }) => {
     );
   }
 
+  // Use embedUrl as the primary source, fall back to id if needed
   const embedUrl = item.embedUrl || item.id || '';
 
   switch (item.type) {
@@ -126,7 +125,11 @@ export const MediaEmbed = memo(({ item }: { item: MediaItem }) => {
       )
     default:
       console.log('Unsupported media type:', item.type);
-      return null
+      return (
+        <div className="p-4 border border-gray-200 rounded bg-gray-50 text-center">
+          <p className="text-gray-500">Unsupported media type: {item.type || 'unknown'}</p>
+        </div>
+      );
   }
 })
 

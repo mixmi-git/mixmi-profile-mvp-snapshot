@@ -1,7 +1,7 @@
 /** @jsxImportSource react */
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import Image from 'next/image';
 import { Button } from '../ui/button';
 import { 
@@ -149,19 +149,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
   // Use either real auth or dev-forced auth
   const effectiveAuth = devForceAuth || isAuthenticated;
 
-  // Debug logging
-  useEffect(() => {
-    if (isDev) {
-      console.log('ProfileView debug:', {
-        isAuthenticated,
-        devForceAuth,
-        effectiveAuth,
-        hasEditCallback: !!onEditProfile
-      });
-    }
-  }, [isAuthenticated, devForceAuth, effectiveAuth, onEditProfile, isDev]);
-
-  // Helper function to return the appropriate icon for each social platform
+  // Debug tracking for UI elements
   const getSocialIcon = (platform: string) => {
     const iconSize = 18;
     const iconStyle = { color: '#e4e4e7' }; // Softer white color (gray-200 equivalent)
@@ -186,66 +174,13 @@ const ProfileView: React.FC<ProfileViewProps> = ({
     }
   };
 
-  // Dev mode toggle - only in development
-  const DevControls = () => {
-    if (process.env.NODE_ENV !== 'development') return null;
-    
-    // Local state to track if debug is enabled
-    const [debugEnabled, setDebugEnabled] = React.useState(false);
-    
-    // Function to toggle auth debugging
-    const toggleDebug = () => {
-      if (typeof window !== 'undefined') {
-        const newState = !(window as any).DEBUG_AUTH;
-        (window as any).DEBUG_AUTH = newState;
-        setDebugEnabled(newState);
-        console.log(`Auth debugging ${newState ? 'enabled' : 'disabled'}`);
-      }
-    };
-    
-    return (
-      <div className="fixed top-20 right-4 bg-black/80 p-3 rounded z-50 text-xs">
-        <h3 className="font-bold text-white mb-2">Dev Controls</h3>
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-gray-300">Force Auth:</span>
-          <button
-            onClick={() => setDevForceAuth(!devForceAuth)}
-            className={`px-2 py-1 rounded ${devForceAuth ? 'bg-green-500' : 'bg-red-500'}`}
-          >
-            {devForceAuth ? 'ON' : 'OFF'}
-          </button>
-        </div>
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-gray-300">Debug Mode:</span>
-          <button
-            onClick={toggleDebug}
-            className={`px-2 py-1 rounded ${debugEnabled ? 'bg-green-500' : 'bg-red-500'}`}
-          >
-            {debugEnabled ? 'ON' : 'OFF'}
-          </button>
-        </div>
-        <div className="text-gray-400 text-[10px]">
-          Auth State: {effectiveAuth ? 'Authenticated' : 'Not Authenticated'}
-        </div>
-      </div>
-    );
-  };
-
-  // For debugging
-  const handleEditClick = () => {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('🖋️ Edit profile clicked:', {
-        isAuthenticated: effectiveAuth,
-        hasCallback: !!onEditProfile
-      });
-    }
-    
+  const handleEditProfile = useCallback(() => {
     if (onEditProfile) {
       onEditProfile();
     } else {
       console.warn('Edit profile clicked but no callback provided!');
     }
-  };
+  }, [onEditProfile]);
 
   // Enhanced edit button display logic
   const renderEditButton = () => {
@@ -256,7 +191,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
     return (
       <div className="mt-6">
         <Button 
-          onClick={handleEditClick}
+          onClick={handleEditProfile}
           variant="outline"
           className="border-gray-600 text-cyan-300 hover:bg-gray-800 hover:text-cyan-200 transition-colors"
         >
@@ -363,14 +298,6 @@ const ProfileView: React.FC<ProfileViewProps> = ({
             </div>
           </div>
           
-          {/* Spotlight Section Debug */}
-          <div className="bg-pink-500 text-white p-2 text-xs m-2 rounded">
-            <h4>Debug: Spotlight Section</h4>
-            <p>Visibility: {String(profile.sectionVisibility?.spotlight !== false)}</p>
-            <p>Items: {spotlightItems.length}</p>
-            <p>Should render: {String((profile.sectionVisibility?.spotlight !== false) && spotlightItems.length > 0)}</p>
-          </div>
-
           {/* Spotlight Section */}
           {(profile.sectionVisibility?.spotlight !== false) && spotlightItems.length > 0 && (
             <div className="mt-24 sm:mt-32 max-w-6xl mx-auto px-4 mb-24 opacity-0 animate-fadeIn"
@@ -384,15 +311,6 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                 </p>
               )}
               {profile.hasEditedProfile && <div className="mb-12"></div>}
-              
-              {/* Add debugging info for spotlight items */}
-              {process.env.NODE_ENV === 'development' && (
-                <div className="mb-4 p-2 bg-gray-800 text-xs text-gray-300 rounded">
-                  <p>Debug: {spotlightItems?.length || 0} spotlight items</p>
-                  <p>Filtered items: {spotlightItems?.filter(item => item.title.trim() || item.description.trim()).length || 0}</p>
-                  <pre className="overflow-auto max-h-20">{JSON.stringify(spotlightItems, null, 2)}</pre>
-                </div>
-              )}
               
               {spotlightItems && spotlightItems.filter(item => item.title.trim() || item.description.trim()).length > 0 ? (
                 spotlightItems.filter(item => item.title.trim() || item.description.trim()).length < 3 ? (
@@ -608,13 +526,6 @@ const ProfileView: React.FC<ProfileViewProps> = ({
             </div>
           )}
 
-          {/* Media Section Debug */}
-          <div className="bg-pink-500 text-white p-2 text-xs m-2 rounded">
-            <h4>Debug: Media Section</h4>
-            <p>Visibility: {String(profile.sectionVisibility?.media !== false)}</p>
-            <p>Items: {mediaItems.length}</p>
-            <p>Should render: {String((profile.sectionVisibility?.media !== false) && mediaItems.length > 0)}</p>
-          </div>
 
           {/* Media Section */}
           {(profile.sectionVisibility?.media !== false) && mediaItems.length > 0 && (
@@ -719,14 +630,6 @@ const ProfileView: React.FC<ProfileViewProps> = ({
             </div>
           )}
 
-          {/* Shop Section Debug */}
-          <div className="bg-pink-500 text-white p-2 text-xs m-2 rounded">
-            <h4>Debug: Shop Section</h4>
-            <p>Visibility: {String(profile.sectionVisibility?.shop !== false)}</p>
-            <p>Items: {shopItems.length}</p>
-            <p>Should render: {String((profile.sectionVisibility?.shop !== false) && shopItems.length > 0)}</p>
-          </div>
-
           {/* Shop Section */}
           {(profile.sectionVisibility?.shop !== false) && shopItems.length > 0 && (
             <div className="mt-24 sm:mt-32 max-w-6xl mx-auto px-4 mb-24 opacity-0 animate-fadeIn"
@@ -743,14 +646,6 @@ const ProfileView: React.FC<ProfileViewProps> = ({
               
               {shopItems && shopItems.length > 0 ? (
                 <>
-                  {/* Add debugging info */}
-                  {process.env.NODE_ENV === 'development' && (
-                    <div className="mb-4 p-2 bg-gray-800 text-xs text-gray-300 rounded">
-                      <p>Debug: {shopItems.length} shop items</p>
-                      <pre className="overflow-auto max-h-20">{JSON.stringify(shopItems, null, 2)}</pre>
-                    </div>
-                  )}
-                  
                   {shopItems.length < 3 ? (
                     // 1-2 items - center justified 
                     <div className="flex flex-col sm:flex-row justify-center gap-6">
@@ -821,7 +716,6 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                           key={index}
                           className="group block relative rounded-lg overflow-hidden"
                         >
-                          {/* Same content as above */}
                           <div className="aspect-square relative bg-gray-800">
                             {item.image ? (
                               item.image.startsWith('data:') ? (
