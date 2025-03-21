@@ -12,7 +12,7 @@ interface StickerDisplayProps {
 export default function StickerDisplay({
   sticker = { 
     visible: true, 
-    image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/daisy-blue-1sqZRfemKwLyREL0Eo89EfmQUT5wst.png" 
+    image: "/images/stickers/daisy-blue.png" 
   }
 }: StickerDisplayProps) {
   // If sticker is not visible, don't render anything
@@ -22,7 +22,7 @@ export default function StickerDisplay({
 
   return (
     <div className="w-full flex justify-center mt-16 mb-12">
-      <div className="w-32 h-32">
+      <div className="w-32 h-32 sticker-rotate">
         <Image
           src={sticker.image}
           alt="Profile sticker"

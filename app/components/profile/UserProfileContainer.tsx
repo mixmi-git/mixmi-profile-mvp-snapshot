@@ -13,7 +13,8 @@ const STORAGE_KEYS = {
   PROFILE: 'mixmi_profile_data',
   SPOTLIGHT: 'mixmi_spotlight_items',
   SHOP: 'mixmi_shop_items',
-  MEDIA: 'mixmi_media_items'
+  MEDIA: 'mixmi_media_items',
+  STICKER: 'mixmi_sticker_data'
 };
 
 // Helper function to safely get data from localStorage
@@ -115,23 +116,14 @@ export interface UserProfileContainerProps {
   disableAuth?: boolean;
 }
 
-// Initial profile data
-const defaultProfile: ProfileData = {
-  id: Date.now().toString(),
+// Default profile structure
+const DEFAULT_PROFILE: ProfileData = {
+  id: '',
   name: 'Your Name',
-  title: 'Artist / Producer / DJ',
-  bio: 'Tell your story here! Share what makes you unique as an artist. This is where fans can learn more about your journey, inspirations, and creative process.',
-  image: '/images/placeholder.png',
-  socialLinks: [
-    {
-      platform: 'twitter',
-      url: 'https://twitter.com/example'
-    },
-    {
-      platform: 'instagram',
-      url: 'https://instagram.com/example'
-    }
-  ],
+  title: 'Your Title',
+  bio: 'Tell your story here...',
+  image: '',
+  socialLinks: [],
   sectionVisibility: {
     spotlight: true,
     media: true,
@@ -139,7 +131,7 @@ const defaultProfile: ProfileData = {
   },
   sticker: {
     visible: true,
-    image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/daisy-blue-1sqZRfemKwLyREL0Eo89EfmQUT5wst.png"
+    image: "/images/stickers/daisy-blue.png"
   },
   hasEditedProfile: false
 };
@@ -163,7 +155,7 @@ const devLog = (...args: any[]) => {
 };
 
 const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
-  initialProfile = defaultProfile,
+  initialProfile = DEFAULT_PROFILE,
   initialSpotlightItems = [],
   initialShopItems = [],
   initialMediaItems = [],
@@ -213,6 +205,13 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
       const savedSpotlightItems = getFromStorage<SpotlightItemType[]>(STORAGE_KEYS.SPOTLIGHT, initialSpotlightItems);
       const savedShopItems = getFromStorage<ShopItemType[]>(STORAGE_KEYS.SHOP, initialShopItems);
       const savedMediaItems = getFromStorage<MediaItemType[]>(STORAGE_KEYS.MEDIA, initialMediaItems);
+      const savedSticker = getFromStorage<{ visible: boolean; image: string }>(
+        STORAGE_KEYS.STICKER, 
+        { 
+          visible: true, 
+          image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/daisy-blue-1sqZRfemKwLyREL0Eo89EfmQUT5wst.png" 
+        }
+      );
       
       // Check if this is a first-time user
       const isFirstTimeUser = 
@@ -232,7 +231,7 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
         devLog('🎉 First-time user detected! Loading example content');
         
         const profileWithDefaults = {
-          ...defaultProfile,
+          ...DEFAULT_PROFILE,
           id: Date.now().toString(),
           sectionVisibility: {
             spotlight: true,
@@ -255,6 +254,7 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
         saveToStorage(STORAGE_KEYS.SPOTLIGHT, exampleSpotlightItems);
         saveToStorage(STORAGE_KEYS.SHOP, exampleShopItems);
         saveToStorage(STORAGE_KEYS.MEDIA, exampleMediaItems);
+        saveToStorage(STORAGE_KEYS.STICKER, savedSticker);
         
         devLog('📦 Saved example content for first-time user');
       } else {
@@ -305,6 +305,56 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
     }
   };
   
+  // Save profile data to localStorage
+  const saveProfileData = (updatedProfile: ProfileData) => {
+    devLog('📦 Saving profile data:', updatedProfile);
+    
+    // Process media items to ensure they have embedUrl set properly
+    if (updatedProfile.mediaItems && updatedProfile.mediaItems.length > 0) {
+      updatedProfile.mediaItems = updatedProfile.mediaItems.map(item => {
+        // Ensure embedUrl is set based on id if not already present
+        if (!item.embedUrl && item.id) {
+          item.embedUrl = item.id;
+        }
+        return item;
+      });
+    }
+    
+    // Save complete profile data
+    const completeProfile = {
+      ...updatedProfile,
+      hasEditedProfile: true,
+    };
+    
+    saveToStorage(STORAGE_KEYS.PROFILE, completeProfile);
+    
+    // Save individual sections
+    if (updatedProfile.spotlightItems) {
+      saveToStorage(STORAGE_KEYS.SPOTLIGHT, updatedProfile.spotlightItems);
+    }
+    
+    if (updatedProfile.mediaItems) {
+      saveToStorage(STORAGE_KEYS.MEDIA, updatedProfile.mediaItems);
+    }
+    
+    if (updatedProfile.shopItems) {
+      saveToStorage(STORAGE_KEYS.SHOP, updatedProfile.shopItems);
+    }
+    
+    // Save sticker data separately
+    if (updatedProfile.sticker) {
+      saveToStorage(STORAGE_KEYS.STICKER, updatedProfile.sticker);
+    }
+    
+    devLog('📦 Saved complete profile:', completeProfile);
+    
+    // Update state
+    setProfile(completeProfile);
+    setSpotlightItems(updatedProfile.spotlightItems || []);
+    setMediaItems(updatedProfile.mediaItems || []);
+    setShopItems(updatedProfile.shopItems || []);
+  };
+  
   // Function to handle saving profile data
   const handleSave = async (updatedProfile: ProfileData) => {
     // Saving profile data
@@ -337,18 +387,7 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
     };
     
     // Save all data to localStorage
-    saveToStorage(STORAGE_KEYS.PROFILE, completeProfile);
-    saveToStorage(STORAGE_KEYS.SPOTLIGHT, updatedSpotlightItems);
-    saveToStorage(STORAGE_KEYS.MEDIA, updatedMediaItems);
-    saveToStorage(STORAGE_KEYS.SHOP, updatedShopItems);
-    
-    // Complete profile saved
-    
-    // Update state with the new items
-    setProfile(completeProfile);
-    setSpotlightItems(updatedSpotlightItems);
-    setMediaItems(updatedMediaItems);
-    setShopItems(updatedShopItems);
+    saveProfileData(completeProfile);
     
     // Transition to view mode
     transitionMode(ProfileMode.VIEW);
@@ -439,7 +478,7 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
     
     // Reset state to initial values with example content
     const resetProfile = {
-      ...defaultProfile,
+      ...DEFAULT_PROFILE,
       hasEditedProfile: false,
       sectionVisibility: {
         spotlight: true,

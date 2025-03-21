@@ -11,26 +11,26 @@ interface StickerSectionProps {
   onChange: (sticker: { visible: boolean; image: string }) => void;
 }
 
-// All available sticker options
+// All available sticker options with local paths
 const STICKER_OPTIONS = [
   {
-    value: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/daisy-blue-1sqZRfemKwLyREL0Eo89EfmQUT5wst.png",
+    value: "/images/stickers/daisy-blue.png",
     label: "Blue Daisy"
   },
   {
-    value: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/daisy-purple-zuy0TjRXzDx6hnayJ249A4Mgp8ktLy.png",
+    value: "/images/stickers/daisy-purple.png",
     label: "Purple Daisy"
   },
   {
-    value: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/daisy-white-sWezY97Qz4q7W6zenHPvu3ns9egGwH.png",
+    value: "/images/stickers/daisy-white.png",
     label: "White Daisy"
   },
   {
-    value: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/daisy-yellow-DLJp7QxgzvZ0jVQhO7iVmGDZ7QxTK9.png",
+    value: "/images/stickers/daisy-yellow.png",
     label: "Yellow Daisy"
   },
   {
-    value: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/daisy-pink-8c61sSM6GcN9gaqfZCUQ03j1ub4YGe.png",
+    value: "/images/stickers/daisy-pink.png",
     label: "Pink Daisy"
   }
 ];
@@ -38,7 +38,7 @@ const STICKER_OPTIONS = [
 export default function StickerSection({
   sticker = { 
     visible: true, 
-    image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/daisy-blue-1sqZRfemKwLyREL0Eo89EfmQUT5wst.png" 
+    image: "/images/stickers/daisy-blue.png"
   },
   onChange
 }: StickerSectionProps) {
@@ -65,7 +65,7 @@ export default function StickerSection({
           <div>
             <h2 className="text-2xl font-bold">Profile Sticker</h2>
             <p className="text-sm text-gray-400 mt-2">
-              Add a decorative flower to your profile
+              Add a decorative spinning flower to your profile
             </p>
             
             <div className="space-y-4 mt-4">
@@ -101,7 +101,7 @@ export default function StickerSection({
                     </select>
                   </div>
                   
-                  <div className="w-24 h-24 relative mx-auto">
+                  <div className="w-24 h-24 relative mx-auto sticker-rotate">
                     <Image
                       src={sticker.image}
                       alt="Selected sticker preview"
