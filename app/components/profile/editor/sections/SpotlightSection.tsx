@@ -44,7 +44,6 @@ export default function SpotlightSection({
   // Ensure items is always an array
   const safeItems = Array.isArray(items) ? items : [];
 
-  }, [items]);
 
   // Validate input fields
   const validateField = (field: keyof SpotlightItemType, value: string): { isValid: boolean, message: string } => {

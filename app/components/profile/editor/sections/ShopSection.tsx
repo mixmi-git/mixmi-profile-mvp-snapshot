@@ -33,8 +33,6 @@ export default function ShopSection({
 }: ShopSectionProps) {
   // Ensure items is always an array
   const safeItems = Array.isArray(items) ? items : [];
-    });
-  }, [items]);
 
   const handleShopChange = useCallback((index: number, field: keyof ShopItemType, value: string) => {
     onChange(index, field, value);
