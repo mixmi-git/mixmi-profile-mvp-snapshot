@@ -248,21 +248,6 @@ const ProfileEditor = forwardRef<ProfileEditorRefType, ProfileEditorProps>(({
           });
         }}
       />
-
-      <div className="flex justify-end gap-4 mt-8">
-        <Button variant="outline" onClick={onCancel}>
-          <X className="w-4 h-4 mr-2" />
-          Cancel
-        </Button>
-        <Button variant="outline" onClick={onPreview}>
-          <Eye className="w-4 h-4 mr-2" />
-          Preview
-        </Button>
-        <Button onClick={handleSubmit}>
-          <Save className="w-4 h-4 mr-2" />
-          Save Changes
-        </Button>
-      </div>
     </div>
   );
 });

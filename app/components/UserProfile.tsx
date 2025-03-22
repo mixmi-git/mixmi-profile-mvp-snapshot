@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { UserProfileContainer, ProfileMode } from './profile/UserProfileContainer';
 import { useAuthState } from '@/hooks/useAuthState';
+import { useAuth } from '@/lib/auth';
 import { NavbarContainer } from './NavbarContainer';
 
 // Example data for testing
@@ -16,6 +17,7 @@ const exampleProfile = {
 
 export function UserProfile() {
   const { isAuthenticated, isTransitioning } = useAuthState();
+  const { refreshAuthState } = useAuth();
   const [profileMode, setProfileMode] = useState<ProfileMode>(ProfileMode.VIEW);
   const editorActionsRef = useRef<{
     save: () => void;
@@ -25,94 +27,76 @@ export function UserProfile() {
     cancel: () => console.log('Cancel not yet available')
   });
   
+  // Enhanced authentication state logging
+  useEffect(() => {
+    console.log('🔐 UserProfile Auth changed:', { 
+      isAuthenticated, 
+      profileMode,
+      timestamp: new Date().toISOString()
+    });
+    
+    // Force a re-render of child components when auth state changes
+    const forceUpdate = setTimeout(() => {
+      if (profileMode === ProfileMode.VIEW) {
+        console.log('🔄 Forcing child component updates after auth change');
+        const tempMode = ProfileMode.LOADING;
+        setProfileMode(tempMode);
+        setTimeout(() => setProfileMode(ProfileMode.VIEW), 50);
+      }
+    }, 500);
+    
+    return () => clearTimeout(forceUpdate);
+  }, [isAuthenticated]);
+  
+  // Periodically refresh auth state
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      refreshAuthState();
+    }, 5000);
+    
+    return () => clearInterval(intervalId);
+  }, [refreshAuthState]);
+  
   // Function to handle editing profile
   const handleEditProfile = () => {
-    console.log('Edit profile button clicked in navbar');
-    // Force UI update to ensure we transition to edit mode
     setProfileMode(ProfileMode.EDIT);
-    // Log the current mode to debug
-    setTimeout(() => {
-      console.log('Current profile mode after Edit clicked:', profileMode);
-    }, 100);
   };
   
   // Function to handle saving changes
   const handleSaveProfile = () => {
-    console.log('🔄 Save profile button clicked in navbar');
-    
-    // Call the save function from the editor
     if (typeof editorActionsRef.current?.save === 'function') {
-      console.log('✅ Calling save function from editor');
       editorActionsRef.current.save();
-      
-      // Also update our local state to match
-      setProfileMode(ProfileMode.VIEW);
+      // Always force the view mode after saving
+      setTimeout(() => {
+        setProfileMode(ProfileMode.VIEW);
+      }, 100);
     } else {
-      console.error('⚠️ Save action not available - editor ref not initialized');
-      // Fallback - just switch to view mode
+      // Fallback to view mode if save function isn't available
       setProfileMode(ProfileMode.VIEW);
     }
   };
   
   // Function to handle canceling edits
   const handleCancelEdit = () => {
-    console.log('🔄 Cancel edit button clicked in navbar');
-    
-    // Call the cancel function from the editor
     if (typeof editorActionsRef.current?.cancel === 'function') {
-      console.log('✅ Calling cancel function from editor');
       editorActionsRef.current.cancel();
-      
-      // Also update our local state to match
-      setProfileMode(ProfileMode.VIEW);
     } else {
-      console.error('⚠️ Cancel action not available - editor ref not initialized');
-      // Fallback - just switch to view mode
+      // Fallback to view mode if cancel function isn't available
       setProfileMode(ProfileMode.VIEW);
     }
   };
   
-  // Set up a direct reference to capture editor actions
+  // Direct capture of editor actions from UserProfileContainer
   const captureEditorActions = useCallback((actions: any) => {
     if (actions && typeof actions.save === 'function' && typeof actions.cancel === 'function') {
-      console.log('🔗 Directly captured editor actions');
       editorActionsRef.current = actions;
     }
   }, []);
 
   // Function to handle mode changes from the profile container
   const handleProfileModeChange = (mode: ProfileMode) => {
-    console.log('Profile mode changed to:', mode);
     setProfileMode(mode);
-    
-    // Try to get editor actions directly from the onModeChange function property
-    if ((handleProfileModeChange as any).editorActions) {
-      console.log('📝 Capturing editor actions from ProfileContainer');
-      editorActionsRef.current = (handleProfileModeChange as any).editorActions;
-    }
   };
-
-  // Set up handler functions as properties on handleProfileModeChange
-  // This is a way to pass additional data to the UserProfileContainer
-  (handleProfileModeChange as any).captureActions = captureEditorActions;
-
-  // Debug editor actions availability
-  useEffect(() => {
-    console.log('🧰 Editor actions status:', {
-      saveAvailable: typeof editorActionsRef.current?.save === 'function',
-      cancelAvailable: typeof editorActionsRef.current?.cancel === 'function',
-      profileMode
-    });
-  }, [profileMode, editorActionsRef.current]);
-
-  // Debug the current mode
-  useEffect(() => {
-    console.log('Profile mode state updated:', {
-      profileMode,
-      isAuthenticated,
-      isTransitioning
-    });
-  }, [profileMode, isAuthenticated, isTransitioning]);
 
   // Determine which function to pass to navbar based on mode
   const getNavbarProps = () => {
@@ -126,19 +110,24 @@ export function UserProfile() {
     
     return {
       inEditMode: false,
-      onEditProfile: isAuthenticated ? handleEditProfile : undefined
+      onEditProfile: isAuthenticated ? handleEditProfile : undefined,
+      isAuthenticated: isAuthenticated
     };
   };
 
   return (
-    <>
+    <div className="flex flex-col min-h-screen">
       <NavbarContainer {...getNavbarProps()} />
-      <UserProfileContainer
-        initialMode={profileMode}
-        disableAuth={false}
-        onModeChange={handleProfileModeChange}
-      />
-    </>
+      
+      <main className="flex-grow">
+        <UserProfileContainer 
+          initialMode={profileMode}
+          onModeChange={handleProfileModeChange}
+          onCaptureEditorActions={captureEditorActions}
+          disableAuth={false}
+        />
+      </main>
+    </div>
   );
 }
 

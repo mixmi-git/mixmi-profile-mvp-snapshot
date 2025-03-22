@@ -194,12 +194,28 @@ const ProfileView: React.FC<ProfileViewProps> = ({
   };
 
   const handleEditProfile = useCallback(() => {
+    console.log('📝 Edit profile clicked:', {
+      isAuthenticated,
+      effectiveAuth,
+      hasEditCallback: !!onEditProfile
+    });
+    
     if (onEditProfile) {
       onEditProfile();
     } else {
       console.warn('Edit profile clicked but no callback provided!');
     }
-  }, [onEditProfile]);
+  }, [onEditProfile, isAuthenticated, effectiveAuth]);
+
+  useEffect(() => {
+    // Log authentication state changes specifically for ProfileView
+    console.log('🔑 ProfileView Auth State:', {
+      isAuthenticated,
+      effectiveAuth,
+      hasEditCallback: !!onEditProfile,
+      timestamp: new Date().toISOString()
+    });
+  }, [isAuthenticated, effectiveAuth, onEditProfile]);
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
@@ -804,6 +820,20 @@ const ProfileView: React.FC<ProfileViewProps> = ({
           
           {/* Sticker display - now positioned after the shop section */}
           <StickerDisplay sticker={profile.sticker} />
+
+          {effectiveAuth && onEditProfile && (
+            <div className="mt-4">
+              <button
+                onClick={handleEditProfile}
+                className="px-4 py-2 bg-transparent border border-cyan-500 text-cyan-300 rounded-md hover:bg-cyan-900 transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  <Edit2 className="w-4 h-4" />
+                  <span>Edit Profile (View)</span>
+                </div>
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

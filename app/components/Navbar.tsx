@@ -45,7 +45,7 @@ export function Navbar({
         </div>
         
         <div className="flex gap-3">
-          {/* Profile Edit/Save Button - transforms based on mode */}
+          {/* Profile Edit/Save Button */}
           {isAuthenticated && (
             inEditMode ? (
               <>

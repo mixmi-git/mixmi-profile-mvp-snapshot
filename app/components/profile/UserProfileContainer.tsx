@@ -127,6 +127,9 @@ export interface UserProfileContainerProps {
   
   // Callback for mode changes
   onModeChange?: (mode: ProfileMode) => void;
+  
+  // Callback to provide editor actions to parent
+  onCaptureEditorActions?: (actions: { save: () => void; cancel: () => void }) => void;
 }
 
 // Default profile structure
@@ -175,6 +178,7 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
   initialMode,
   disableAuth = false,
   onModeChange,
+  onCaptureEditorActions,
 }) => {
   // Authentication state
   const { 
@@ -477,16 +481,9 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
   useEffect(() => {
     // Create a save function that will save data and transition to view mode
     const saveFunction = () => {
-      console.log('💾 Save triggered from navbar', {
-        profileName: profile.name,
-        mediaItems: mediaItems.length,
-        currentMode
-      });
-      
       // Get current form data from the editor if in edit mode and ref is available
       if (currentMode === ProfileMode.EDIT && editorRef.current) {
         const currentFormData = editorRef.current.getCurrentFormData();
-        console.log('📝 Got current form data from editor', currentFormData);
         
         // Create a complete profile object with all form data
         const completeProfile = {
@@ -513,16 +510,13 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
         saveProfileData(completeProfile);
       }
       
-      // Force transition back to view mode
-      console.log('🔄 Transitioning to view mode after save');
-      setCurrentMode(ProfileMode.VIEW);
+      // Force transition back to view mode using the transition function
+      transitionMode(ProfileMode.VIEW);
     };
     
     // Create a cancel function that will transition to view mode
     const cancelFunction = () => {
-      console.log('❌ Cancel triggered from navbar');
-      console.log('🔄 Transitioning to view mode after cancel');
-      setCurrentMode(ProfileMode.VIEW);
+      transitionMode(ProfileMode.VIEW);
     };
     
     // Update the ref with the new functions
@@ -530,8 +524,6 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
       save: saveFunction,
       cancel: cancelFunction
     };
-    
-    console.log('📝 Editor actions updated with new functions');
   }, [profile, mediaItems, spotlightItems, shopItems, currentMode]);
   
   // Debug changes to current mode
@@ -553,22 +545,13 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
     }
   }, [initialMode, currentMode]);
   
-  // Make the editor actions available to the parent component through both ways
+  // Make the editor actions available to the parent component
   useEffect(() => {
-    // Method 1: Use non-standard property on callback
-    if (onModeChange) {
-      // This allows the parent component to access the save/cancel methods
-      (onModeChange as any).editorActions = editorActionsRef.current;
+    // Call the onCaptureEditorActions callback when in edit mode
+    if (currentMode === ProfileMode.EDIT && onCaptureEditorActions) {
+      onCaptureEditorActions(editorActionsRef.current);
     }
-    
-    // Method 2: Call the parent directly after a short delay to ensure actions are ready
-    if (currentMode === ProfileMode.EDIT && onModeChange && (onModeChange as any).captureActions) {
-      console.log('🔄 Providing editor actions directly to parent component');
-      setTimeout(() => {
-        (onModeChange as any).captureActions(editorActionsRef.current);
-      }, 100);
-    }
-  }, [onModeChange, editorActionsRef.current, currentMode]);
+  }, [onCaptureEditorActions, editorActionsRef.current, currentMode]);
   
   // Determine if user is authenticated for edit access
   const canEdit = disableAuth || isAuthenticated;
@@ -600,7 +583,14 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
       profileId,
       availableAccounts: availableAccounts?.length || 0
     });
-  }, [isAuthenticated, canEdit, userAddress, currentAccount, profileId, availableAccounts]);
+    
+    // Force a UI update in view mode when authentication changes
+    if (currentMode === ProfileMode.VIEW) {
+      // This will trigger ProfileView to re-render with the updated authentication state
+      const updatedProfile = { ...profile };
+      setProfile(updatedProfile);
+    }
+  }, [isAuthenticated, canEdit, userAddress, currentAccount, profileId, availableAccounts, currentMode]);
   
   // Handle initial page load authentication
   useEffect(() => {
@@ -774,34 +764,23 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
                       PREVIEW MODE - Viewing your page as others will see it
                     </div>
                   </div>
+                  <button 
+                    onClick={handlePreview}
+                    className="px-4 py-2 rounded bg-gray-700 text-gray-200 hover:bg-gray-600 transition-colors flex items-center border border-gray-600"
+                  >
+                    <Edit2 className="h-4 w-4 mr-1" />
+                    Return to Editor
+                  </button>
                 </div>
               </div>
               
-              <div className="pt-10">
-                <ProfileView
+              <div className="mt-14">
+                <ProfileView 
                   profile={profile}
                   mediaItems={mediaItems}
                   spotlightItems={spotlightItems}
                   shopItems={shopItems}
-                  onEditProfile={() => {}}
                 />
-              </div>
-              
-              <div className="fixed bottom-0 left-0 right-0 bg-gray-900/95 backdrop-blur-sm border-t border-gray-800 z-50">
-                <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-                  <div className="flex items-center space-x-4">
-                    <div className="text-sm text-amber-400 font-medium">
-                      PREVIEW MODE
-                    </div>
-                    <button 
-                      onClick={handlePreview}
-                      className="px-4 py-2 rounded bg-gray-700 text-gray-200 hover:bg-gray-600 transition-colors flex items-center border border-cyan-500/50 hover:border-cyan-500"
-                    >
-                      <Edit2 className="h-4 w-4 mr-1" />
-                      Return to Editor
-                    </button>
-                  </div>
-                </div>
               </div>
             </>
           )}

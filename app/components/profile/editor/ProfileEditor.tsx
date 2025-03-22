@@ -128,40 +128,6 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
           onRemove={removeShopItem}
         />
       </div>
-
-      {/* Sticky Footer */}
-      <div className="fixed bottom-0 left-0 right-0 bg-gray-900/95 backdrop-blur-sm border-t border-gray-800 z-50">
-        <div className="container mx-auto max-w-4xl px-4 py-4 flex justify-between items-center">
-          <Button
-            variant="ghost"
-            onClick={onCancel}
-            className="text-gray-400 hover:text-white"
-          >
-            <X className="w-4 h-4 mr-2" />
-            Cancel
-          </Button>
-
-          <div className="flex gap-3">
-            <Button
-              variant="outline"
-              onClick={onPreview}
-              className="text-gray-200"
-            >
-              <Eye className="w-4 h-4 mr-2" />
-              Preview
-            </Button>
-
-            <Button
-              onClick={handleSaveAll}
-              disabled={!isDirty}
-              className="bg-cyan-500 hover:bg-cyan-600"
-            >
-              <Save className="w-4 h-4 mr-2" />
-              Save All Changes
-            </Button>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };

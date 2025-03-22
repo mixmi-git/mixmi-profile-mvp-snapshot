@@ -17,6 +17,9 @@ interface NavbarContainerProps {
   
   // View mode props
   onEditProfile?: () => void;
+  
+  // Auth state that can be passed from parent
+  isAuthenticated?: boolean;
 }
 
 // Enhanced Navbar Container with better debug features
@@ -24,25 +27,31 @@ export function NavbarContainer({
   onEditProfile, 
   inEditMode = false,
   onSaveProfile,
-  onCancelEdit
+  onCancelEdit,
+  isAuthenticated: propIsAuthenticated
 }: NavbarContainerProps) {
-  const { isAuthenticated, connectWallet, disconnectWallet, refreshAuthState, isInitialized } = useAuth()
+  const { isAuthenticated: authIsAuthenticated, connectWallet, disconnectWallet, refreshAuthState, isInitialized } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
+  
+  // Use provided authentication state if available, otherwise use from hook
+  const isAuthenticated = propIsAuthenticated !== undefined ? propIsAuthenticated : authIsAuthenticated;
   
   // Add debug logging for authentication state
   useEffect(() => {
     console.log('🔑 NavbarContainer state:', { 
-      isAuthenticated, 
+      propIsAuthenticated,
+      authIsAuthenticated,
+      isAuthenticated,
       isInitialized,
       inEditMode,
       hasEditCallback: !!onEditProfile,
       hasSaveCallback: !!onSaveProfile,
       hasCancelCallback: !!onCancelEdit
     })
-  }, [isAuthenticated, isInitialized, onEditProfile, inEditMode, onSaveProfile, onCancelEdit])
+  }, [propIsAuthenticated, authIsAuthenticated, isAuthenticated, isInitialized, onEditProfile, inEditMode, onSaveProfile, onCancelEdit])
   
   // Implement handleLoginToggle for the login/logout button
-  const handleLoginToggle = useCallback(() => {
+  const handleLoginToggle = useCallback(async () => {
     try {
       console.log('🔄 NavbarContainer login toggle called');
       
@@ -50,21 +59,35 @@ export function NavbarContainer({
       setIsLoading(true);
       
       if (isAuthenticated) {
-        console.log('🔌 Disconnecting wallet...');
-        disconnectWallet();
-        setTimeout(() => setIsLoading(false), 1000);
+        await disconnectWallet();
       } else {
-        console.log('🔌 Connecting wallet...');
-        connectWallet();
-        
-        // Set a timeout to reset loading state if connection takes too long
-        setTimeout(() => setIsLoading(false), 3000);
+        await connectWallet();
+        // Force refresh auth state after connection
+        setTimeout(() => {
+          refreshAuthState();
+        }, 1000);
       }
+      
+      // Set a timeout to reset loading state if connection takes too long
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 3000);
     } catch (error) {
-      console.error('❌ Error in handleLoginToggle:', error);
+      console.error('Error in login toggle:', error);
       setIsLoading(false);
     }
-  }, [isAuthenticated, connectWallet, disconnectWallet]);
+  }, [isAuthenticated, connectWallet, disconnectWallet, refreshAuthState]);
+  
+  // Force refresh auth state periodically when not authenticated
+  useEffect(() => {
+    if (!isAuthenticated && isInitialized) {
+      const checkInterval = setInterval(() => {
+        refreshAuthState();
+      }, 2000);
+      
+      return () => clearInterval(checkInterval);
+    }
+  }, [isAuthenticated, refreshAuthState, isInitialized]);
   
   return (
     <>
@@ -77,16 +100,6 @@ export function NavbarContainer({
         onSaveProfile={onSaveProfile}
         onCancelEdit={onCancelEdit}
       />
-      
-      {/* Debug panel showing auth state */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="fixed bottom-0 right-0 bg-gray-800 text-white text-xs p-2 z-50 opacity-75">
-          Status: {isAuthenticated ? '🟢 Connected' : '🔴 Disconnected'} | 
-          Init: {isInitialized ? '✅' : '⏳'} |
-          Mode: {inEditMode ? '✏️ Edit' : '👁️ View'} |
-          Loading: {isLoading ? '⌛' : '✓'}
-        </div>
-      )}
     </>
   )
 } 
