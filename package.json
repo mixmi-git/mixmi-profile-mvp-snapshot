@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "jest"
+    "test": "jest",
+    "clean": "kill -9 $(lsof -t -i:3000-3010) 2>/dev/null || true && rm -rf .next && rm -rf node_modules/.cache",
+    "dev:clean": "npm run clean && next dev"
   },
   "dependencies": {
     "@micro-stacks/react": "^1.0.9",
