@@ -66,6 +66,21 @@ export function NavbarContainer({
         setTimeout(() => {
           refreshAuthState();
         }, 1000);
+        
+        // Also do a second refresh after a longer delay to catch any delayed updates
+        setTimeout(() => {
+          console.log('🔄 Performing delayed auth refresh check');
+          refreshAuthState();
+          
+          // Store auth status in localStorage for persistence across page refreshes
+          if (typeof window !== 'undefined') {
+            try {
+              localStorage.setItem('mixmi-last-auth-check', new Date().toISOString());
+            } catch (e) {
+              console.error('Failed to update auth check timestamp:', e);
+            }
+          }
+        }, 3000);
       }
       
       // Set a timeout to reset loading state if connection takes too long

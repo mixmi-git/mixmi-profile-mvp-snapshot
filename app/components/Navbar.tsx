@@ -25,7 +25,7 @@ export function Navbar({
   onCancelEdit
 }: NavbarProps) {
   return (
-    <header className="bg-gray-900 border-b border-gray-800 p-4">
+    <header className="bg-gray-900 border-b border-gray-800 p-4 sticky top-0 z-50">
       <div className="container mx-auto flex justify-between items-center">
         <div className="flex items-center">
           <a href="/" className="h-8 w-auto relative">

@@ -429,42 +429,76 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
   // Add a reference to access the editor's form data
   const editorRef = useRef<ProfileEditorRefType>(null);
 
-  // Function to handle saving profile data
-  const handleSave = async (updatedProfile: ProfileData) => {
-    // Saving profile data
+  // Handle Save
+  const handleSave = () => {
+    console.log('Saving profile changes...');
     
-    // Extract items from the updatedProfile if they exist
-    const updatedSpotlightItems = updatedProfile.spotlightItems || spotlightItems;
+    // Get the current edited profile from the editor reference
+    let updatedProfile = { ...profile };
     
-    // Process media items to ensure they have proper embed URLs
-    const updatedMediaItems = (updatedProfile.mediaItems || mediaItems).map(item => {
-      // If the item is missing an embedUrl but has an id, use the id as a fallback
-      if (!item.embedUrl && item.id) {
-        return {
-          ...item,
-          embedUrl: item.id
-        };
-      }
-      return item;
+    // Try to get data from the editor ref if available
+    if (editorRef.current?.getCurrentFormData) {
+      const formData = editorRef.current.getCurrentFormData();
+      updatedProfile = { 
+        ...formData.profile
+      };
+    }
+    
+    // Set loading state while saving
+    setIsLoading(true);
+    
+    // Log the changes for debugging
+    console.log('Profile changes:', {
+      original: profile,
+      updated: updatedProfile
     });
     
-    const updatedShopItems = updatedProfile.shopItems || shopItems;
-    
-    // Create a complete profile object with all data
-    const completeProfile = {
-      ...updatedProfile,
-      hasEditedProfile: true,
-      // Use the updated items
-      spotlightItems: updatedSpotlightItems,
-      mediaItems: updatedMediaItems,
-      shopItems: updatedShopItems
-    };
-    
-    // Save all data to localStorage
-    saveProfileData(completeProfile);
-    
-    // Transition to view mode
-    transitionMode(ProfileMode.VIEW);
+    // Save profile changes with a brief delay to allow UI feedback
+    setTimeout(() => {
+      // Update the actual profile state with our edited data
+      setProfile(updatedProfile);
+      
+      // Save to local storage for persistence
+      try {
+        const profileJSON = JSON.stringify({
+          profile: updatedProfile,
+          profileId,
+          timestamp: new Date().toISOString()
+        });
+        
+        localStorage.setItem(`mixmi-profile-${profileId}`, profileJSON);
+        console.log('Saved profile to localStorage with ID:', profileId);
+        
+        // Mark last save time
+        localStorage.setItem('mixmi-last-save', new Date().toISOString());
+      } catch (error) {
+        console.error('Error saving profile to localStorage:', error);
+      }
+      
+      // Switch back to view mode
+      setIsLoading(false);
+      setCurrentMode(ProfileMode.VIEW);
+      
+      // Refresh auth state to ensure we don't lose connection
+      if (typeof window !== 'undefined') {
+        // Trigger an auth refresh after save completes
+        setTimeout(() => {
+          if (window.dispatchEvent) {
+            // Use a custom event to notify other components
+            const event = new CustomEvent('mixmi-profile-saved', { 
+              detail: { profileId }
+            });
+            window.dispatchEvent(event);
+            
+            console.log('🔄 Triggering auth refresh after save');
+            // Access the refreshAuthState from window if available
+            if ((window as any).refreshAuthState) {
+              (window as any).refreshAuthState();
+            }
+          }
+        }, 500);
+      }
+    }, 500);
   };
 
   // Function to handle preview mode

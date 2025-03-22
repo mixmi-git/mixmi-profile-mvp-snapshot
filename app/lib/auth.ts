@@ -201,7 +201,7 @@ export const useAuth = () => {
   const [refreshCounter, setRefreshCounter] = useState(0)
 
   // Function to check auth status and update state
-  const checkAuthStatus = useCallback(() => {
+  const checkAuthStatus = useCallback(async () => {
     try {
       // First check: is the user signed in according to userSession
       if (userSession.isUserSignedIn()) {
@@ -213,9 +213,15 @@ export const useAuth = () => {
         const mainnetAddress = userData.profile.stxAddress.mainnet
         setUserAddress(mainnetAddress)
         
-        // Try to get the current account from the wallet
-        const account = getCurrentAccount(userSession)
-        setCurrentAccount(account && account.length > 0 ? account[0] : null)
+        // Try to get the current account from the wallet - handle async properly
+        try {
+          const accounts = await getCurrentAccount(userSession)
+          setCurrentAccount(accounts && accounts.length > 0 ? accounts[0] : null)
+        } catch (accountError) {
+          console.error('Error getting current account:', accountError)
+          // Fallback to mainnet address
+          setCurrentAccount(mainnetAddress)
+        }
         
         // Update the profile ID mapping if needed
         const profileId = getProfileIdForAddress(mainnetAddress)
@@ -228,30 +234,39 @@ export const useAuth = () => {
         return
       }
       
-      // Second check: If we see session data in localStorage but userSession doesn't recognize it
-      if (checkLocalStorageForSession()) {
-        console.log('Auth: Session data found in localStorage but isUserSignedIn() returns false')
-        
+      // Second check: look for blockstack-session data in localStorage
+      if (typeof window !== 'undefined') {
         try {
-          // Try to manually get user data from localStorage session
+          // Check when the last auth check was performed
+          const lastAuthCheck = localStorage.getItem('mixmi-last-auth-check');
           const sessionData = localStorage.getItem('blockstack-session');
-          if (sessionData) {
-            const parsedSession = JSON.parse(sessionData);
-            if (parsedSession && parsedSession.userData && parsedSession.userData.profile) {
-              console.log('Auth: Manually extracted user data from localStorage session', parsedSession.userData);
-              setIsAuthenticated(true);
-              
-              // Try to extract address from the parsed session
-              const address = parsedSession.userData.profile?.stxAddress?.mainnet;
-              if (address) {
-                setUserAddress(address);
-                setCurrentAccount(address);
-                return;
+          
+          // Check if we have recently verified auth status (within 10 minutes)
+          const recentCheck = lastAuthCheck && 
+            (new Date().getTime() - new Date(lastAuthCheck).getTime() < 10 * 60 * 1000);
+          
+          if (sessionData && (recentCheck || checkLocalStorageForSession())) {
+            console.log('Auth: Found session data in localStorage');
+            
+            try {
+              const parsed = JSON.parse(sessionData);
+              if (parsed && parsed.userData && parsed.userData.profile) {
+                const address = parsed.userData.profile.stxAddress?.mainnet;
+                
+                if (address) {
+                  console.log('Auth: Restoring auth state from localStorage session');
+                  setIsAuthenticated(true);
+                  setUserAddress(address);
+                  setCurrentAccount(address);
+                  return;
+                }
               }
+            } catch (e) {
+              console.error('Error parsing localStorage session:', e);
             }
           }
         } catch (e) {
-          console.error('Auth: Error parsing localStorage session data', e);
+          console.error('Auth: Error reading from localStorage:', e);
         }
       }
       
@@ -314,7 +329,10 @@ export const useAuth = () => {
         })
     } else {
       // No pending sign-in, just check current status
-      checkAuthStatus()
+      checkAuthStatus().catch(err => {
+        console.error('Error checking auth status:', err);
+        setIsInitialized(true);
+      });
       clearTimeout(initTimeout)
     }
     
@@ -366,22 +384,70 @@ export const useAuth = () => {
   const disconnectWallet = useCallback(() => {
     console.log('Auth: Disconnecting wallet...')
     try {
+      // First clear all session data
       userSession.signUserOut('')  // Pass an empty string to prevent redirection issues
+      
+      // Manually clear any local storage data related to sessions
+      if (typeof window !== 'undefined') {
+        // Clear specific auth-related items
+        const keysToRemove = Object.keys(localStorage).filter(key => 
+          key.includes('blockstack') || 
+          key.includes('stacks') ||
+          key.includes('authResponse')
+        );
+        
+        console.log('Auth: Clearing session data from localStorage:', keysToRemove);
+        keysToRemove.forEach(key => {
+          try {
+            localStorage.removeItem(key);
+          } catch (e) {
+            console.error(`Error removing ${key}:`, e);
+          }
+        });
+      }
+      
+      // Reset auth state
       setIsAuthenticated(false)
       setUserAddress(null)
       setCurrentAccount(null)
-      console.log('Auth: Wallet disconnected!')
-      forceRefresh() // Ensure UI updates after disconnect
+      
+      // Force refresh to ensure UI updates
+      setTimeout(() => {
+        forceRefresh() // Ensure UI updates after disconnect
+        console.log('Auth: Wallet disconnected and state refreshed!')
+      }, 100);
     } catch (error) {
       console.error('Auth: Error disconnecting wallet', error)
+      
+      // Attempt recovery in case of failure
+      setIsAuthenticated(false)
+      setUserAddress(null)
+      setCurrentAccount(null)
+      forceRefresh()
     }
   }, [forceRefresh])
 
   // Function to manually refresh auth state - useful for testing
   const refreshAuthState = useCallback(() => {
     console.log('Auth: Manually refreshing auth state')
-    checkAuthStatus()
+    checkAuthStatus().catch(err => {
+      console.error('Error during manual auth refresh:', err);
+    });
   }, [checkAuthStatus])
+
+  // Make refreshAuthState globally available for other components
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      (window as any).refreshAuthState = refreshAuthState;
+    }
+    
+    return () => {
+      // Clean up when component unmounts
+      if (typeof window !== 'undefined') {
+        delete (window as any).refreshAuthState;
+      }
+    };
+  }, [refreshAuthState]);
 
   // Function to switch between accounts
   const switchAccount = useCallback((accountAddress: string) => {
