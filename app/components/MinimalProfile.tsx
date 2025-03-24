@@ -3,6 +3,23 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 
+// Simple StickerDisplay component
+const StickerDisplay = ({ sticker }: { sticker?: { visible: boolean; image: string } }) => {
+  if (!sticker || !sticker.visible || !sticker.image) return null;
+  
+  return (
+    <div className="flex justify-center mt-24 mb-12">
+      <div className="sticker-rotate">
+        <img 
+          src={sticker.image} 
+          alt="Sticker" 
+          className="w-24 h-24 md:w-32 md:h-32"
+        />
+      </div>
+    </div>
+  );
+};
+
 // Media embed component for rendering different types of media
 const MediaEmbed = ({ item }: { item: any }) => {
   if (!item.embedUrl) return null;
@@ -91,6 +108,11 @@ export function MinimalProfile() {
     bio: 'Tell your story here...'
   });
   const [mediaItems, setMediaItems] = useState<any[]>([]);
+  const [shopItems, setShopItems] = useState<any[]>([]);
+  const [stickerData, setStickerData] = useState<{ visible: boolean; image: string }>({
+    visible: true,
+    image: "/images/stickers/daisy-blue.png"
+  });
   const [isWalletConnected, setIsWalletConnected] = useState(false);
   const [walletAddress, setWalletAddress] = useState('');
   const [walletStatus, setWalletStatus] = useState('');
@@ -113,10 +135,32 @@ export function MinimalProfile() {
     }
   ];
 
+  // Default example shop items
+  const exampleShopItems = [
+    {
+      id: '1',
+      title: 'Limited Edition Merch',
+      description: 'Exclusive merchandise from the latest tour',
+      image: '/images/shop-placeholder.jpg',
+      price: '$25.00',
+      link: 'https://example.com/merch/limited-edition'
+    },
+    {
+      id: '2',
+      title: 'Digital Album',
+      description: 'Download my latest album in high quality',
+      image: '/images/placeholder.png',
+      price: '$9.99',
+      link: 'https://example.com/album/digital'
+    }
+  ];
+
   // Storage keys
   const STORAGE_KEYS = {
     PROFILE: 'mixmi_profile_data',
-    MEDIA: 'mixmi_media_items'
+    MEDIA: 'mixmi_media_items',
+    SHOP: 'mixmi_shop_items',
+    STICKER: 'mixmi_sticker_data'
   };
 
   // Load any saved profile data on mount
@@ -131,7 +175,23 @@ export function MinimalProfile() {
           title: parsed.title || 'Your Title',
           bio: parsed.bio || 'Tell your story here...'
         });
+        
+        // Also load sticker data if it exists in the profile
+        if (parsed.sticker) {
+          setStickerData(parsed.sticker);
+        }
+        
         console.log('Loaded profile from localStorage');
+      }
+
+      // Also try to load standalone sticker data (some versions store it separately)
+      const savedSticker = localStorage.getItem(STORAGE_KEYS.STICKER);
+      if (savedSticker) {
+        const parsed = JSON.parse(savedSticker);
+        if (parsed && parsed.image) {
+          setStickerData(parsed);
+          console.log('Loaded sticker data from localStorage');
+        }
       }
 
       // Load media items
@@ -148,6 +208,22 @@ export function MinimalProfile() {
       } else {
         setMediaItems(exampleMediaItems);
         console.log('No media items in localStorage, using example items');
+      }
+      
+      // Load shop items
+      const savedShop = localStorage.getItem(STORAGE_KEYS.SHOP);
+      if (savedShop) {
+        const parsed = JSON.parse(savedShop);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setShopItems(parsed);
+          console.log('Loaded shop items from localStorage:', parsed.length);
+        } else {
+          setShopItems(exampleShopItems);
+          console.log('No shop items found in localStorage, using example items');
+        }
+      } else {
+        setShopItems(exampleShopItems);
+        console.log('No shop items in localStorage, using example items');
       }
 
       // Check for wallet connection
@@ -177,14 +253,17 @@ export function MinimalProfile() {
       return;
     }
 
-    setIsLoading(true);
-    setWalletStatus('Connecting wallet...');
-
     try {
+      setIsLoading(true);
+      setWalletStatus('Connecting wallet...');
+
+      // Import needed dependencies
       const { showConnect, AppConfig, UserSession } = await import('@stacks/connect');
+      
+      // Setup app configuration and user session
       const appConfig = new AppConfig(['store_write']);
       const userSession = new UserSession({ appConfig });
-
+      
       showConnect({
         appDetails: {
           name: 'Mixmi',
@@ -192,23 +271,30 @@ export function MinimalProfile() {
         },
         redirectTo: window.location.origin,
         onFinish: () => {
-          if (userSession.isUserSignedIn()) {
-            const userData = userSession.loadUserData();
-            const address = userData.profile.stxAddress.mainnet;
-            
-            setIsWalletConnected(true);
-            setWalletAddress(address);
-            setWalletStatus(`Connected: ${address.slice(0, 6)}...${address.slice(-4)}`);
-            
-            localStorage.setItem('simple-wallet-connected', 'true');
-            localStorage.setItem('simple-wallet-address', address);
-            
-            setTimeout(() => setWalletStatus(''), 5000);
-          } else {
-            setWalletStatus('Connection completed but not signed in');
+          try {
+            if (userSession.isUserSignedIn()) {
+              const userData = userSession.loadUserData();
+              const address = userData.profile.stxAddress.mainnet;
+              
+              setIsWalletConnected(true);
+              setWalletAddress(address);
+              setWalletStatus(`Connected: ${address.slice(0, 6)}...${address.slice(-4)}`);
+              
+              localStorage.setItem('simple-wallet-connected', 'true');
+              localStorage.setItem('simple-wallet-address', address);
+              
+              setTimeout(() => setWalletStatus(''), 5000);
+            } else {
+              setWalletStatus('Connection completed but not signed in');
+              setTimeout(() => setWalletStatus(''), 3000);
+            }
+          } catch (error) {
+            console.error('Error in onFinish handler:', error);
+            setWalletStatus('Error processing connection');
             setTimeout(() => setWalletStatus(''), 3000);
+          } finally {
+            setIsLoading(false);
           }
-          setIsLoading(false);
         },
         userSession,
       });
@@ -321,7 +407,7 @@ export function MinimalProfile() {
             </div>
           </div>
           
-          {/* Example Content */}
+          {/* Spotlight Section */}
           <div className="mb-16">
             <h2 className="text-4xl font-bold text-center mb-8">SPOTLIGHT</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -356,9 +442,8 @@ export function MinimalProfile() {
           </div>
           
           {/* Media Section */}
-          {mediaItems.length > 0 && (
-            <div className="mt-24 max-w-6xl mx-auto mb-24 opacity-0 animate-fadeIn"
-                 style={{ animationDelay: '150ms', animationFillMode: 'forwards' }}>
+          {mediaItems && mediaItems.length > 0 && (
+            <div className="mt-24 mb-24 max-w-6xl mx-auto">
               <h2 className="text-4xl font-bold text-white text-center mb-8 tracking-wider">
                 MEDIA
               </h2>
@@ -415,6 +500,111 @@ export function MinimalProfile() {
               )}
             </div>
           )}
+          
+          {/* Shop Section */}
+          {shopItems && shopItems.length > 0 && (
+            <div className="mt-24 mb-24 max-w-6xl mx-auto">
+              <h2 className="text-4xl font-bold text-white text-center mb-8 tracking-wider">
+                SHOP
+              </h2>
+              <p className="text-sm text-gray-400 text-center mb-12">
+                Connect visitors to your shop and products
+              </p>
+              
+              {shopItems.length < 3 ? (
+                // 1-2 items - center justified with fixed width
+                <div className="flex flex-col sm:flex-row justify-center gap-6">
+                  {shopItems.map((item, index) => (
+                    <div key={index} className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)]">
+                      <div className="bg-gray-800 rounded-lg overflow-hidden h-full">
+                        <div className="aspect-square relative bg-gray-700">
+                          <img 
+                            src={item.image || "/images/shop-placeholder.jpg"}
+                            alt={item.title}
+                            className="absolute inset-0 w-full h-full object-cover"
+                          />
+                          
+                          {/* Price badge */}
+                          {item.price && (
+                            <div className="absolute top-2 right-2 bg-cyan-600 text-white px-2 py-1 rounded text-sm font-bold">
+                              {item.price}
+                            </div>
+                          )}
+                        </div>
+                        <div className="p-4">
+                          <h3 className="text-lg font-medium mb-1">
+                            {item.title}
+                          </h3>
+                          <p className="text-gray-400 text-sm mb-2">
+                            {item.description}
+                          </p>
+                          {item.link && (
+                            <a 
+                              href={item.link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-cyan-400 text-sm hover:underline inline-flex items-center"
+                            >
+                              View Details
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                              </svg>
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                // 3+ items - grid layout
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {shopItems.map((item, index) => (
+                    <div key={index} className="bg-gray-800 rounded-lg overflow-hidden h-full">
+                      <div className="aspect-square relative bg-gray-700">
+                        <img 
+                          src={item.image || "/images/shop-placeholder.jpg"}
+                          alt={item.title}
+                          className="absolute inset-0 w-full h-full object-cover"
+                        />
+                        
+                        {/* Price badge */}
+                        {item.price && (
+                          <div className="absolute top-2 right-2 bg-cyan-600 text-white px-2 py-1 rounded text-sm font-bold">
+                            {item.price}
+                          </div>
+                        )}
+                      </div>
+                      <div className="p-4">
+                        <h3 className="text-lg font-medium mb-1">
+                          {item.title}
+                        </h3>
+                        <p className="text-gray-400 text-sm mb-2">
+                          {item.description}
+                        </p>
+                        {item.link && (
+                          <a 
+                            href={item.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-cyan-400 text-sm hover:underline inline-flex items-center"
+                          >
+                            View Details
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+          
+          {/* Sticker Display - position at the bottom of the content, not fixed */}
+          <StickerDisplay sticker={stickerData} />
           
           {/* Navigation */}
           <div className="flex justify-center space-x-4 mt-12">
