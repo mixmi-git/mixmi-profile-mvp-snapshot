@@ -91,7 +91,7 @@ const renderEditForm = (item: SpotlightItem, index: number, errors: SpotlightErr
               <div className="mt-2">
                 <ErrorBoundary>
                   <ImageUpload 
-                    onImageUploaded={(file) => handlers.handleImageUpload(index, file)}
+                    onUpload={(file) => handlers.handleImageUpload(index, file)}
                     currentImage={item.image}
                   />
                 </ErrorBoundary>
@@ -138,7 +138,7 @@ const renderEditForm = (item: SpotlightItem, index: number, errors: SpotlightErr
 const SpotlightCard = ({ item, isEditing = false }: { item: SpotlightItem, isEditing?: boolean }) => {
   console.log('SpotlightCard render:', { title: item.title, link: item.link });
   return (
-    <Card className={`w-full overflow-hidden group ${isEditing ? 'max-w-sm' : ''}`}>
+    <Card className={`w-full overflow-hidden group ${isEditing ? 'max-w-sm' : 'max-w-md'}`}>
       <CardContent className="p-0">
         <a
           href={item.link}
@@ -217,9 +217,9 @@ export function SpotlightSection({
 
   if (!isEditing) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mx-auto max-w-6xl">
         {items.map((item) => (
-          <div key={item.id}>
+          <div key={item.id} className="flex justify-center">
             <SpotlightCard item={item} />
           </div>
         ))}

@@ -76,8 +76,8 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
   return (
     <div className="w-full max-w-4xl mx-auto px-4 py-8">
       {/* Profile header with image and text */}
-      <div className="flex flex-col md:flex-row items-center md:items-start gap-6 mb-8">
-        {/* Profile Image */}
+      <div className="flex flex-col md:flex-row items-center gap-8 mb-8">
+        {/* Profile Image - left side */}
         <div className="relative group">
           {isAuthenticated ? (
             <HoverControls
@@ -102,13 +102,13 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
                 </div>
               }
             >
-              <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-2 border-gray-700 bg-gray-800 flex items-center justify-center">
+              <div className="w-60 h-60 rounded-lg overflow-hidden border-2 border-cyan-600 bg-gray-800 flex items-center justify-center">
                 {profile.image ? (
                   <Image
                     src={profile.image}
                     alt={profile.name || "Profile"}
-                    width={160}
-                    height={160}
+                    width={240}
+                    height={240}
                     className="w-full h-full object-cover"
                   />
                 ) : (
@@ -120,13 +120,13 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
               </div>
             </HoverControls>
           ) : (
-            <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-2 border-gray-700 bg-gray-800 flex items-center justify-center">
+            <div className="w-60 h-60 rounded-lg overflow-hidden border-2 border-cyan-600 bg-gray-800 flex items-center justify-center">
               {profile.image ? (
                 <Image
                   src={profile.image}
                   alt={profile.name || "Profile"}
-                  width={160}
-                  height={160}
+                  width={240}
+                  height={240}
                   className="w-full h-full object-cover"
                 />
               ) : (
@@ -138,15 +138,15 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
           )}
         </div>
         
-        {/* Profile info */}
-        <div className="flex-1 text-center md:text-left">
-          <div className="mb-2">
+        {/* Profile info - center justified in its container */}
+        <div className="flex-1 text-center flex flex-col items-center">
+          <div className="mb-3">
             <EditableField
               value={profile.name}
               onSave={(value) => onUpdateProfile?.('name', value)}
               placeholder="Your Name"
               className="inline-block"
-              labelClassName="text-2xl md:text-3xl font-bold"
+              labelClassName="text-2xl md:text-3xl font-bold text-cyan-300"
               isAuthenticated={isAuthenticated}
             />
           </div>
@@ -162,21 +162,21 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
             />
           </div>
           
-          <div className="mb-6">
+          <div className="mb-6 max-w-2xl w-full">
             <EditableField
               value={profile.bio}
               onSave={(value) => onUpdateProfile?.('bio', value)}
               placeholder="Tell your story here..."
               multiline
               rows={4}
-              className="inline-block w-full max-w-2xl"
+              className="w-full"
               labelClassName="text-gray-300 leading-relaxed text-sm md:text-base"
               isAuthenticated={isAuthenticated}
             />
           </div>
           
           {/* Social links */}
-          <div className="flex flex-wrap justify-center md:justify-start gap-3">
+          <div className="flex flex-wrap justify-center gap-3">
             {profile.socialLinks && profile.socialLinks.map((link, index) => (
               <a
                 key={`${link.platform}-${index}`}

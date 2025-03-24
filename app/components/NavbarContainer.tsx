@@ -10,24 +10,12 @@ import { useAuth } from '@/lib/auth'
  */
 
 interface NavbarContainerProps {
-  // Edit mode props
-  inEditMode?: boolean;
-  onSaveProfile?: () => void;
-  onCancelEdit?: () => void;
-  
-  // View mode props
-  onEditProfile?: () => void;
-  
   // Auth state that can be passed from parent
   isAuthenticated?: boolean;
 }
 
 // Enhanced Navbar Container with better debug features
 export function NavbarContainer({ 
-  onEditProfile, 
-  inEditMode = false,
-  onSaveProfile,
-  onCancelEdit,
   isAuthenticated: propIsAuthenticated
 }: NavbarContainerProps) {
   const { isAuthenticated: authIsAuthenticated, connectWallet, disconnectWallet, refreshAuthState, isInitialized } = useAuth()
@@ -42,13 +30,9 @@ export function NavbarContainer({
       propIsAuthenticated,
       authIsAuthenticated,
       isAuthenticated,
-      isInitialized,
-      inEditMode,
-      hasEditCallback: !!onEditProfile,
-      hasSaveCallback: !!onSaveProfile,
-      hasCancelCallback: !!onCancelEdit
+      isInitialized
     })
-  }, [propIsAuthenticated, authIsAuthenticated, isAuthenticated, isInitialized, onEditProfile, inEditMode, onSaveProfile, onCancelEdit])
+  }, [propIsAuthenticated, authIsAuthenticated, isAuthenticated, isInitialized])
   
   // Implement handleLoginToggle for the login/logout button
   const handleLoginToggle = useCallback(async () => {
@@ -110,10 +94,6 @@ export function NavbarContainer({
         isAuthenticated={isAuthenticated}
         isLoading={isLoading}
         onLoginToggle={handleLoginToggle}
-        onEditProfile={inEditMode ? undefined : onEditProfile}
-        inEditMode={inEditMode}
-        onSaveProfile={onSaveProfile}
-        onCancelEdit={onCancelEdit}
       />
     </>
   )

@@ -38,13 +38,16 @@ const SectionVisibilityManager = ({
     return null;
   }
 
+  // Ensure visibility object exists even if undefined
+  const safeVisibility = visibility || {};
+
   const toggleExpanded = () => {
     setIsExpanded(!isExpanded);
   };
 
   // Handler for toggling visibility
   const handleToggle = (section: keyof SectionVisibility) => {
-    onVisibilityChange(section, !(visibility[section] ?? true));
+    onVisibilityChange(section, !(safeVisibility[section] ?? true));
   };
 
   return (
@@ -69,7 +72,7 @@ const SectionVisibilityManager = ({
               </Label>
               <Switch
                 id="toggle-spotlight"
-                checked={visibility.spotlight ?? true}
+                checked={safeVisibility.spotlight ?? true}
                 onCheckedChange={() => handleToggle('spotlight')}
               />
             </div>
@@ -80,7 +83,7 @@ const SectionVisibilityManager = ({
               </Label>
               <Switch
                 id="toggle-media"
-                checked={visibility.media ?? true}
+                checked={safeVisibility.media ?? true}
                 onCheckedChange={() => handleToggle('media')}
               />
             </div>
@@ -91,7 +94,7 @@ const SectionVisibilityManager = ({
               </Label>
               <Switch
                 id="toggle-shop"
-                checked={visibility.shop ?? true}
+                checked={safeVisibility.shop ?? true}
                 onCheckedChange={() => handleToggle('shop')}
               />
             </div>
@@ -102,7 +105,7 @@ const SectionVisibilityManager = ({
               </Label>
               <Switch
                 id="toggle-sticker"
-                checked={visibility.sticker ?? true}
+                checked={safeVisibility.sticker ?? true}
                 onCheckedChange={() => handleToggle('sticker')}
               />
             </div>

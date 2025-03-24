@@ -18,6 +18,7 @@ import { ProfileData, MediaItemType, SpotlightItemType, ShopItemType } from './U
 import StickerDisplay from './StickDisplay';
 import PersonalInfoSection from './PersonalInfoSection';
 import { SectionVisibilityManager } from '../ui/section-visibility-manager';
+import { Card, CardContent } from '../ui/card';
 
 // Media embed component for rendering different types of media
 const MediaEmbed = ({ item }: { item: MediaItemType }) => {
@@ -248,227 +249,58 @@ const ProfileView: React.FC<ProfileViewProps> = ({
       {/* Spotlight Section */}
       {(profile.sectionVisibility?.spotlight !== false) && spotlightItems.length > 0 && (
         <div className="mb-16 px-4">
-          <h2 className="text-4xl font-bold text-white text-center mb-4 tracking-wider">
-            SPOTLIGHT
-          </h2>
-          {!profile.hasEditedProfile && (
-            <p className="text-sm text-gray-400 text-center mb-12">
-              Share your work and favorite projects
-            </p>
-          )}
-          {profile.hasEditedProfile && <div className="mb-12"></div>}
-          
-          {spotlightItems && spotlightItems.filter(item => item.title.trim() || item.description.trim()).length > 0 ? (
-            spotlightItems.filter(item => item.title.trim() || item.description.trim()).length < 3 ? (
-              // 1-2 items - center justified
-              <div className="flex flex-col sm:flex-row justify-center gap-6">
-                {spotlightItems
-                  .filter(item => item.title.trim() || item.description.trim())
-                  .slice(0, 3)
-                  .map((item, index) => (
-                    <div 
-                      key={index}
-                      className="group block relative rounded-lg overflow-hidden w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)]"
-                    >
-                      <div className="aspect-square relative bg-gray-800">
-                        {item.image ? (
-                          item.image.startsWith('data:') ? (
-                            <img
-                              src={item.image}
-                              alt={item.title}
-                              className="absolute w-full h-full object-cover"
-                              style={{ imageRendering: 'auto' }} // Ensures GIFs animate properly
-                            />
-                          ) : (
-                            <Image
-                              src={item.image}
-                              alt={item.title}
-                              fill
-                              className="object-cover"
-                            />
-                          )
-                        ) : (
-                          <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
-                            <p className="text-gray-500">No image</p>
-                          </div>
-                        )}
-                        
-                        {/* Corner badge - similar to the editor but optimized for viewing */}
-                        <div className="absolute bottom-0 left-0 bg-black bg-opacity-70 p-2 
-                          max-w-[90%] md:max-w-[80%] transition-all duration-300 
-                          md:group-hover:max-w-full rounded-tr-md">
-                          <div className="border-l-2 border-cyan-400 pl-2">
-                            {item.link ? (
-                              <a 
-                                href={item.link} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="group/title"
-                              >
-                                <div className="flex items-center gap-2">
-                                  <h4 className="text-white text-sm font-medium truncate group-hover/title:underline">{item.title || "Untitled"}</h4>
-                                </div>
-                              </a>
-                            ) : (
+          <div className="max-w-6xl mx-auto">
+            <h2 className="text-4xl font-bold text-white text-center mb-4 tracking-wider">
+              SPOTLIGHT
+            </h2>
+            {!profile.hasEditedProfile && (
+              <p className="text-sm text-gray-400 text-center mb-12">
+                Share your work and favorite projects
+              </p>
+            )}
+            {profile.hasEditedProfile && <div className="mb-12"></div>}
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {spotlightItems.map((item) => (
+                <div key={item.id} className="flex justify-center">
+                  <Card className="w-full overflow-hidden group max-w-md">
+                    <CardContent className="p-0">
+                      <a
+                        href={item.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block"
+                      >
+                        <div className="relative aspect-square w-full bg-gray-800">
+                          <Image
+                            src={item.image || '/images/next-event-placeholder.jpg'}
+                            alt={item.title || 'Spotlight image'}
+                            fill
+                            className="object-cover transition-transform duration-300 group-hover:scale-105"
+                            unoptimized
+                          />
+                          
+                          {/* Corner badge with title */}
+                          <div className="absolute bottom-0 left-0 bg-black bg-opacity-70 p-2 
+                            max-w-[90%] md:max-w-[80%] transition-all duration-300 
+                            md:group-hover:max-w-full rounded-tr-md">
+                            <div className="border-l-2 border-cyan-400 pl-2">
                               <div className="flex items-center gap-2">
                                 <h4 className="text-white text-sm font-medium truncate">{item.title || "Untitled"}</h4>
                               </div>
-                            )}
-                            <p className="text-xs text-gray-300 mt-1 line-clamp-2 hidden md:group-hover:block md:hidden">{item.description}</p>
+                              <p className="text-xs text-gray-300 mt-1 line-clamp-2 hidden md:group-hover:block md:hidden">
+                                {item.description}
+                              </p>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            ) : (
-              // 3 items - grid layout
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {spotlightItems
-                  .filter(item => item.title.trim() || item.description.trim())
-                  .slice(0, 3)
-                  .map((item, index) => (
-                    <div 
-                      key={index}
-                      className="group block relative rounded-lg overflow-hidden"
-                    >
-                      <div className="aspect-square relative bg-gray-800">
-                        {item.image ? (
-                          item.image.startsWith('data:') ? (
-                            <img
-                              src={item.image}
-                              alt={item.title}
-                              className="absolute w-full h-full object-cover"
-                              style={{ imageRendering: 'auto' }} // Ensures GIFs animate properly
-                            />
-                          ) : (
-                            <Image
-                              src={item.image}
-                              alt={item.title}
-                              fill
-                              className="object-cover"
-                            />
-                          )
-                        ) : (
-                          <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
-                            <p className="text-gray-500">No image</p>
-                          </div>
-                        )}
-                        
-                        {/* Corner badge - similar to the editor but optimized for viewing */}
-                        <div className="absolute bottom-0 left-0 bg-black bg-opacity-70 p-2 
-                          max-w-[90%] md:max-w-[80%] transition-all duration-300 
-                          md:group-hover:max-w-full rounded-tr-md">
-                          <div className="border-l-2 border-cyan-400 pl-2">
-                            {item.link ? (
-                              <a 
-                                href={item.link} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="group/title"
-                              >
-                                <div className="flex items-center gap-2">
-                                  <h4 className="text-white text-sm font-medium truncate group-hover/title:underline">{item.title || "Untitled"}</h4>
-                                </div>
-                              </a>
-                            ) : (
-                              <div className="flex items-center gap-2">
-                                <h4 className="text-white text-sm font-medium truncate">{item.title || "Untitled"}</h4>
-                              </div>
-                            )}
-                            <p className="text-xs text-gray-300 mt-1 line-clamp-2 hidden md:group-hover:block md:hidden">{item.description}</p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            )
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* Example cards showing what you can do with Spotlight */}
-              <div className="relative rounded-lg overflow-hidden group">
-                <div className="aspect-square relative bg-gray-800/50">
-                  <Image
-                    src="/images/next-event-placeholder.jpg"
-                    alt="Event example"
-                    fill
-                    className="object-cover"
-                  />
-                  
-                  {/* Corner badge */}
-                  <div className="absolute bottom-0 left-0 bg-black bg-opacity-70 p-2 
-                    max-w-[90%] md:max-w-[80%] transition-all duration-300 
-                    md:group-hover:max-w-full rounded-tr-md">
-                    <div className="border-l-2 border-cyan-400 pl-2">
-                      <a href="#" className="group/title">
-                        <div className="flex items-center gap-2">
-                          <h4 className="text-white text-sm font-medium truncate group-hover/title:underline">Your Next Event</h4>
-                        </div>
                       </a>
-                      <p className="text-xs text-gray-300 mt-1 line-clamp-2 hidden md:group-hover:block md:hidden">
-                        Share details about your upcoming shows, releases, or collaborations
-                      </p>
-                    </div>
-                  </div>
+                    </CardContent>
+                  </Card>
                 </div>
-              </div>
-              
-              <div className="relative rounded-lg overflow-hidden group">
-                <div className="aspect-square relative bg-gray-800/50">
-                  <Image
-                    src="/images/featured-artist-placeholder.jpg"
-                    alt="Featured artist example"
-                    fill
-                    className="object-cover"
-                  />
-                  
-                  {/* Corner badge */}
-                  <div className="absolute bottom-0 left-0 bg-black bg-opacity-70 p-2 
-                    max-w-[90%] md:max-w-[80%] transition-all duration-300 
-                    md:group-hover:max-w-full rounded-tr-md">
-                    <div className="border-l-2 border-cyan-400 pl-2">
-                      <a href="#" className="group/title">
-                        <div className="flex items-center gap-2">
-                          <h4 className="text-white text-sm font-medium truncate group-hover/title:underline">Featured Artist</h4>
-                        </div>
-                      </a>
-                      <p className="text-xs text-gray-300 mt-1 line-clamp-2 hidden md:group-hover:block md:hidden">
-                        Highlight creators and collaborators you want to support
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="relative rounded-lg overflow-hidden group">
-                <div className="aspect-square relative bg-gray-800/50">
-                  <Image
-                    src="/images/latest-project-placeholder.jpg"
-                    alt="Project example"
-                    fill
-                    className="object-cover"
-                  />
-                  
-                  {/* Corner badge */}
-                  <div className="absolute bottom-0 left-0 bg-black bg-opacity-70 p-2 
-                    max-w-[90%] md:max-w-[80%] transition-all duration-300 
-                    md:group-hover:max-w-full rounded-tr-md">
-                    <div className="border-l-2 border-cyan-400 pl-2">
-                      <a href="#" className="group/title">
-                        <div className="flex items-center gap-2">
-                          <h4 className="text-white text-sm font-medium truncate group-hover/title:underline">Latest Project</h4>
-                        </div>
-                      </a>
-                      <p className="text-xs text-gray-300 mt-1 line-clamp-2 hidden md:group-hover:block md:hidden">
-                        Showcase your work, ideas, or upcoming releases
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              ))}
             </div>
-          )}
+          </div>
         </div>
       )}
 
