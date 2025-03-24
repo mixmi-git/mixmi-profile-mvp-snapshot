@@ -23,8 +23,19 @@ export function NavbarContainer({
   const [debugMessage, setDebugMessage] = useState<string | null>(null)
   const [showDebug, setShowDebug] = useState(false)
   
+  const devMode = process.env.NODE_ENV === 'development';
+  
   // Use provided authentication state if available, otherwise use from hook
   const isAuthenticated = propIsAuthenticated !== undefined ? propIsAuthenticated : authIsAuthenticated;
+  
+  // Enforce dev mode override for button state
+  useEffect(() => {
+    // If in development mode and window.DEV_FORCE_AUTH is true, force refresh auth
+    if (devMode && typeof window !== 'undefined' && (window as any).DEV_FORCE_AUTH) {
+      console.log('🔧 DEV: NavbarContainer detected forced auth enabled');
+      refreshAuthState();
+    }
+  }, [devMode, refreshAuthState]);
   
   // Add debug logging for authentication state
   useEffect(() => {
@@ -32,9 +43,11 @@ export function NavbarContainer({
       propIsAuthenticated,
       authIsAuthenticated,
       isAuthenticated,
-      isInitialized
+      isInitialized,
+      devMode,
+      devForceAuth: typeof window !== 'undefined' ? (window as any).DEV_FORCE_AUTH : undefined
     })
-  }, [propIsAuthenticated, authIsAuthenticated, isAuthenticated, isInitialized])
+  }, [propIsAuthenticated, authIsAuthenticated, isAuthenticated, isInitialized, devMode]);
   
   // Toggle debug display
   useEffect(() => {
@@ -53,6 +66,29 @@ export function NavbarContainer({
   const handleLoginToggle = useCallback(async () => {
     try {
       console.log('🔄 NavbarContainer login toggle called');
+      
+      // In dev mode with DEV_FORCE_AUTH, just toggle the auth state and reload
+      if (devMode && typeof window !== 'undefined') {
+        console.log('🔧 DEV: Using development mode toggle');
+        setIsLoading(true);
+        setDebugMessage('Toggling authentication state in dev mode...');
+        
+        // Toggle auth state
+        if ((window as any).toggleAuth) {
+          (window as any).toggleAuth();
+        } else {
+          console.warn('🔧 DEV: toggleAuth function not available');
+        }
+        
+        // Refresh the auth state without reloading page
+        setTimeout(() => {
+          refreshAuthState();
+          setIsLoading(false);
+          setDebugMessage('Auth state toggled in dev mode.');
+        }, 300);
+        
+        return;
+      }
       
       // Set loading state to provide feedback to the user
       setIsLoading(true);
@@ -147,7 +183,7 @@ export function NavbarContainer({
       setDebugMessage(`Error: ${error}`);
       setIsLoading(false);
     }
-  }, [isAuthenticated, connectWallet, disconnectWallet, refreshAuthState]);
+  }, [isAuthenticated, connectWallet, disconnectWallet, refreshAuthState, devMode]);
   
   // Clear periodic auth refresh interval on unmount
   useEffect(() => {

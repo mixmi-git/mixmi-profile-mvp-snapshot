@@ -36,7 +36,7 @@ export function Navbar({ isAuthenticated, isLoading = false, onLoginToggle }: Na
                 <span>{isAuthenticated ? 'Disconnecting...' : 'Connecting...'}</span>
               </span>
             ) : (
-              <span>{isAuthenticated ? 'Disconnect' : 'Connect Wallet'}</span>
+              <span>{isAuthenticated ? '✓ Disconnect Wallet' : '🔑 Connect Wallet'}</span>
             )}
           </Button>
         </div>

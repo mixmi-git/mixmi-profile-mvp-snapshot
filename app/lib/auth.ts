@@ -37,10 +37,30 @@ let DEV_FORCE_AUTH = true;
 if (typeof window !== 'undefined' && DEV_MODE) {
   (window as any).DEV_FORCE_AUTH = DEV_FORCE_AUTH;
   (window as any).toggleAuth = () => {
-    DEV_FORCE_AUTH = !(window as any).DEV_FORCE_AUTH;
+    DEV_FORCE_AUTH = !DEV_FORCE_AUTH;
     console.log(`🔧 DEV: Authentication ${DEV_FORCE_AUTH ? 'FORCED' : 'NORMAL'}`);
     (window as any).DEV_FORCE_AUTH = DEV_FORCE_AUTH;
+    
+    // Trigger a custom event that components can listen for
+    try {
+      const event = new CustomEvent('dev-auth-changed', { 
+        detail: { forced: DEV_FORCE_AUTH } 
+      });
+      window.dispatchEvent(event);
+      console.log('🔧 DEV: Dispatched dev-auth-changed event');
+    } catch (e) {
+      console.error('Failed to dispatch auth change event:', e);
+    }
+    
     return DEV_FORCE_AUTH;
+  };
+  
+  // Add a helper to check auth state
+  (window as any).checkAuth = () => {
+    console.log({
+      DEV_FORCE_AUTH,
+      windowDEV_FORCE_AUTH: (window as any).DEV_FORCE_AUTH
+    });
   };
 }
 
@@ -137,6 +157,33 @@ export const useAuth = () => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [availableAccounts, setAvailableAccounts] = useState<string[]>([]);
   const [currentAccount, setCurrentAccount] = useState<string | null>(null);
+
+  // Listen for dev-auth-changed events
+  useEffect(() => {
+    if (DEV_MODE && typeof window !== 'undefined') {
+      const handleDevAuthChanged = (event: Event) => {
+        const customEvent = event as CustomEvent<{forced: boolean}>;
+        console.log('🔧 DEV: Auth change event received:', customEvent.detail);
+        
+        if (customEvent.detail.forced) {
+          // Force authentication
+          setIsAuthenticated(true);
+          setUserAddress('SP00000000000000000000');
+          setCurrentAccount('SP00000000000000000000');
+          setAvailableAccounts(['SP00000000000000000000']);
+        } else {
+          // Clear forced authentication
+          setIsAuthenticated(false);
+          setUserAddress(null);
+          setCurrentAccount(null);
+          setAvailableAccounts([]);
+        }
+      };
+      
+      window.addEventListener('dev-auth-changed', handleDevAuthChanged);
+      return () => window.removeEventListener('dev-auth-changed', handleDevAuthChanged);
+    }
+  }, []);
 
   // In development mode, we can force authentication for testing
   useEffect(() => {
