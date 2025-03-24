@@ -106,7 +106,8 @@ export function NavbarContainer({
             (key.includes('blockstack') || 
             key.includes('stacks') ||
             key.includes('authResponse') ||
-            key.includes('mixmi-last-auth-check')) &&
+            key.includes('mixmi-last-auth-check') ||
+            key.includes('mixmi-wallet-')) &&
             // Don't remove content data
             !key.includes('mixmi_profile_data') &&
             !key.includes('mixmi_spotlight_items') &&
@@ -137,47 +138,68 @@ export function NavbarContainer({
         }
       } else {
         console.log('Connecting wallet...');
-        setDebugMessage('Connecting wallet... Please check for the Hiro Wallet popup.');
+        
+        // Check for wallet extensions
+        if (typeof window === 'undefined') {
+          setDebugMessage('Not in browser environment');
+          setIsLoading(false);
+          return;
+        }
+        
+        // Use simple connection approach that's working in the /wallet page
         try {
-          await connectWallet();
-          console.log('✅ Connect wallet call completed');
-          setDebugMessage('Wallet connect attempt completed.');
+          setDebugMessage('Preparing wallet connection...');
           
-          // Force refresh auth state after connection
-          setTimeout(() => {
-            console.log('🔄 First refresh auth state call');
-            setDebugMessage('Refreshing authentication...');
-            refreshAuthState();
-          }, 1000);
+          // Use the standard Stacks connection approach that works with both wallet types
+          const { showConnect, AppConfig, UserSession } = await import('@stacks/connect');
+          const appConfig = new AppConfig(['store_write']);
+          const userSession = new UserSession({ appConfig });
           
-          // Also do a second refresh after a longer delay to catch any delayed updates
-          setTimeout(() => {
-            console.log('🔄 Performing delayed auth refresh check');
-            setDebugMessage('Performing final auth check...');
-            refreshAuthState();
-            
-            // Store auth status in localStorage for persistence across page refreshes
-            if (typeof window !== 'undefined') {
-              try {
-                localStorage.setItem('mixmi-last-auth-check', new Date().toISOString());
-                console.log('✅ Set auth check timestamp');
-              } catch (e) {
-                console.error('Failed to update auth check timestamp:', e);
+          setDebugMessage('Showing wallet dialog. Please check your browser extensions...');
+          
+          showConnect({
+            appDetails: {
+              name: 'Mixmi',
+              icon: window.location.origin + '/favicon.ico',
+            },
+            redirectTo: window.location.origin,
+            onFinish: () => {
+              if (userSession.isUserSignedIn()) {
+                const userData = userSession.loadUserData();
+                const address = userData.profile.stxAddress.mainnet;
+                
+                setDebugMessage(`Connected! Address: ${address.slice(0, 6)}...${address.slice(-4)}`);
+                
+                // Store for persistence
+                try {
+                  localStorage.setItem('mixmi-wallet-connected', 'true');
+                  localStorage.setItem('mixmi-wallet-address', address);
+                  localStorage.setItem('mixmi-last-auth-check', new Date().toISOString());
+                } catch (e) {
+                  console.error('Error saving connection data:', e);
+                }
+                
+                // Refresh auth state to update UI
+                refreshAuthState();
+                setTimeout(() => {
+                  setIsLoading(false);
+                  refreshAuthState();
+                }, 1000);
+              } else {
+                setDebugMessage('Connection completed but not signed in');
+                setIsLoading(false);
               }
-            }
-          }, 3000);
-        } catch (connectError) {
-          console.error('⚠️ Error connecting wallet:', connectError);
-          setDebugMessage(`Error connecting: ${connectError}`);
+            },
+            userSession,
+          });
+          
+          return; // Don't set isLoading=false yet
+        } catch (error) {
+          console.error('Error connecting wallet:', error);
+          setDebugMessage(`Connection error: ${error}`);
+          setIsLoading(false);
         }
       }
-      
-      // Set a timeout to reset loading state if connection takes too long
-      setTimeout(() => {
-        console.log('⏱️ Resetting loading state');
-        setIsLoading(false);
-        setDebugMessage(null);
-      }, 3000);
     } catch (error) {
       console.error('Error in login toggle:', error);
       setDebugMessage(`Error: ${error}`);
@@ -256,6 +278,7 @@ export function NavbarContainer({
         isAuthenticated={isAuthenticated}
         isLoading={isLoading}
         onLoginToggle={handleLoginToggle}
+        statusMessage={debugMessage || undefined}
       />
       
       {/* Debug button - always visible in development mode */}

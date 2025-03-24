@@ -9,7 +9,7 @@ import { exampleMediaItems, exampleSpotlightItems, exampleShopItems } from '@/li
 import { ProfileMode, ProfileData, SpotlightItem, MediaItem, ShopItem, SocialLink } from '@/types';
 
 // Re-export ProfileMode for backward compatibility
-export { ProfileMode };
+export { ProfileMode } from '@/types';
 
 // Type aliases for backward compatibility
 export type SpotlightItemType = SpotlightItem;

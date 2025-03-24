@@ -1,6 +1,5 @@
-import { Project, ShopItem } from '@/types/content'
-import { MediaItem } from '@/types/media'
-import { MediaItemType, SpotlightItemType, ShopItemType } from '../components/profile/UserProfileContainer'
+import { MediaItem, SpotlightItem, ShopItem } from '../types';
+import { Project } from '../types/content';
 
 export const exampleProjects: Project[] = [
   {
@@ -26,7 +25,7 @@ export const exampleProjects: Project[] = [
   }
 ]
 
-export const exampleMediaItems: MediaItemType[] = [
+export const exampleMediaItems: MediaItem[] = [
   {
     id: '1',
     type: 'youtube',
@@ -43,7 +42,7 @@ export const exampleMediaItems: MediaItemType[] = [
   }
 ]
 
-export const exampleSpotlightItems: SpotlightItemType[] = [
+export const exampleSpotlightItems: SpotlightItem[] = [
   {
     id: '1',
     title: 'Latest Release',
@@ -67,7 +66,7 @@ export const exampleSpotlightItems: SpotlightItemType[] = [
   }
 ]
 
-export const exampleShopItems: ShopItemType[] = [
+export const exampleShopItems: ShopItem[] = [
   {
     id: '1',
     title: 'Limited Edition Merch',

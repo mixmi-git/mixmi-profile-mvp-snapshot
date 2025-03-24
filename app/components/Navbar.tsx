@@ -7,9 +7,10 @@ interface NavbarProps {
   isAuthenticated: boolean;
   isLoading?: boolean;
   onLoginToggle: () => void;
+  statusMessage?: string;
 }
 
-export function Navbar({ isAuthenticated, isLoading = false, onLoginToggle }: NavbarProps) {
+export function Navbar({ isAuthenticated, isLoading = false, onLoginToggle, statusMessage }: NavbarProps) {
   // Dev mode check
   const isDev = process.env.NODE_ENV === 'development';
   
@@ -33,7 +34,14 @@ export function Navbar({ isAuthenticated, isLoading = false, onLoginToggle }: Na
           </a>
         </div>
         
-        <div className="flex gap-3">
+        <div className="flex items-center gap-3">
+          {/* Status message - shows when available */}
+          {statusMessage && (
+            <div className="text-xs text-cyan-400 animate-pulse mr-2">
+              {statusMessage}
+            </div>
+          )}
+          
           {/* Dev toggle button - only visible in development */}
           {isDev && (
             <Button

@@ -151,6 +151,16 @@ const checkHasStacksWallet = () => {
   }
 };
 
+// Add Leather wallet interfaces
+declare global {
+  interface Window {
+    StacksProvider?: any;
+    LeatherProvider?: {
+      getAccounts: () => Promise<string[]>;
+    };
+  }
+}
+
 export const useAuth = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userAddress, setUserAddress] = useState<string | null>(null);
@@ -196,145 +206,87 @@ export const useAuth = () => {
     }
   }, [isInitialized, isAuthenticated]);
 
+  // Function to connect wallet
   const connectWallet = useCallback(async () => {
+    console.log("🔄 Connect wallet called at:", new Date().toISOString());
+    
+    // Set the tracking variable to prevent multiple connection attempts
+    if (connectionInProgress) {
+      console.log("⚠️ Connection already in progress, aborting");
+      return;
+    }
+    
+    // Track whether a connection is in progress
+    connectionInProgress = true;
+    console.log("🔌 Connection attempt started at:", new Date().toISOString());
+    
     try {
-      console.log("🔌 Connecting wallet...");
-      
-      // For development mode, we can force auth
-      if (DEV_MODE && DEV_FORCE_AUTH) {
-        console.log("🔧 DEV: Using forced authentication");
-        setIsAuthenticated(true);
-        setUserAddress('SP00000000000000000000');
-        setCurrentAccount('SP00000000000000000000');
-        setAvailableAccounts(['SP00000000000000000000']);
-        return;
-      }
-      
-      // Set the connection tracking variables
-      connectionInProgress = true;
-      connectionAttemptTimestamp = Date.now();
-      console.log("🔌 Connection attempt started at:", new Date(connectionAttemptTimestamp).toISOString());
-      
-      // Check if already signed in - if so, just set state directly
+      // Check if the user is already signed in
       if (userSession.isUserSignedIn()) {
-        try {
-          console.log("👤 User already signed in, loading data directly");
-          const userData = userSession.loadUserData();
-          setIsAuthenticated(true);
-          setUserAddress(userData.profile.stxAddress.mainnet);
-          setCurrentAccount(userData.profile.stxAddress.mainnet);
-          connectionInProgress = false;
-          return; // Exit early
-        } catch (err) {
-          console.error("Error loading user data directly:", err);
-          // Continue to showConnect flow
-          userSession.signUserOut('');
-        }
-      }
-
-      console.log("🔧 Initializing showConnect");
-      
-      // Check if window has @stacks/connect available
-      if (typeof window === 'undefined' || !window.document) {
-        console.error("Cannot connect: Not in a browser environment");
+        console.log("✅ User already signed in");
+        setIsAuthenticated(true);
+        const userData = userSession.loadUserData();
+        setUserAddress(userData.profile.stxAddress.mainnet);
         connectionInProgress = false;
         return;
       }
       
+      // SIMPLIFIED APPROACH - Use standard showConnect for all wallet connections
       try {
-        // Force any existing Hiro dialog to close
-        const existingDialog = document.querySelector('[data-stacks-connect-dialog]');
-        if (existingDialog) {
-          console.log("🔄 Found existing dialog, attempting to close it");
-          existingDialog.remove();
-        }
+        // Dynamically import minimal dependencies
+        const { showConnect, AppConfig, UserSession } = await import('@stacks/connect');
         
-        // Check if Hiro wallet extension is installed - show a message if not
-        // @ts-ignore
-        if (!window.StacksProvider) {
-          console.warn("⚠️ Hiro Wallet extension not detected");
-          // Alert the user
-          if (window.confirm("Hiro Wallet extension not detected. Would you like to install it?")) {
-            window.open("https://wallet.hiro.so/download", "_blank");
-          }
-          connectionInProgress = false;
-          return;
-        }
+        // Create a fresh session just for this connection
+        const appConfig = new AppConfig(['store_write']);
+        const uSession = new UserSession({ appConfig });
         
-        // Use showConnect from @stacks/connect with more reliable settings
-        const connectOptions = {
+        console.log("🔧 Using standard wallet connection dialog");
+        
+        showConnect({
           appDetails: {
             name: 'Mixmi',
             icon: window.location.origin + '/favicon.ico',
           },
           redirectTo: window.location.origin,
           onFinish: () => {
-            console.log('Auth: onFinish callback triggered');
+            console.log('✅ Connect dialog finished, checking session...');
             
-            // Allow time for the session to be fully established
-            setTimeout(() => {
+            if (uSession.isUserSignedIn()) {
+              const userData = uSession.loadUserData();
+              const address = userData.profile.stxAddress.mainnet;
+              
+              console.log('✅ User signed in! Address:', address);
+              setIsAuthenticated(true);
+              setUserAddress(address);
+              setAvailableAccounts([address]);
+              setCurrentAccount(address);
+              
+              // Store for persistence
               try {
-                // Check if the user is now signed in
-                if (userSession.isUserSignedIn()) {
-                  const userData = userSession.loadUserData();
-                  console.log('✅ Wallet connected:', userData);
-                  setIsAuthenticated(true);
-                  setUserAddress(userData.profile.stxAddress.mainnet);
-                  
-                  // Try to get available accounts from the wallet - using promises properly
-                  try {
-                    // @ts-ignore
-                    if (window?.StacksProvider?.getAccounts) {
-                      // @ts-ignore
-                      window.StacksProvider.getAccounts()
-                        .then((accounts: string[]) => {
-                          if (accounts && accounts.length > 0) {
-                            setAvailableAccounts(accounts);
-                            setCurrentAccount(accounts[0]);
-                          } else {
-                            setAvailableAccounts([userData.profile.stxAddress.mainnet]);
-                            setCurrentAccount(userData.profile.stxAddress.mainnet);
-                          }
-                        })
-                        .catch((err: any) => {
-                          console.error('Error getting accounts from provider:', err);
-                          setAvailableAccounts([userData.profile.stxAddress.mainnet]);
-                          setCurrentAccount(userData.profile.stxAddress.mainnet);
-                        });
-                    } else {
-                      setAvailableAccounts([userData.profile.stxAddress.mainnet]);
-                      setCurrentAccount(userData.profile.stxAddress.mainnet);
-                    }
-                  } catch (error) {
-                    console.error('Error getting accounts from provider:', error);
-                    setAvailableAccounts([userData.profile.stxAddress.mainnet]);
-                    setCurrentAccount(userData.profile.stxAddress.mainnet);
-                  }
-                } else {
-                  console.log("⚠️ User not signed in after connect attempt");
-                }
-              } catch (error) {
-                console.error('Error in onFinish timeout handler', error);
-              } finally {
-                // Always clear the connection state
-                connectionInProgress = false;
-                console.log("🔌 Connection attempt finished at:", new Date().toISOString());
+                localStorage.setItem('mixmi-wallet-connected', 'true');
+                localStorage.setItem('mixmi-wallet-provider', 'connect');
+                localStorage.setItem('mixmi-wallet-accounts', JSON.stringify([address]));
+                localStorage.setItem('mixmi-last-auth-check', new Date().toISOString());
+              } catch (e) {
+                console.error('Error saving connection data:', e);
               }
-            }, 500);
+            } else {
+              console.log("⚠️ Connect dialog finished but user not signed in");
+            }
+            
+            connectionInProgress = false;
           },
-          userSession,
-        };
+          userSession: uSession,
+        });
         
-        console.log("🔧 Calling showConnect with options:", connectOptions);
-        showConnect(connectOptions);
-        console.log("🔧 showConnect initialized successfully");
-      } catch (showConnectError) {
-        console.error("Error during showConnect:", showConnectError);
+        // Return early since showConnect is asynchronous
+        return;
+      } catch (error) {
+        console.error("Error in wallet connection:", error);
         connectionInProgress = false;
       }
     } catch (error) {
-      console.error("Error connecting wallet:", error);
-      // Always clear the connection state on error
+      console.error("❌ Wallet connection error:", error);
       connectionInProgress = false;
     }
   }, []);
@@ -614,13 +566,59 @@ export const useAuth = () => {
     }
   }, [forceRefresh])
 
-  // Function to manually refresh auth state - useful for testing
+  // This function is called to check the current auth state
   const refreshAuthState = useCallback(() => {
-    console.log('Auth: Manually refreshing auth state')
-    checkAuthStatus().catch(err => {
-      console.error('Error during manual auth refresh:', err);
-    });
-  }, [checkAuthStatus])
+    try {
+      console.log('🔄 Refreshing auth state...');
+      // For development mode
+      if (DEV_MODE && DEV_FORCE_AUTH) {
+        console.log('🔧 DEV: Using forced authenticated state');
+        setIsAuthenticated(true);
+        setUserAddress('SP00000000000000000000');
+        setIsInitialized(true);
+        return;
+      }
+      
+      // Simplest check: see if userSession reports user is signed in
+      const isSignedIn = userSession.isUserSignedIn();
+      console.log(`👤 User signed in according to userSession: ${isSignedIn}`);
+      
+      // Also check localStorage for a recent wallet connection
+      let hasWalletInLocalStorage = false;
+      let storedAddress = '';
+      if (typeof window !== 'undefined') {
+        hasWalletInLocalStorage = localStorage.getItem('mixmi-wallet-connected') === 'true';
+        storedAddress = localStorage.getItem('mixmi-wallet-address') || '';
+        
+        if (hasWalletInLocalStorage && storedAddress) {
+          console.log('📦 Found wallet connection in localStorage:', storedAddress);
+        }
+      }
+      
+      // Set auth state based on userSession or localStorage
+      if (isSignedIn || hasWalletInLocalStorage) {
+        setIsAuthenticated(true);
+        
+        if (isSignedIn) {
+          // Get address from userSession if available
+          const userData = userSession.loadUserData();
+          setUserAddress(userData.profile.stxAddress.mainnet);
+        } else if (hasWalletInLocalStorage && storedAddress) {
+          // Otherwise use address from localStorage
+          setUserAddress(storedAddress);
+        }
+      } else {
+        setIsAuthenticated(false);
+        setUserAddress('');
+      }
+      
+      // Mark as initialized
+      setIsInitialized(true);
+    } catch (error) {
+      console.error('Error refreshing auth state:', error);
+      setIsInitialized(true);
+    }
+  }, []);
 
   // Make refreshAuthState globally available for other components
   useEffect(() => {
