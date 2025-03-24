@@ -10,6 +10,16 @@ interface NavbarProps {
 }
 
 export function Navbar({ isAuthenticated, isLoading = false, onLoginToggle }: NavbarProps) {
+  // Dev mode check
+  const isDev = process.env.NODE_ENV === 'development';
+  
+  // For dev mode only - force toggle authentication
+  const forceAuthToggle = () => {
+    if (typeof window !== 'undefined' && (window as any).toggleAuth) {
+      (window as any).toggleAuth();
+    }
+  };
+  
   return (
     <header className="bg-gray-900 border-b border-gray-800 p-4 sticky top-0 z-50">
       <div className="container mx-auto flex justify-between items-center">
@@ -24,6 +34,16 @@ export function Navbar({ isAuthenticated, isLoading = false, onLoginToggle }: Na
         </div>
         
         <div className="flex gap-3">
+          {/* Dev toggle button - only visible in development */}
+          {isDev && (
+            <Button
+              onClick={forceAuthToggle}
+              className="bg-purple-600 hover:bg-purple-700 text-white"
+            >
+              DEV: {isAuthenticated ? 'Disable Auth' : 'Enable Auth'}
+            </Button>
+          )}
+          
           {/* Auth button - always visible */}
           <Button
             onClick={onLoginToggle}

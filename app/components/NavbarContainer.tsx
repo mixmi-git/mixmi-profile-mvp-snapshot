@@ -185,6 +185,56 @@ export function NavbarContainer({
     }
   }, [isAuthenticated, connectWallet, disconnectWallet, refreshAuthState, devMode]);
   
+  // Function to directly test wallet connection without any dev mode overrides
+  const directWalletTest = useCallback(async () => {
+    try {
+      setDebugMessage('Testing direct wallet connection...');
+      
+      if (typeof window === 'undefined' || !window.document) {
+        setDebugMessage('Not in browser environment');
+        return;
+      }
+      
+      // @ts-ignore
+      if (!window.StacksProvider) {
+        setDebugMessage('Hiro Wallet extension not detected');
+        if (window.confirm('Hiro Wallet extension not detected. Install it?')) {
+          window.open('https://wallet.hiro.so/download', '_blank');
+        }
+        return;
+      }
+      
+      setDebugMessage('Wallet extension detected, attempting connection...');
+      
+      // Using the standard connect options directly
+      const { showConnect, AppConfig, UserSession } = await import('@stacks/connect');
+      const appConfig = new AppConfig(['store_write']);
+      const uSession = new UserSession({ appConfig });
+      
+      showConnect({
+        appDetails: {
+          name: 'Mixmi Test',
+          icon: window.location.origin + '/favicon.ico',
+        },
+        redirectTo: window.location.origin,
+        onFinish: () => {
+          setDebugMessage('Direct wallet connection completed! Checking session...');
+          if (uSession.isUserSignedIn()) {
+            const userData = uSession.loadUserData();
+            setDebugMessage(`Connected! Address: ${userData.profile.stxAddress.mainnet}`);
+          } else {
+            setDebugMessage('Connection completed but user is not signed in');
+          }
+        },
+        userSession: uSession,
+      });
+      
+    } catch (error) {
+      console.error('Error in direct wallet test:', error);
+      setDebugMessage(`Error in direct test: ${error}`);
+    }
+  }, []);
+  
   // Clear periodic auth refresh interval on unmount
   useEffect(() => {
     let checkInterval: ReturnType<typeof setInterval> | null = null;
@@ -235,6 +285,22 @@ export function NavbarContainer({
             <p>Initialized: {isInitialized ? '✅ Yes' : '⏳ No'}</p>
             <p>Loading: {isLoading ? '⏳ Yes' : '✅ No'}</p>
             {debugMessage && <p className="text-yellow-300">{debugMessage}</p>}
+            
+            <div className="mt-2 flex space-x-2">
+              <button
+                onClick={directWalletTest}
+                className="px-2 py-1 bg-blue-600 rounded hover:bg-blue-700"
+              >
+                Direct Wallet Test
+              </button>
+              <button
+                onClick={() => window.location.href = 'https://wallet.hiro.so/download'}
+                className="px-2 py-1 bg-green-600 rounded hover:bg-green-700"
+              >
+                Get Hiro Wallet
+              </button>
+            </div>
+            
             <div className="mt-2 pt-2 border-t border-gray-700">
               <p className="text-xs text-gray-400">Local Storage Auth Keys:</p>
               <div className="mt-1 text-xs max-h-20 overflow-y-auto">

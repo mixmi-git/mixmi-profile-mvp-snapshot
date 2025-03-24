@@ -249,8 +249,20 @@ export const useAuth = () => {
           existingDialog.remove();
         }
         
-        // Use showConnect from @stacks/connect
-        showConnect({
+        // Check if Hiro wallet extension is installed - show a message if not
+        // @ts-ignore
+        if (!window.StacksProvider) {
+          console.warn("⚠️ Hiro Wallet extension not detected");
+          // Alert the user
+          if (window.confirm("Hiro Wallet extension not detected. Would you like to install it?")) {
+            window.open("https://wallet.hiro.so/download", "_blank");
+          }
+          connectionInProgress = false;
+          return;
+        }
+        
+        // Use showConnect from @stacks/connect with more reliable settings
+        const connectOptions = {
           appDetails: {
             name: 'Mixmi',
             icon: window.location.origin + '/favicon.ico',
@@ -269,7 +281,7 @@ export const useAuth = () => {
                   setIsAuthenticated(true);
                   setUserAddress(userData.profile.stxAddress.mainnet);
                   
-                  // Try to get available accounts from the wallet
+                  // Try to get available accounts from the wallet - using promises properly
                   try {
                     // @ts-ignore
                     if (window?.StacksProvider?.getAccounts) {
@@ -311,7 +323,10 @@ export const useAuth = () => {
             }, 500);
           },
           userSession,
-        });
+        };
+        
+        console.log("🔧 Calling showConnect with options:", connectOptions);
+        showConnect(connectOptions);
         console.log("🔧 showConnect initialized successfully");
       } catch (showConnectError) {
         console.error("Error during showConnect:", showConnectError);
