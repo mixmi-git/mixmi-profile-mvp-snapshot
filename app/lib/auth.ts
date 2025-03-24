@@ -28,31 +28,21 @@ declare module '@stacks/connect' {
 const appConfig = new AppConfig(['store_write'])
 const userSession = new UserSession({ appConfig })
 
-// Helper function to check for session data in localStorage
-const checkLocalStorageForSession = () => {
-  if (typeof window === 'undefined') return false;
-  
-  try {
-    const sessionData = localStorage.getItem('blockstack-session');
-    return !!sessionData;
-  } catch (error) {
-    console.error('Error checking localStorage for session:', error);
-    return false;
-  }
-};
+// Development mode flag for easier testing
+const DEV_MODE = process.env.NODE_ENV === 'development';
+// Dev flag to force authentication in development - can be toggled in console
+let DEV_FORCE_AUTH = true;
 
-// Helper function to check if Stacks wallet is installed
-const checkHasStacksWallet = () => {
-  if (typeof window === 'undefined') return false;
-  
-  try {
-    // @ts-ignore - window.StacksProvider is added by the Stacks wallet
-    return !!window.StacksProvider;
-  } catch (error) {
-    console.error('Error checking for Stacks wallet:', error);
-    return false;
-  }
-};
+// Make DEV_FORCE_AUTH accessible from console in development mode
+if (typeof window !== 'undefined' && DEV_MODE) {
+  (window as any).DEV_FORCE_AUTH = DEV_FORCE_AUTH;
+  (window as any).toggleAuth = () => {
+    DEV_FORCE_AUTH = !(window as any).DEV_FORCE_AUTH;
+    console.log(`🔧 DEV: Authentication ${DEV_FORCE_AUTH ? 'FORCED' : 'NORMAL'}`);
+    (window as any).DEV_FORCE_AUTH = DEV_FORCE_AUTH;
+    return DEV_FORCE_AUTH;
+  };
+}
 
 // Global state to track connection attempts
 let connectionInProgress = false;
@@ -115,6 +105,32 @@ export const setProfileIdForAddress = (address: string, profileId: string): void
   }
 };
 
+// Helper function to check for session data in localStorage
+const checkLocalStorageForSession = () => {
+  if (typeof window === 'undefined') return false;
+  
+  try {
+    const sessionData = localStorage.getItem('blockstack-session');
+    return !!sessionData;
+  } catch (error) {
+    console.error('Error checking localStorage for session:', error);
+    return false;
+  }
+};
+
+// Helper function to check if Stacks wallet is installed
+const checkHasStacksWallet = () => {
+  if (typeof window === 'undefined') return false;
+  
+  try {
+    // @ts-ignore - window.StacksProvider is added by the Stacks wallet
+    return !!window.StacksProvider;
+  } catch (error) {
+    console.error('Error checking for Stacks wallet:', error);
+    return false;
+  }
+};
+
 export const useAuth = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userAddress, setUserAddress] = useState<string | null>(null);
@@ -122,9 +138,30 @@ export const useAuth = () => {
   const [availableAccounts, setAvailableAccounts] = useState<string[]>([]);
   const [currentAccount, setCurrentAccount] = useState<string | null>(null);
 
+  // In development mode, we can force authentication for testing
+  useEffect(() => {
+    if (DEV_MODE && DEV_FORCE_AUTH && !isAuthenticated && isInitialized) {
+      console.log('🔧 DEV: Forcing authentication state');
+      setIsAuthenticated(true);
+      setUserAddress('SP00000000000000000000');
+      setCurrentAccount('SP00000000000000000000');
+      setAvailableAccounts(['SP00000000000000000000']);
+    }
+  }, [isInitialized, isAuthenticated]);
+
   const connectWallet = useCallback(async () => {
     try {
       console.log("🔌 Connecting wallet...");
+      
+      // For development mode, we can force auth
+      if (DEV_MODE && DEV_FORCE_AUTH) {
+        console.log("🔧 DEV: Using forced authentication");
+        setIsAuthenticated(true);
+        setUserAddress('SP00000000000000000000');
+        setCurrentAccount('SP00000000000000000000');
+        setAvailableAccounts(['SP00000000000000000000']);
+        return;
+      }
       
       // Set the connection tracking variables
       connectionInProgress = true;

@@ -369,6 +369,60 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
   // Determine if user is authenticated for edit access
   const canEdit = disableAuth || isAuthenticated;
   
+  // Debug controls - enable in development mode
+  const DevControls = () => {
+    if (process.env.NODE_ENV !== 'development') return null;
+    
+    return (
+      <div className="fixed bottom-4 left-4 z-50 bg-black/80 text-white p-4 rounded-lg text-xs">
+        <h3 className="font-semibold mb-2">Dev Controls</h3>
+        <div className="space-y-2">
+          <div className="flex items-center space-x-2">
+            <span>Auth: </span>
+            <span className={`px-2 py-1 rounded ${isAuthenticated ? 'bg-green-600' : 'bg-red-600'}`}>
+              {isAuthenticated ? 'Authenticated' : 'Not Authenticated'}
+            </span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <span>Edit Mode: </span>
+            <span className={`px-2 py-1 rounded ${canEdit ? 'bg-green-600' : 'bg-red-600'}`}>
+              {canEdit ? 'Enabled' : 'Disabled'}
+            </span>
+            <button 
+              className="px-2 py-1 rounded bg-blue-600 hover:bg-blue-700"
+              onClick={() => {
+                if (typeof window !== 'undefined') {
+                  (window as any).toggleAuth?.();
+                  window.location.reload();
+                }
+              }}
+            >
+              Toggle
+            </button>
+          </div>
+          <div>
+            <button
+              className="px-2 py-1 mt-2 rounded bg-purple-600 hover:bg-purple-700 w-full"
+              onClick={() => {
+                // Clear all localStorage data and reload
+                if (typeof window !== 'undefined') {
+                  Object.keys(localStorage)
+                    .filter(key => key.includes('mixmi_'))
+                    .forEach(key => localStorage.removeItem(key));
+                    
+                  console.log('🧹 Cleared all profile data');
+                  window.location.reload();
+                }
+              }}
+            >
+              Reset All Data
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+  
   // Debug logging for authentication
   useEffect(() => {
     console.log('🧩 UserProfileContainer Auth State:', {
@@ -450,6 +504,9 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
             onUpdateStickerData={saveStickerData}
             onUpdateSectionVisibility={handleSectionVisibilityChange}
           />
+          
+          {/* Show dev controls in development */}
+          {process.env.NODE_ENV === 'development' && <DevControls />}
         </div>
       )}
     </div>

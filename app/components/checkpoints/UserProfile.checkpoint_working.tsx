@@ -1,9 +1,10 @@
 'use client';
 
 import React from 'react';
-import UserProfileContainer, { ProfileMode, SpotlightItemType, ShopItemType, MediaItemType } from './profile/UserProfileContainer';
+import { UserProfileContainer, SpotlightItemType, ShopItemType, MediaItemType } from '../profile/UserProfileContainer';
+import { ProfileMode } from '@/types';
 import { useAuthState } from '@/hooks/useAuthState';
-import { NavbarContainer } from './NavbarContainer';
+import { NavbarContainer } from '../NavbarContainer';
 
 // Example data for testing
 const exampleProfile = {

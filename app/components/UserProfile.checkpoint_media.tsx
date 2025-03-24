@@ -1,7 +1,8 @@
 'use client';
 
 import React from 'react';
-import { UserProfileContainer, ProfileMode } from './profile/UserProfileContainer';
+import { UserProfileContainer } from './profile/UserProfileContainer';
+import { ProfileMode } from '@/types';
 import { useAuthState } from '@/hooks/useAuthState';
 import { NavbarContainer } from './NavbarContainer';
 
