@@ -310,6 +310,34 @@ export const useAuth = () => {
       }
     }, 2000)
     
+    // Clear any stale auth data on initial load
+    // This ensures users always start in a logged-out state
+    // unless they explicitly authenticate
+    if (typeof window !== 'undefined') {
+      const devMode = process.env.NODE_ENV === 'development';
+      
+      // In dev mode, force a clean state by removing any stale auth data
+      if (devMode) {
+        const keysToRemove = Object.keys(localStorage).filter(key => 
+          key.includes('blockstack') || 
+          key.includes('stacks') ||
+          key.includes('authResponse') ||
+          key.includes('mixmi-last-auth-check')
+        );
+        
+        if (keysToRemove.length > 0) {
+          console.log('Auth: Clearing stale auth data in development mode');
+          keysToRemove.forEach(key => {
+            try {
+              localStorage.removeItem(key);
+            } catch (e) {
+              console.error(`Error removing ${key}:`, e);
+            }
+          });
+        }
+      }
+    }
+    
     // Check if there's a pending sign-in to handle
     if (userSession.isSignInPending()) {
       console.log('Auth: Found pending sign-in, handling...')

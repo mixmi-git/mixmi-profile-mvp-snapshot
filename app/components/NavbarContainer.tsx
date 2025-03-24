@@ -43,7 +43,32 @@ export function NavbarContainer({
       setIsLoading(true);
       
       if (isAuthenticated) {
+        console.log('Disconnecting wallet...');
         await disconnectWallet();
+        
+        // Clear any lingering auth data
+        if (typeof window !== 'undefined') {
+          // Clear specific auth-related items in localStorage
+          const keysToRemove = Object.keys(localStorage).filter(key => 
+            key.includes('blockstack') || 
+            key.includes('stacks') ||
+            key.includes('authResponse') ||
+            key.includes('mixmi-last-auth-check')
+          );
+          
+          keysToRemove.forEach(key => {
+            try {
+              localStorage.removeItem(key);
+            } catch (e) {
+              console.error(`Error removing ${key}:`, e);
+            }
+          });
+          
+          // Force a page reload to complete disconnect
+          setTimeout(() => {
+            window.location.reload();
+          }, 500);
+        }
       } else {
         await connectWallet();
         // Force refresh auth state after connection
@@ -77,15 +102,19 @@ export function NavbarContainer({
     }
   }, [isAuthenticated, connectWallet, disconnectWallet, refreshAuthState]);
   
-  // Force refresh auth state periodically when not authenticated
+  // Clear periodic auth refresh interval on unmount
   useEffect(() => {
+    let checkInterval: ReturnType<typeof setInterval> | null = null;
+    
     if (!isAuthenticated && isInitialized) {
-      const checkInterval = setInterval(() => {
+      checkInterval = setInterval(() => {
         refreshAuthState();
       }, 2000);
-      
-      return () => clearInterval(checkInterval);
     }
+    
+    return () => {
+      if (checkInterval) clearInterval(checkInterval);
+    };
   }, [isAuthenticated, refreshAuthState, isInitialized]);
   
   return (
