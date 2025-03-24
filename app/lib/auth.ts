@@ -131,66 +131,108 @@ export const useAuth = () => {
       connectionAttemptTimestamp = Date.now();
       console.log("🔌 Connection attempt started at:", new Date(connectionAttemptTimestamp).toISOString());
       
-      // Check if already signed in
+      // Check if already signed in - if so, just set state directly
       if (userSession.isUserSignedIn()) {
-        console.log("👤 User already signed in");
-        userSession.signUserOut('');
+        try {
+          console.log("👤 User already signed in, loading data directly");
+          const userData = userSession.loadUserData();
+          setIsAuthenticated(true);
+          setUserAddress(userData.profile.stxAddress.mainnet);
+          setCurrentAccount(userData.profile.stxAddress.mainnet);
+          connectionInProgress = false;
+          return; // Exit early
+        } catch (err) {
+          console.error("Error loading user data directly:", err);
+          // Continue to showConnect flow
+          userSession.signUserOut('');
+        }
       }
 
-      // Use showConnect from @stacks/connect instead of openSTXConnect
-      showConnect({
-        appDetails: {
-          name: 'Mixmi',
-          icon: window.location.origin + '/favicon.ico',
-        },
-        redirectTo: window.location.origin,
-        onFinish: () => {
-          console.log('Auth: onFinish callback triggered');
-          
-          // Allow time for the session to be fully established
-          setTimeout(() => {
-            try {
-              // Check if the user is now signed in
-              if (userSession.isUserSignedIn()) {
-                const userData = userSession.loadUserData();
-                console.log('✅ Wallet connected:', userData);
-                setIsAuthenticated(true);
-                setUserAddress(userData.profile.stxAddress.mainnet);
-                
-                // Try to get available accounts from the wallet
-                try {
-                  // @ts-ignore
-                  if (window?.StacksProvider?.getAccounts) {
+      console.log("🔧 Initializing showConnect");
+      
+      // Check if window has @stacks/connect available
+      if (typeof window === 'undefined' || !window.document) {
+        console.error("Cannot connect: Not in a browser environment");
+        connectionInProgress = false;
+        return;
+      }
+      
+      try {
+        // Force any existing Hiro dialog to close
+        const existingDialog = document.querySelector('[data-stacks-connect-dialog]');
+        if (existingDialog) {
+          console.log("🔄 Found existing dialog, attempting to close it");
+          existingDialog.remove();
+        }
+        
+        // Use showConnect from @stacks/connect
+        showConnect({
+          appDetails: {
+            name: 'Mixmi',
+            icon: window.location.origin + '/favicon.ico',
+          },
+          redirectTo: window.location.origin,
+          onFinish: () => {
+            console.log('Auth: onFinish callback triggered');
+            
+            // Allow time for the session to be fully established
+            setTimeout(() => {
+              try {
+                // Check if the user is now signed in
+                if (userSession.isUserSignedIn()) {
+                  const userData = userSession.loadUserData();
+                  console.log('✅ Wallet connected:', userData);
+                  setIsAuthenticated(true);
+                  setUserAddress(userData.profile.stxAddress.mainnet);
+                  
+                  // Try to get available accounts from the wallet
+                  try {
                     // @ts-ignore
-                    const accounts = window.StacksProvider.getAccounts();
-                    if (accounts && accounts.length > 0) {
-                      setAvailableAccounts(accounts);
-                      setCurrentAccount(accounts[0]);
+                    if (window?.StacksProvider?.getAccounts) {
+                      // @ts-ignore
+                      window.StacksProvider.getAccounts()
+                        .then((accounts: string[]) => {
+                          if (accounts && accounts.length > 0) {
+                            setAvailableAccounts(accounts);
+                            setCurrentAccount(accounts[0]);
+                          } else {
+                            setAvailableAccounts([userData.profile.stxAddress.mainnet]);
+                            setCurrentAccount(userData.profile.stxAddress.mainnet);
+                          }
+                        })
+                        .catch((err: any) => {
+                          console.error('Error getting accounts from provider:', err);
+                          setAvailableAccounts([userData.profile.stxAddress.mainnet]);
+                          setCurrentAccount(userData.profile.stxAddress.mainnet);
+                        });
                     } else {
                       setAvailableAccounts([userData.profile.stxAddress.mainnet]);
                       setCurrentAccount(userData.profile.stxAddress.mainnet);
                     }
-                  } else {
+                  } catch (error) {
+                    console.error('Error getting accounts from provider:', error);
                     setAvailableAccounts([userData.profile.stxAddress.mainnet]);
                     setCurrentAccount(userData.profile.stxAddress.mainnet);
                   }
-                } catch (error) {
-                  console.error('Error getting accounts from provider:', error);
-                  setAvailableAccounts([userData.profile.stxAddress.mainnet]);
-                  setCurrentAccount(userData.profile.stxAddress.mainnet);
+                } else {
+                  console.log("⚠️ User not signed in after connect attempt");
                 }
+              } catch (error) {
+                console.error('Error in onFinish timeout handler', error);
+              } finally {
+                // Always clear the connection state
+                connectionInProgress = false;
+                console.log("🔌 Connection attempt finished at:", new Date().toISOString());
               }
-            } catch (error) {
-              console.error('Error in onFinish timeout handler', error);
-            } finally {
-              // Always clear the connection state
-              connectionInProgress = false;
-              console.log("🔌 Connection attempt finished at:", new Date().toISOString());
-            }
-          }, 500);
-        },
-        userSession,
-      });
+            }, 500);
+          },
+          userSession,
+        });
+        console.log("🔧 showConnect initialized successfully");
+      } catch (showConnectError) {
+        console.error("Error during showConnect:", showConnectError);
+        connectionInProgress = false;
+      }
     } catch (error) {
       console.error("Error connecting wallet:", error);
       // Always clear the connection state on error

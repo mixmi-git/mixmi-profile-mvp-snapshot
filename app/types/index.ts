@@ -1,3 +1,10 @@
+/**
+ * This file exports all shared types for the application.
+ * 
+ * The ProfileMode enum is kept for backward compatibility but is not used
+ * in the new edit-in-place functionality.
+ */
+
 // Profile mode enum (for backward compatibility)
 export enum ProfileMode {
   VIEW = 'VIEW',

@@ -6,8 +6,7 @@ import { useAuthState } from '../../hooks/useAuthState';
 import ProfileView from './ProfileView';
 import { Edit2 } from 'lucide-react';
 import { exampleMediaItems, exampleSpotlightItems, exampleShopItems } from '@/lib/example-content';
-import { ProfileMode } from '@/types';
-import { ProfileData, SpotlightItem, MediaItem, ShopItem, SocialLink } from '@/types';
+import { ProfileMode, ProfileData, SpotlightItem, MediaItem, ShopItem, SocialLink } from '@/types';
 
 // Re-export ProfileMode for backward compatibility
 export { ProfileMode };
@@ -158,6 +157,10 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
         ? getStorageKeys(profileId)
         : LEGACY_STORAGE_KEYS;
       
+      console.log('🔍 DEBUG: Storage keys being used:', STORAGE_KEYS);
+      console.log('🔍 DEBUG: localStorage keys available:', Object.keys(localStorage).filter(key => 
+        key.includes('mixmi_')));
+      
       const savedProfile = getFromStorage<ProfileData>(STORAGE_KEYS.PROFILE, initialProfile);
       const savedSpotlightItems = getFromStorage<SpotlightItemType[]>(STORAGE_KEYS.SPOTLIGHT, initialSpotlightItems);
       const savedShopItems = getFromStorage<ShopItemType[]>(STORAGE_KEYS.SHOP, initialShopItems);
@@ -171,9 +174,51 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
       );
       
       // Check if this is a first-time user for this profile
-      const isFirstTimeUser = 
-        !localStorage.getItem(STORAGE_KEYS.PROFILE) || 
+      // FORCE first-time user for development
+      const devMode = process.env.NODE_ENV === 'development';
+      console.log('🔍 DEBUG: devMode check:', process.env.NODE_ENV, devMode);
+      
+      // Directly use forced example data in development mode
+      if (devMode) {
+        console.log('🔧 DEV MODE: Forcing example content load');
+        
+        const profileWithDefaults = {
+          ...DEFAULT_PROFILE,
+          id: profileId || Date.now().toString(),
+          sectionVisibility: {
+            spotlight: true,
+            media: true,
+            shop: true,
+            sticker: true
+          },
+          sticker: {
+            visible: true,
+            image: "/images/stickers/daisy-blue.png"
+          }
+        };
+        
+        setProfile(profileWithDefaults);
+        setSpotlightItems(exampleSpotlightItems);
+        setShopItems(exampleShopItems);
+        setMediaItems(exampleMediaItems);
+        
+        // Save example content to localStorage for persistence
+        saveToStorage(STORAGE_KEYS.PROFILE, profileWithDefaults);
+        saveToStorage(STORAGE_KEYS.SPOTLIGHT, exampleSpotlightItems);
+        saveToStorage(STORAGE_KEYS.SHOP, exampleShopItems);
+        saveToStorage(STORAGE_KEYS.MEDIA, exampleMediaItems);
+        saveToStorage(STORAGE_KEYS.STICKER, savedSticker);
+        
+        devLog('📦 Saved example content for DEV MODE with profile ID:', profileId);
+        return; // Skip the rest of the useEffect
+      }
+      
+      const isFirstTimeUser = !localStorage.getItem(STORAGE_KEYS.PROFILE) || 
         !savedProfile.hasEditedProfile;
+      
+      console.log('🔍 DEBUG: Is first time user:', isFirstTimeUser);
+      console.log('🔍 DEBUG: Loaded profile:', savedProfile);
+      console.log('🔍 DEBUG: Loaded spotlight items:', savedSpotlightItems?.length || 0);
       
       devLog('📦 Loading data for profile ID:', profileId, {
         isFirstTimeUser,
