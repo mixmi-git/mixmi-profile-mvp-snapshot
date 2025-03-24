@@ -6,6 +6,17 @@ import { useAuthState } from '../../hooks/useAuthState';
 import ProfileView from './ProfileView';
 import { Edit2 } from 'lucide-react';
 import { exampleMediaItems, exampleSpotlightItems, exampleShopItems } from '@/lib/example-content';
+import { ProfileMode } from '@/types';
+import { ProfileData, SpotlightItem, MediaItem, ShopItem, SocialLink } from '@/types';
+
+// Re-export ProfileMode for backward compatibility
+export { ProfileMode };
+
+// Type aliases for backward compatibility
+export type SpotlightItemType = SpotlightItem;
+export type MediaItemType = MediaItem;
+export type ShopItemType = ShopItem;
+export type SocialLinkType = SocialLink;
 
 // Storage keys for localStorage with dynamic profile ID support
 const getStorageKeys = (profileId: string) => ({
@@ -50,58 +61,6 @@ const saveToStorage = <T,>(key: string, value: T): void => {
 };
 
 // Define the interfaces for our component props
-export interface SocialLinkType {
-  platform: string;
-  url: string;
-}
-
-export interface ProfileData {
-  id: string;
-  name: string;
-  title: string;
-  bio: string;
-  image: string;
-  socialLinks: SocialLinkType[];
-  sectionVisibility?: {
-    spotlight?: boolean;
-    media?: boolean;
-    shop?: boolean;
-    sticker?: boolean;
-  };
-  sticker?: {
-    image: string;
-    visible: boolean;
-  };
-  walletAddress?: string;
-  showWalletAddress?: boolean;
-  hasEditedProfile?: boolean;
-}
-
-export interface SpotlightItemType {
-  id: string;
-  title: string;
-  description: string;
-  image: string;
-  link?: string;
-}
-
-export interface ShopItemType {
-  id: string;
-  title: string;
-  description: string;
-  image: string;
-  price?: string;
-  link?: string;
-}
-
-export interface MediaItemType {
-  id: string;
-  type: string;
-  title?: string;
-  rawUrl?: string;
-  embedUrl?: string;
-}
-
 export interface UserProfileContainerProps {
   initialProfile?: ProfileData;
   initialSpotlightItems?: SpotlightItemType[];

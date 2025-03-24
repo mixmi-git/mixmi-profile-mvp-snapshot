@@ -50,10 +50,17 @@ export function NavbarContainer({
         if (typeof window !== 'undefined') {
           // Clear specific auth-related items in localStorage
           const keysToRemove = Object.keys(localStorage).filter(key => 
-            key.includes('blockstack') || 
+            (key.includes('blockstack') || 
             key.includes('stacks') ||
             key.includes('authResponse') ||
-            key.includes('mixmi-last-auth-check')
+            key.includes('mixmi-last-auth-check')) &&
+            // Don't remove content data
+            !key.includes('mixmi_profile_data') &&
+            !key.includes('mixmi_spotlight_items') &&
+            !key.includes('mixmi_shop_items') &&
+            !key.includes('mixmi_media_items') &&
+            !key.includes('mixmi_sticker_data') &&
+            !key.includes('mixmi_account_profile_map')
           );
           
           keysToRemove.forEach(key => {

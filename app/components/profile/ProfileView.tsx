@@ -14,7 +14,8 @@ import {
 import { FaYoutube, FaSpotify, FaSoundcloud, FaLinkedinIn } from 'react-icons/fa';
 import { FaXTwitter } from 'react-icons/fa6';
 import { SiTiktok } from 'react-icons/si';
-import { ProfileData, MediaItemType, SpotlightItemType, ShopItemType } from './UserProfileContainer';
+import { ProfileData } from '@/types';
+import { MediaItem as MediaItemType, SpotlightItem as SpotlightItemType, ShopItem as ShopItemType } from '@/types';
 import StickerDisplay from './StickDisplay';
 import PersonalInfoSection from './PersonalInfoSection';
 import { SectionVisibilityManager } from '../ui/section-visibility-manager';

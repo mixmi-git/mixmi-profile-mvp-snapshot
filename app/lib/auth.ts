@@ -126,6 +126,11 @@ export const useAuth = () => {
     try {
       console.log("🔌 Connecting wallet...");
       
+      // Set the connection tracking variables
+      connectionInProgress = true;
+      connectionAttemptTimestamp = Date.now();
+      console.log("🔌 Connection attempt started at:", new Date(connectionAttemptTimestamp).toISOString());
+      
       // Check if already signed in
       if (userSession.isUserSignedIn()) {
         console.log("👤 User already signed in");
@@ -177,6 +182,10 @@ export const useAuth = () => {
               }
             } catch (error) {
               console.error('Error in onFinish timeout handler', error);
+            } finally {
+              // Always clear the connection state
+              connectionInProgress = false;
+              console.log("🔌 Connection attempt finished at:", new Date().toISOString());
             }
           }, 500);
         },
@@ -184,6 +193,8 @@ export const useAuth = () => {
       });
     } catch (error) {
       console.error("Error connecting wallet:", error);
+      // Always clear the connection state on error
+      connectionInProgress = false;
     }
   }, []);
 
@@ -319,10 +330,17 @@ export const useAuth = () => {
       // In dev mode, force a clean state by removing any stale auth data
       if (devMode) {
         const keysToRemove = Object.keys(localStorage).filter(key => 
-          key.includes('blockstack') || 
+          (key.includes('blockstack') || 
           key.includes('stacks') ||
           key.includes('authResponse') ||
-          key.includes('mixmi-last-auth-check')
+          key.includes('mixmi-last-auth-check')) &&
+          // Don't remove content data
+          !key.includes('mixmi_profile_data') &&
+          !key.includes('mixmi_spotlight_items') &&
+          !key.includes('mixmi_shop_items') &&
+          !key.includes('mixmi_media_items') &&
+          !key.includes('mixmi_sticker_data') &&
+          !key.includes('mixmi_account_profile_map')
         );
         
         if (keysToRemove.length > 0) {
