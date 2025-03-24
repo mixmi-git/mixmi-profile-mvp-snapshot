@@ -1,73 +1,57 @@
-# MixMi Profile Component
+# Profile App Overview
 
-A modern, customizable profile component for MixMi platform users.
+## Project Description
+This app provides creators with a customizable profile page that they can modify after authenticating with their Stacks wallet. The profile allows creators to showcase their work, social links, shop items, and other personalized content.
 
-## Current Status - v3.0.0 (March 25, 2025)
+## Current Architecture
 
-This repository contains a refactored version of the MixMi profile component with the following improvements:
+### Authentication Flow
+1. User arrives at their profile page (initially in read-only mode)
+2. User connects their Stacks wallet through the navbar button
+3. Stacks wallets allow multiple accounts after the initial seed phrase authentication
+4. The profile page should identify which specific wallet account is connected
+5. Once authenticated, an "Edit Profile" button appears in the navbar
+6. Clicking "Edit Profile" navigates to a separate edit page
+7. Changes made on the edit page are saved back to the profile view
+8. The profile must store user information specific to each wallet account
+9. Only the currently connected wallet account should be able to edit its own profile
+10. Disconnecting wallet hides the edit button and returns to read-only mode
 
-- ✅ Fixed infinite update loop in Checkbox components
-- ✅ Implemented custom HTML checkbox to replace problematic Radix UI components
-- ✅ Improved state management in form components
-- ✅ Full Edit mode functionality restored
-- ✅ Proper section visibility controls
-- ✅ All profile sections properly rendering (ProfileDetails, Spotlight, Media, Shop)
-- ✅ Spotlight section now correctly saves and displays images (including GIFs) and text content
+### Component Structure
+- **UserProfileContainer**: Main container that manages all state
+- **ProfileView**: Displays the read-only profile page
+- **ProfileEditor**: Separate page for editing profile content
+- **NavbarContainer**: Handles wallet connection and edit/save buttons
 
-## Components
+### Current Issues
+1. The separation between view and edit pages creates navigation issues
+2. The navbar save button doesn't properly update all content
+3. Form components in the edit page need modernization
+4. Circular dependencies in authentication system
+5. Duplicate components causing conflicts
 
-The application is structured around several key components:
+## Working Components
+- Basic profile information display
+- Spotlight items (row of cards with images and links)
+- Media embeds section
+- Shop items section
+- Rotating sticker image
+- Wallet authentication
 
-- `UserProfileContainer`: Main container component that manages profile state and mode switching
-- `ProfileView`: Responsible for displaying the read-only view of a user's profile
-- `ProfileEditor`: Handles the edit mode with form controls for modifying profile data
-- Various section components:
-  - `ProfileDetailsSection`: Basic profile info (name, bio, image)
-  - `SpotlightSection`: Featured content section
-  - `MediaSection`: Embedded media from various platforms
-  - `ShopSection`: Products or services for sale
-  - `VisibilitySection`: Controls for showing/hiding different sections
+## Project Goals
+We want to refactor the application to:
+1. Use an edit-in-place approach instead of separate pages
+2. Modernize form components with ShadCN
+3. Fix the save functionality
+4. Improve mobile responsiveness
+5. Simplify the component architecture
 
-## Recent Fixes
-
-### v3.0.1 (March 26, 2025)
-- 🖼️ Fixed Spotlight section saving functionality - now properly saves images (including GIFs) and text content
-- 🔄 Corrected data flow between editor components and parent container
-- 📝 Fixed state management in UserProfileContainer's handleSave function
-
-### v3.0.0 (March 25, 2025)
-- 🛠️ Fixed critical infinite loop bug by replacing Radix UI Checkbox component with custom HTML implementation
-- 🔄 Improved state management in form components to prevent React state cycling
-- 🎛️ Enhanced section visibility controls with improved state handling
-
-## Development Notes
-
-### Known Issues
-- Styling and UI refinements needed
-- StickerSection temporarily removed due to rendering issues (backed up in repo history)
-
-### Upcoming Work
-- UI/UX improvements
-- Additional profile section features
-- Improved responsive design
-
-## Version Control Strategy
-
-We maintain a strict versioning approach:
-1. Working milestones are tagged with version numbers
-2. Detailed commit messages explain changes and fixes
-3. We never overwrite or force push to working versions
-4. Checkpoint branches preserve key functionality points
-
-## Setup and Development
-
-```bash
-# Install dependencies
-npm install
-
-# Run development server
-npm run dev
-```
-
-## License
-Proprietary - All rights reserved
+## Technology Stack
+- React
+- Next.js
+- TypeScript
+- Tailwind CSS
+- ShadCN UI components (which are built on Tailwind)
+- Stacks wallet for authentication
+- Supabase for data storage (profiles, metadata)
+- IPFS for decentralized content storage (images, media)
