@@ -156,6 +156,7 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
                 className="inline-block"
                 labelClassName="text-2xl md:text-3xl lg:text-4xl font-bold text-cyan-300"
                 isAuthenticated={isAuthenticated}
+                fieldType="name"
               />
             </div>
             
@@ -167,6 +168,7 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
                 className="inline-block"
                 labelClassName="text-xl md:text-2xl text-gray-300 mt-2"
                 isAuthenticated={isAuthenticated}
+                fieldType="title"
               />
             </div>
           </div>
@@ -181,6 +183,7 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
               className="w-full"
               labelClassName="text-gray-300 leading-relaxed text-sm md:text-base"
               isAuthenticated={isAuthenticated}
+              fieldType="bio"
             />
           </div>
           

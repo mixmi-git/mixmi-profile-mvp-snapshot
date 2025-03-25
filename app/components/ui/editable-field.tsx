@@ -23,6 +23,7 @@ interface EditableFieldProps {
   maxLength?: number;
   isAuthenticated?: boolean;
   hideEditButton?: boolean;
+  fieldType?: 'name' | 'title' | 'bio' | 'other';
 }
 
 /**
@@ -45,6 +46,7 @@ const EditableField = ({
   maxLength,
   isAuthenticated = true,
   hideEditButton = false,
+  fieldType = 'other',
 }: EditableFieldProps) => {
   // Use internal state if external control is not provided
   const [internalIsEditing, setInternalIsEditing] = useState(false);
@@ -53,6 +55,18 @@ const EditableField = ({
   // Track edited value separately from original
   const [editedValue, setEditedValue] = useState(value);
   
+  // Character count state
+  const [charCount, setCharCount] = useState(value.length);
+  
+  // Determine maxLength based on fieldType if not explicitly provided
+  const defaultMaxLength = 
+    fieldType === 'name' ? 30 : 
+    fieldType === 'title' ? 50 : 
+    fieldType === 'bio' ? 300 : 
+    undefined;
+  
+  const effectiveMaxLength = maxLength || defaultMaxLength;
+  
   // Input ref for focusing when edit mode is enabled
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
   
@@ -60,6 +74,7 @@ const EditableField = ({
   useEffect(() => {
     if (!isEditing) {
       setEditedValue(value);
+      setCharCount(value.length);
     }
   }, [value, isEditing]);
   
@@ -100,6 +115,7 @@ const EditableField = ({
   // Cancel editing and revert to original value
   const handleCancel = () => {
     setEditedValue(value);
+    setCharCount(value.length);
     setInternalIsEditing(false);
     if (onEditToggle) {
       onEditToggle(false);
@@ -107,6 +123,13 @@ const EditableField = ({
     if (onCancel) {
       onCancel();
     }
+  };
+  
+  // Handle input change
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const newValue = e.target.value;
+    setEditedValue(newValue);
+    setCharCount(newValue.length);
   };
   
   // Handle Enter key to save and Escape to cancel
@@ -128,11 +151,11 @@ const EditableField = ({
           <Textarea
             ref={inputRef as React.RefObject<HTMLTextAreaElement>}
             value={editedValue}
-            onChange={(e) => setEditedValue(e.target.value)}
+            onChange={handleChange}
             placeholder={placeholder}
             className={`w-full ${inputClassName}`}
             rows={rows}
-            maxLength={maxLength}
+            maxLength={effectiveMaxLength}
             onKeyDown={handleKeyDown}
           />
         ) : (
@@ -140,12 +163,18 @@ const EditableField = ({
             ref={inputRef as React.RefObject<HTMLInputElement>}
             type="text"
             value={editedValue}
-            onChange={(e) => setEditedValue(e.target.value)}
+            onChange={handleChange}
             placeholder={placeholder}
             className={`w-full ${inputClassName}`}
-            maxLength={maxLength}
+            maxLength={effectiveMaxLength}
             onKeyDown={handleKeyDown}
           />
+        )}
+        
+        {effectiveMaxLength && (
+          <div className="text-xs text-gray-400 mt-1 text-right">
+            {charCount}/{effectiveMaxLength}
+          </div>
         )}
         
         {showControls && (
