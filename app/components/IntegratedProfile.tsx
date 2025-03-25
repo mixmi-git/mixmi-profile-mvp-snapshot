@@ -98,7 +98,8 @@ export function IntegratedProfile() {
       
       // Alternative: Only clear profile data if there's an issue
       localStorage.removeItem(STORAGE_KEYS.PROFILE);
-      console.log('🧹 Cleared profile data from localStorage to prevent potential loading issues');
+      localStorage.removeItem(STORAGE_KEYS.SHOP);
+      console.log('🧹 Cleared profile and shop data from localStorage to prevent potential loading issues');
     }
     
     // Immediately set some example data to show content while loading

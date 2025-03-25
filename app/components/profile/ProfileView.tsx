@@ -449,6 +449,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                               src={item.image}
                               alt={item.title}
                               fill
+                              priority
                               className="object-cover"
                             />
                           )
@@ -511,6 +512,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                               src={item.image}
                               alt={item.title}
                               fill
+                              priority
                               className="object-cover"
                             />
                           )

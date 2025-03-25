@@ -79,7 +79,7 @@ export const exampleShopItems: ShopItem[] = [
     id: '2',
     title: 'Digital Album',
     description: 'Download my latest album in high quality',
-    image: '/images/placeholder.png',
+    image: '/images/digital-album-placeholder.jpg',
     price: '$9.99',
     link: 'https://example.com/album/digital'
   }

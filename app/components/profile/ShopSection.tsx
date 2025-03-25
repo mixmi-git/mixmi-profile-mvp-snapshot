@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Plus, Trash2 } from "lucide-react"
 import Image from "next/image"
 import ImageUpload from '../ui/ImageUpload'
-import { ShopItem } from '@/types/content'
+import { ShopItem } from '@/types'
 
 interface ShopSectionProps {
   items: ShopItem[]
@@ -77,8 +77,8 @@ export function ShopSection({
                       <Label htmlFor={`store-url-${index}`}>Store URL</Label>
                       <Input
                         id={`store-url-${index}`}
-                        value={item.storeUrl}
-                        onChange={(e) => onItemChange(index, 'storeUrl', e.target.value)}
+                        value={item.link}
+                        onChange={(e) => onItemChange(index, 'link', e.target.value)}
                         placeholder="https://"
                         className="mt-2"
                       />
@@ -124,7 +124,7 @@ export const ShopItemCard = ({ item }: { item: ShopItem }) => {
     <Card className="w-full overflow-hidden group">
       <CardContent className="p-0">
         <a
-          href={item.storeUrl}
+          href={item.link}
           target="_blank"
           rel="noopener noreferrer"
           className="block"
@@ -134,6 +134,7 @@ export const ShopItemCard = ({ item }: { item: ShopItem }) => {
               src={item.image || '/images/shop-placeholder.jpg'}
               alt={item.title || 'Store image'}
               fill
+              priority
               className="object-cover transition-transform duration-300 group-hover:scale-105"
               unoptimized
             />
