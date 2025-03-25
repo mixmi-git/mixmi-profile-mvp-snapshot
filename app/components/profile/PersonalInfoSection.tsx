@@ -186,18 +186,37 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
           
           {/* Social links */}
           <div className="flex flex-wrap justify-center gap-3">
-            {profile.socialLinks && profile.socialLinks.map((link: SocialLinkType, index: number) => (
-              <a
-                key={`${link.platform}-${index}`}
-                href={link.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center p-2 bg-gray-800 hover:bg-gray-700 rounded-full transition-colors"
-                aria-label={link.platform}
-              >
-                {getSocialIcon(link.platform)}
-              </a>
-            ))}
+            {profile.socialLinks && profile.socialLinks.length > 0 ? (
+              // Display actual social links if they exist
+              profile.socialLinks.map((link: SocialLinkType, index: number) => (
+                <a
+                  key={`${link.platform}-${index}`}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center p-2 bg-gray-800 hover:bg-gray-700 rounded-full transition-colors"
+                  aria-label={link.platform}
+                >
+                  {getSocialIcon(link.platform)}
+                </a>
+              ))
+            ) : (
+              // Display placeholder icons when no social links exist
+              <>
+                <div className="inline-flex items-center justify-center p-2 bg-gray-800/60 rounded-full cursor-default opacity-60">
+                  <Instagram size={18} className="text-gray-400" />
+                </div>
+                <div className="inline-flex items-center justify-center p-2 bg-gray-800/60 rounded-full cursor-default opacity-60">
+                  <FaYoutube size={18} className="text-gray-400" />
+                </div>
+                <div className="inline-flex items-center justify-center p-2 bg-gray-800/60 rounded-full cursor-default opacity-60">
+                  <FaXTwitter size={18} className="text-gray-400" />
+                </div>
+                <div className="inline-flex items-center justify-center p-2 bg-gray-800/60 rounded-full cursor-default opacity-60">
+                  <FaSpotify size={18} className="text-gray-400" />
+                </div>
+              </>
+            )}
             
             {isAuthenticated && (
               <EditButtonControl
