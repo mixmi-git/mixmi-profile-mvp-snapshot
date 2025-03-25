@@ -164,7 +164,7 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
           </div>
           
           <div className="mb-8 max-w-2xl w-full">
-            <p className="text-xs md:text-sm leading-relaxed text-gray-300">
+            <p className="text-xs md:text-sm leading-relaxed text-gray-300 text-center">
               {profile.bio || "Tell your story here..."}
             </p>
           </div>
