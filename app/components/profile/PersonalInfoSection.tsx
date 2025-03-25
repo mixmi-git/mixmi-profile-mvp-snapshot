@@ -103,7 +103,7 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
         {/* Profile picture */}
         <div className="relative w-32 h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 overflow-hidden rounded-full">
           <Image
-            src={profile.image || '/placeholder-profile.jpg'}
+            src={profile.image || 'https://via.placeholder.com/192/1a202c/718096?text=Profile'}
             alt={profile.name}
             width={192}
             height={192}
@@ -134,7 +134,7 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
         
         {/* Profile text info */}
         <div className="flex-1 text-center flex flex-col items-center justify-center">
-          <div className="mb-8 relative">
+          <div className="mb-8 relative group">
             <div className="mb-1">
               <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-cyan-300">
                 {profile.name || "Your Name"}
@@ -150,7 +150,7 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
             {isAuthenticated && (
               <button 
                 onClick={() => setIsProfileInfoEditorOpen(true)}
-                className="absolute -right-8 top-1/2 transform -translate-y-1/2 bg-gray-800/70 hover:bg-gray-700 text-white p-1.5 rounded-full transition-colors sm:opacity-0 sm:group-hover:opacity-100"
+                className="absolute -right-8 top-1/2 transform -translate-y-1/2 bg-gray-800/70 hover:bg-gray-700 text-white p-1.5 rounded-full transition-colors opacity-100 md:opacity-70 md:group-hover:opacity-100"
                 aria-label="Edit profile info"
               >
                 <Edit className="w-4 h-4" />
