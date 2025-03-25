@@ -185,7 +185,7 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
           </div>
           
           {/* Social links */}
-          <div className="flex flex-wrap justify-center gap-3">
+          <div className="flex flex-wrap justify-center gap-3 mb-4">
             {profile.socialLinks && profile.socialLinks.length > 0 ? (
               // Display actual social links if they exist
               profile.socialLinks.map((link: SocialLinkType, index: number) => (
@@ -231,37 +231,37 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
               </EditButtonControl>
             )}
           </div>
+          
+          {/* Wallet address display - now inside the right column */}
+          {profile.walletAddress && (
+            <div className="w-full max-w-sm mx-auto px-4 py-2 bg-gray-800/50 rounded-lg flex items-center justify-between border border-gray-700/50 mt-4">
+              <div className="flex items-center gap-2">
+                <div className="text-sm text-gray-300 truncate">
+                  {profile.walletAddress.slice(0, 6)}...{profile.walletAddress.slice(-4)}
+                </div>
+                {isAuthenticated && (
+                  <button
+                    onClick={() => onUpdateProfile?.('showWalletAddress', !(profile.showWalletAddress ?? true))}
+                    className="text-xs text-gray-500 hover:text-gray-400"
+                  >
+                    {profile.showWalletAddress === false ? 'Show publicly' : 'Hide publicly'}
+                  </button>
+                )}
+                {isAuthenticated && profile.showWalletAddress === false && (
+                  <span className="text-xs bg-gray-700 text-gray-400 px-1.5 py-0.5 rounded">Hidden</span>
+                )}
+              </div>
+              <button
+                onClick={() => copyToClipboard(profile.walletAddress || '')}
+                className="p-1 hover:bg-gray-700 rounded transition-colors"
+                aria-label={copied ? "Copied to clipboard" : "Copy wallet address"}
+              >
+                <Copy size={14} className={copied ? "text-green-400" : "text-gray-400"} />
+              </button>
+            </div>
+          )}
         </div>
       </div>
-      
-      {/* Wallet address display */}
-      {profile.walletAddress && (
-        <div className="max-w-md mx-auto md:mx-0 mb-4 px-4 py-2 bg-gray-800/50 rounded-lg flex items-center justify-between border border-gray-700/50">
-          <div className="flex items-center gap-2">
-            <div className="text-sm text-gray-300 truncate">
-              {profile.walletAddress.slice(0, 6)}...{profile.walletAddress.slice(-4)}
-            </div>
-            {isAuthenticated && (
-              <button
-                onClick={() => onUpdateProfile?.('showWalletAddress', !(profile.showWalletAddress ?? true))}
-                className="text-xs text-gray-500 hover:text-gray-400"
-              >
-                {profile.showWalletAddress === false ? 'Show publicly' : 'Hide publicly'}
-              </button>
-            )}
-            {isAuthenticated && profile.showWalletAddress === false && (
-              <span className="text-xs bg-gray-700 text-gray-400 px-1.5 py-0.5 rounded">Hidden</span>
-            )}
-          </div>
-          <button
-            onClick={() => copyToClipboard(profile.walletAddress || '')}
-            className="p-1 hover:bg-gray-700 rounded transition-colors"
-            aria-label={copied ? "Copied to clipboard" : "Copy wallet address"}
-          >
-            <Copy size={14} className={copied ? "text-green-400" : "text-gray-400"} />
-          </button>
-        </div>
-      )}
     </div>
   );
 };
