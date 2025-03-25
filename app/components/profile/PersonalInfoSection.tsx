@@ -101,18 +101,18 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
     <section className="py-6 md:py-8 lg:py-10 w-full">
       <div className="flex flex-col md:flex-row items-center md:items-center gap-8 md:gap-12">
         {/* Profile picture */}
-        <div className="relative w-32 h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 overflow-hidden rounded-full bg-gray-800">
+        <div className="relative w-60 h-60 md:w-[280px] md:h-[280px] lg:w-[320px] lg:h-[320px] overflow-hidden rounded-lg border-2 border-cyan-600 bg-gray-800">
           {profile.image && profile.image.trim() ? (
             <Image
               src={profile.image}
               alt={profile.name || 'Profile'}
-              width={192}
-              height={192}
+              width={320}
+              height={320}
               className="w-full h-full object-cover"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-gray-500">
-              <svg xmlns="http://www.w3.org/2000/svg" width="40%" height="40%" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg xmlns="http://www.w3.org/2000/svg" width="30%" height="30%" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                 <circle cx="12" cy="7" r="4"></circle>
               </svg>
@@ -122,12 +122,8 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
           {isAuthenticated && (
             <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 hover:opacity-100 transition-opacity">
               <label htmlFor="profile-image" className="cursor-pointer">
-                <div className="bg-gray-800 hover:bg-gray-700 text-white p-2 rounded-full">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M16 16v1a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h1" />
-                    <path d="M17 9v7" />
-                    <path d="M12.5 3.5a2.12 2.12 0 0 1 3 3L9 13l-4 1 1-4Z" />
-                  </svg>
+                <div className="bg-gray-800 hover:bg-gray-700 text-white px-3 py-2 rounded-md">
+                  Change Image
                 </div>
                 <input
                   id="profile-image"
