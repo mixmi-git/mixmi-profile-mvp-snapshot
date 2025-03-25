@@ -17,6 +17,29 @@ export default function IntegratedProfilePage() {
           overflow: hidden !important;
         }
         
+        /* Profile layout styles */
+        .flex-col {
+          display: flex !important;
+          flex-direction: column !important;
+        }
+        
+        @media (min-width: 768px) {
+          .md\\:flex-row {
+            flex-direction: row !important;
+          }
+          
+          .md\\:items-center {
+            align-items: center !important;
+          }
+        }
+        
+        .profile-text-container {
+          display: flex !important;
+          flex-direction: column !important;
+          justify-content: center !important;
+          height: 100% !important;
+        }
+        
         .profile-name {
           font-size: 2.5rem !important;
           font-weight: bold !important;
