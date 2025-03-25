@@ -50,13 +50,6 @@ const SectionVisibilityManager = ({
     onVisibilityChange(section, !(safeVisibility[section] ?? true));
   };
 
-  // Helper function to render status indicator
-  const renderStatus = (isVisible: boolean) => (
-    <span className={`text-xs font-medium ml-2 ${isVisible ? 'text-cyan-400' : 'text-gray-500'}`}>
-      {isVisible ? 'VISIBLE' : 'HIDDEN'}
-    </span>
-  );
-
   return (
     <Card className={cn('relative border border-gray-700 bg-gray-800 text-white', className)}>
       <div 
@@ -71,15 +64,12 @@ const SectionVisibilityManager = ({
       </div>
 
       {isExpanded && (
-        <CardContent className="pt-4 bg-gray-800 text-white rounded-b-lg">
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <Label htmlFor="toggle-spotlight" className="flex items-center cursor-pointer text-gray-200">
-                  Spotlight Section
-                </Label>
-                {renderStatus(safeVisibility.spotlight ?? true)}
-              </div>
+        <CardContent className="pt-3 pb-3 px-4 bg-gray-800 text-white rounded-b-lg">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between gap-6">
+              <Label htmlFor="toggle-spotlight" className="text-gray-200 text-sm">
+                Spotlight Section
+              </Label>
               <Switch
                 id="toggle-spotlight"
                 checked={safeVisibility.spotlight ?? true}
@@ -88,13 +78,10 @@ const SectionVisibilityManager = ({
               />
             </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <Label htmlFor="toggle-media" className="flex items-center cursor-pointer text-gray-200">
-                  Media Section
-                </Label>
-                {renderStatus(safeVisibility.media ?? true)}
-              </div>
+            <div className="flex items-center justify-between gap-6">
+              <Label htmlFor="toggle-media" className="text-gray-200 text-sm">
+                Media Section
+              </Label>
               <Switch
                 id="toggle-media"
                 checked={safeVisibility.media ?? true}
@@ -103,13 +90,10 @@ const SectionVisibilityManager = ({
               />
             </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <Label htmlFor="toggle-shop" className="flex items-center cursor-pointer text-gray-200">
-                  Shop Section
-                </Label>
-                {renderStatus(safeVisibility.shop ?? true)}
-              </div>
+            <div className="flex items-center justify-between gap-6">
+              <Label htmlFor="toggle-shop" className="text-gray-200 text-sm">
+                Shop Section
+              </Label>
               <Switch
                 id="toggle-shop"
                 checked={safeVisibility.shop ?? true}
@@ -118,13 +102,10 @@ const SectionVisibilityManager = ({
               />
             </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <Label htmlFor="toggle-sticker" className="flex items-center cursor-pointer text-gray-200">
-                  Sticker
-                </Label>
-                {renderStatus(safeVisibility.sticker ?? true)}
-              </div>
+            <div className="flex items-center justify-between gap-6">
+              <Label htmlFor="toggle-sticker" className="text-gray-200 text-sm">
+                Sticker
+              </Label>
               <Switch
                 id="toggle-sticker"
                 checked={safeVisibility.sticker ?? true}
