@@ -88,6 +88,17 @@ export function IntegratedProfile() {
   
   // Quick initial setup to avoid blank screen
   useEffect(() => {
+    // TEMPORARY FIX: Clear localStorage to prevent infinite loading loop
+    if (typeof window !== 'undefined') {
+      // Only clear if you're experiencing infinite loading
+      // Uncomment the next line to reset all data
+      // localStorage.clear();
+      
+      // Alternative: Only clear profile data if there's an issue
+      localStorage.removeItem(STORAGE_KEYS.PROFILE);
+      console.log('🧹 Cleared profile data from localStorage to prevent potential loading issues');
+    }
+    
     // Immediately set some example data to show content while loading
     setProfile(DEFAULT_PROFILE);
     setSpotlightItems(exampleSpotlightItems);
@@ -435,6 +446,15 @@ export function IntegratedProfile() {
           >
             Cancel Loading
           </button>
+          <div className="mt-6 text-center">
+            <p className="text-gray-400 mb-2">Stuck loading? Try resetting the app:</p>
+            <Link
+              href="/reset"
+              className="text-cyan-400 hover:text-cyan-300 underline"
+            >
+              Reset Application Data
+            </Link>
+          </div>
         </div>
       ) : (
         <main className="flex-grow">
