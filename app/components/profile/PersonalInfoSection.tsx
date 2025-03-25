@@ -101,14 +101,23 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
     <section className="py-6 md:py-8 lg:py-10 w-full">
       <div className="flex flex-col md:flex-row items-center md:items-center gap-8 md:gap-12">
         {/* Profile picture */}
-        <div className="relative w-32 h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 overflow-hidden rounded-full">
-          <Image
-            src={profile.image || 'https://via.placeholder.com/192/1a202c/718096?text=Profile'}
-            alt={profile.name}
-            width={192}
-            height={192}
-            className="w-full h-full object-cover"
-          />
+        <div className="relative w-32 h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 overflow-hidden rounded-full bg-gray-800">
+          {profile.image && profile.image.trim() ? (
+            <Image
+              src={profile.image}
+              alt={profile.name || 'Profile'}
+              width={192}
+              height={192}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-gray-500">
+              <svg xmlns="http://www.w3.org/2000/svg" width="40%" height="40%" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+            </div>
+          )}
           
           {isAuthenticated && (
             <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 hover:opacity-100 transition-opacity">
