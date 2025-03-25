@@ -76,9 +76,9 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
   return (
     <div className="w-full max-w-4xl mx-auto px-4 py-8">
       {/* Profile header with image and text */}
-      <div className="flex flex-col md:flex-row items-center md:items-center gap-8 md:gap-12 lg:gap-16 mb-8">
+      <div className="profile-container mb-8">
         {/* Profile Image - left side */}
-        <div className="relative group flex-shrink-0">
+        <div className="relative group">
           {isAuthenticated ? (
             <HoverControls
               isAuthenticated={isAuthenticated}
@@ -138,8 +138,8 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
           )}
         </div>
         
-        {/* Profile info - left aligned on desktop, center on mobile */}
-        <div className="flex-1 text-center md:text-left flex flex-col items-center md:items-start justify-center profile-text-container">
+        {/* Profile info - right side with left-aligned text on desktop */}
+        <div className="profile-text-container">
           <div className="mb-3">
             <EditableField
               value={profile.name}
