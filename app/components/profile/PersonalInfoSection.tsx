@@ -76,9 +76,9 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
   return (
     <div className="w-full max-w-4xl mx-auto px-4 py-8">
       {/* Profile header with image and text */}
-      <div className="profile-container">
+      <div className="flex flex-col md:flex-row items-center md:items-start gap-8 md:gap-12">
         {/* Profile Image - left side */}
-        <div className="relative group">
+        <div className="relative group flex-shrink-0">
           {isAuthenticated ? (
             <HoverControls
               isAuthenticated={isAuthenticated}
@@ -102,7 +102,7 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
                 </div>
               }
             >
-              <div className="profile-image-container">
+              <div className="w-60 h-60 md:w-[360px] md:h-[360px] lg:w-[420px] lg:h-[420px] rounded-lg overflow-hidden border-2 border-cyan-600 bg-gray-800 flex items-center justify-center">
                 {profile.image ? (
                   <Image
                     src={profile.image}
@@ -120,7 +120,7 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
               </div>
             </HoverControls>
           ) : (
-            <div className="profile-image-container">
+            <div className="w-60 h-60 md:w-[360px] md:h-[360px] lg:w-[420px] lg:h-[420px] rounded-lg overflow-hidden border-2 border-cyan-600 bg-gray-800 flex items-center justify-center">
               {profile.image ? (
                 <Image
                   src={profile.image}
@@ -139,14 +139,14 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
         </div>
         
         {/* Profile info - right side with left-aligned text on desktop */}
-        <div className="profile-text-container">
+        <div className="flex-1 text-center md:text-left flex flex-col items-center md:items-start">
           <div className="mb-3">
             <EditableField
               value={profile.name}
               onSave={(value) => onUpdateProfile?.('name', value)}
               placeholder="Your Name"
               className="inline-block"
-              labelClassName="text-3xl md:text-4xl lg:text-5xl font-bold text-cyan-300 profile-name"
+              labelClassName="text-3xl md:text-4xl lg:text-5xl font-bold text-cyan-300"
               isAuthenticated={isAuthenticated}
             />
           </div>
@@ -157,7 +157,7 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
               onSave={(value) => onUpdateProfile?.('title', value)}
               placeholder="Your Title or Tagline"
               className="inline-block"
-              labelClassName="text-xl md:text-2xl text-gray-300 mt-2 profile-title"
+              labelClassName="text-xl md:text-2xl text-gray-300 mt-2"
               isAuthenticated={isAuthenticated}
             />
           </div>
@@ -170,7 +170,7 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
               multiline
               rows={4}
               className="w-full"
-              labelClassName="text-gray-300 leading-relaxed text-sm md:text-base profile-bio"
+              labelClassName="text-gray-300 leading-relaxed text-sm md:text-base"
               isAuthenticated={isAuthenticated}
             />
           </div>
