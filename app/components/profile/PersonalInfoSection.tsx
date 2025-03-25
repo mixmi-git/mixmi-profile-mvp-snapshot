@@ -139,7 +139,7 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
         </div>
         
         {/* Profile info - right side with vertically centered text */}
-        <div className="flex-1 text-center md:text-left flex flex-col items-center md:items-start justify-center">
+        <div className="flex-1 text-center flex flex-col items-center justify-center">
           <div className="mb-3">
             <EditableField
               value={profile.name}
@@ -176,7 +176,7 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
           </div>
           
           {/* Social links */}
-          <div className="flex flex-wrap md:justify-start justify-center gap-3">
+          <div className="flex flex-wrap justify-center gap-3">
             {profile.socialLinks && profile.socialLinks.map((link: SocialLinkType, index: number) => (
               <a
                 key={`${link.platform}-${index}`}
