@@ -6,25 +6,20 @@ import { exampleMediaItems, exampleSpotlightItems, exampleShopItems } from '@/li
 import ProfileView from './profile/ProfileView';
 import Link from 'next/link';
 
-// Default profile structure
+// Default profile for development and testing
 const DEFAULT_PROFILE: ProfileData = {
-  id: 'default',
+  id: 'default-profile',
   name: 'Your Name',
   title: 'What You Do',
   bio: 'Tell your story here...',
-  image: '',
-  socialLinks: [],
+  image: '/images/placeholder.png',
   walletAddress: '0x1234567890abcdef1234567890abcdef12345678',
   showWalletAddress: true,
+  socialLinks: [],
   sectionVisibility: {
     spotlight: true,
     media: true,
-    shop: true,
-    sticker: true
-  },
-  sticker: {
-    visible: true,
-    image: "/images/stickers/daisy-blue.png"
+    shop: true
   },
   hasEditedProfile: false
 };
