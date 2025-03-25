@@ -10,6 +10,7 @@ import { ProfileData, SocialLink as SocialLinkType } from '@/types';
 import { EditableField } from '../ui/editable-field';
 import { HoverControls, EditButtonControl } from '../ui/hover-controls';
 import { Button } from '../ui/button';
+import { SocialLinksEditor } from './SocialLinksEditor';
 
 interface PersonalInfoSectionProps {
   profile: ProfileData;
@@ -71,6 +72,16 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
+  };
+
+  // State to control social links editor modal
+  const [isSocialLinksEditorOpen, setIsSocialLinksEditorOpen] = useState(false);
+  
+  // Handle social links update
+  const handleSocialLinksUpdate = (links: SocialLinkType[]) => {
+    if (onUpdateProfile) {
+      onUpdateProfile('socialLinks', links);
+    }
   };
 
   return (
@@ -223,7 +234,7 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
             
             {isAuthenticated && (
               <EditButtonControl
-                onEdit={() => alert('Edit social links')}
+                onEdit={() => setIsSocialLinksEditorOpen(true)}
                 label="Edit Links"
                 isAuthenticated={isAuthenticated}
                 className="p-2 rounded-full"
@@ -234,6 +245,14 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
               </EditButtonControl>
             )}
           </div>
+          
+          {/* Social Links Editor Modal */}
+          <SocialLinksEditor
+            isOpen={isSocialLinksEditorOpen}
+            onClose={() => setIsSocialLinksEditorOpen(false)}
+            socialLinks={profile.socialLinks || []}
+            onSave={handleSocialLinksUpdate}
+          />
           
           {/* Wallet address display - now inside the right column */}
           {profile.walletAddress && (
