@@ -120,6 +120,12 @@ export const setProfileIdForAddress = (address: string, profileId: string): void
     
     // Save back to localStorage
     localStorage.setItem(ACCOUNT_PROFILE_MAP_KEY, JSON.stringify(map));
+    
+    // Dispatch an event to notify components of the account change
+    const event = new CustomEvent('account-changed', {
+      detail: { address, profileId }
+    });
+    window.dispatchEvent(event);
   } catch (error) {
     console.error('Error setting profile ID for address:', error);
   }
@@ -652,7 +658,7 @@ export const useAuth = () => {
   }, [refreshAuthState]);
 
   // Function to switch between accounts
-  const switchAccount = async (address: string) => {
+  const switchAccount = useCallback(async (address: string) => {
     if (!address) return;
     
     try {
@@ -660,23 +666,61 @@ export const useAuth = () => {
       setCurrentAccount(address);
       
       // Get or create profile ID for this account
-      const profileId = getProfileIdForAddress(address) || `profile_${Date.now()}`;
-      if (!getProfileIdForAddress(address)) {
+      let profileId = getProfileIdForAddress(address);
+      if (!profileId) {
+        profileId = `profile_${address.slice(0, 10)}`;
         setProfileIdForAddress(address, profileId);
       }
       
       // Store the current account
-      localStorage.setItem('mixmi-current-account', address);
+      localStorage.setItem('current_account', address);
       
       // Emit an event that components can listen to
-      const event = new CustomEvent('account-changed', { 
-        detail: { address, profileId } 
+      const event = new CustomEvent('account-changed', {
+        detail: { address, profileId }
       });
       window.dispatchEvent(event);
+      
+      console.log('🔄 Account switched:', { address, profileId });
     } catch (error) {
       console.error('Error switching accounts:', error);
     }
-  };
+  }, []);
+
+  // Effect to handle authentication state changes
+  useEffect(() => {
+    const handleAuthChange = async () => {
+      if (isAuthenticated && userAddress) {
+        // Get or create profile ID for this account
+        let profileId = getProfileIdForAddress(userAddress);
+        if (!profileId) {
+          profileId = `profile_${userAddress.slice(0, 10)}`;
+          setProfileIdForAddress(userAddress, profileId);
+        }
+        
+        // Set current account
+        setCurrentAccount(userAddress);
+        
+        // Get available accounts
+        const accounts = await getCurrentAccount(userSession);
+        setAvailableAccounts(accounts);
+        
+        // Emit account changed event
+        const event = new CustomEvent('account-changed', {
+          detail: { address: userAddress, profileId }
+        });
+        window.dispatchEvent(event);
+        
+        console.log('🔐 Auth state changed:', { userAddress, profileId, accounts });
+      } else {
+        // Clear account state when not authenticated
+        setCurrentAccount(null);
+        setAvailableAccounts([]);
+      }
+    };
+    
+    handleAuthChange();
+  }, [isAuthenticated, userAddress]);
 
   // Effect to check for Leather accounts when authenticated
   useEffect(() => {

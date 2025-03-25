@@ -126,13 +126,18 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
   useEffect(() => {
     const handleAccountChanged = (event: CustomEvent<{ address: string; profileId: string }>) => {
       console.log('🔄 Account changed:', event.detail);
-      setProfileId(event.detail.profileId);
       
-      // Load data for the new account
+      // Get appropriate storage keys based on profile ID
       const STORAGE_KEYS = getStorageKeys(event.detail.profileId);
       
-      // Load profile data
-      const savedProfile = getFromStorage<ProfileData>(STORAGE_KEYS.PROFILE, DEFAULT_PROFILE);
+      // Load profile data with the new account's wallet address
+      const savedProfile = getFromStorage<ProfileData>(STORAGE_KEYS.PROFILE, {
+        ...DEFAULT_PROFILE,
+        walletAddress: event.detail.address,
+        id: event.detail.profileId,
+      });
+      
+      // Load other data
       const savedSpotlightItems = getFromStorage<SpotlightItemType[]>(STORAGE_KEYS.SPOTLIGHT, []);
       const savedShopItems = getFromStorage<ShopItemType[]>(STORAGE_KEYS.SHOP, []);
       const savedMediaItems = getFromStorage<MediaItemType[]>(STORAGE_KEYS.MEDIA, []);
@@ -142,6 +147,16 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
       setSpotlightItems(savedSpotlightItems);
       setShopItems(savedShopItems);
       setMediaItems(savedMediaItems);
+      
+      // Update profile ID after loading data
+      setProfileId(event.detail.profileId);
+      
+      console.log('🔄 Loaded profile data for account:', event.detail.address, {
+        profile: savedProfile,
+        spotlightItems: savedSpotlightItems.length,
+        shopItems: savedShopItems.length,
+        mediaItems: savedMediaItems.length
+      });
     };
     
     window.addEventListener('account-changed', handleAccountChanged as EventListener);
@@ -180,18 +195,23 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
     // Only load data if we're in a browser environment
     if (typeof window !== 'undefined') {
       // Get appropriate storage keys based on profile ID
-      const STORAGE_KEYS = profileId !== 'default' 
-        ? getStorageKeys(profileId)
-        : LEGACY_STORAGE_KEYS;
+      const STORAGE_KEYS = getStorageKeys(profileId);
       
       console.log('🔍 DEBUG: Storage keys being used:', STORAGE_KEYS);
       console.log('🔍 DEBUG: localStorage keys available:', Object.keys(localStorage).filter(key => 
         key.includes('mixmi_')));
       
-      const savedProfile = getFromStorage<ProfileData>(STORAGE_KEYS.PROFILE, initialProfile);
-      const savedSpotlightItems = getFromStorage<SpotlightItemType[]>(STORAGE_KEYS.SPOTLIGHT, initialSpotlightItems);
-      const savedShopItems = getFromStorage<ShopItemType[]>(STORAGE_KEYS.SHOP, initialShopItems);
-      const savedMediaItems = getFromStorage<MediaItemType[]>(STORAGE_KEYS.MEDIA, initialMediaItems);
+      // Load profile data with the current account's wallet address
+      const savedProfile = getFromStorage<ProfileData>(STORAGE_KEYS.PROFILE, {
+        ...DEFAULT_PROFILE,
+        walletAddress: currentAccount || '',
+        id: profileId,
+      });
+      
+      // Load other data
+      const savedSpotlightItems = getFromStorage<SpotlightItemType[]>(STORAGE_KEYS.SPOTLIGHT, []);
+      const savedShopItems = getFromStorage<ShopItemType[]>(STORAGE_KEYS.SHOP, []);
+      const savedMediaItems = getFromStorage<MediaItemType[]>(STORAGE_KEYS.MEDIA, []);
       const savedSticker = getFromStorage<{ visible: boolean; image: string }>(
         STORAGE_KEYS.STICKER, 
         { 
@@ -201,45 +221,6 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
       );
       
       // Check if this is a first-time user for this profile
-      // FORCE first-time user for development
-      const devMode = process.env.NODE_ENV === 'development';
-      console.log('🔍 DEBUG: devMode check:', process.env.NODE_ENV, devMode);
-      
-      // Directly use forced example data in development mode
-      if (devMode) {
-        console.log('🔧 DEV MODE: Forcing example content load');
-        
-        const profileWithDefaults = {
-          ...DEFAULT_PROFILE,
-          id: profileId || Date.now().toString(),
-          sectionVisibility: {
-            spotlight: true,
-            media: true,
-            shop: true,
-            sticker: true
-          },
-          sticker: {
-            visible: true,
-            image: "/images/stickers/daisy-blue.png"
-          }
-        };
-        
-        setProfile(profileWithDefaults);
-        setSpotlightItems(exampleSpotlightItems);
-        setShopItems(exampleShopItems);
-        setMediaItems(exampleMediaItems);
-        
-        // Save example content to localStorage for persistence
-        saveToStorage(STORAGE_KEYS.PROFILE, profileWithDefaults);
-        saveToStorage(STORAGE_KEYS.SPOTLIGHT, exampleSpotlightItems);
-        saveToStorage(STORAGE_KEYS.SHOP, exampleShopItems);
-        saveToStorage(STORAGE_KEYS.MEDIA, exampleMediaItems);
-        saveToStorage(STORAGE_KEYS.STICKER, savedSticker);
-        
-        devLog('📦 Saved example content for DEV MODE with profile ID:', profileId);
-        return; // Skip the rest of the useEffect
-      }
-      
       const isFirstTimeUser = !localStorage.getItem(STORAGE_KEYS.PROFILE) || 
         !savedProfile.hasEditedProfile;
       
@@ -261,7 +242,8 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
         
         const profileWithDefaults = {
           ...DEFAULT_PROFILE,
-          id: profileId || Date.now().toString(),
+          id: profileId,
+          walletAddress: currentAccount || '',
           sectionVisibility: {
             spotlight: true,
             media: true,
@@ -300,14 +282,12 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
         }]);
       }
     }
-  }, [initialProfile, initialSpotlightItems, initialShopItems, initialMediaItems, profileId]);
+  }, [initialProfile, initialSpotlightItems, initialShopItems, initialMediaItems, profileId, currentAccount]);
   
   // Save profile data to localStorage
   const saveProfileData = (updatedProfile: ProfileData) => {
     // Get appropriate storage keys based on profile ID
-    const STORAGE_KEYS = profileId !== 'default' 
-      ? getStorageKeys(profileId)
-      : LEGACY_STORAGE_KEYS;
+    const STORAGE_KEYS = getStorageKeys(profileId);
       
     devLog('📦 Saving profile data for profile ID:', profileId, updatedProfile);
     
@@ -315,18 +295,31 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
     const completeProfile = {
       ...updatedProfile,
       hasEditedProfile: true,
+      walletAddress: currentAccount || '', // Ensure wallet address is saved
+      id: profileId, // Ensure profile ID is saved
     };
     
+    // Save to account-specific storage
     saveToStorage(STORAGE_KEYS.PROFILE, completeProfile);
+    
+    // Update the account-profile mapping
+    if (currentAccount) {
+      const mapString = localStorage.getItem('mixmi_account_profile_map');
+      const map = mapString ? JSON.parse(mapString) : {};
+      map[currentAccount] = profileId;
+      localStorage.setItem('mixmi_account_profile_map', JSON.stringify(map));
+      
+      // Also save the profile ID to the account's specific storage
+      localStorage.setItem(`mixmi_account_${currentAccount}_profile_id`, profileId);
+    }
+    
     setProfile(completeProfile);
-    devLog('📦 Saved profile for profile ID:', profileId);
+    devLog('📦 Saved profile for profile ID:', profileId, completeProfile);
   };
   
   // Save spotlight items to localStorage
   const saveSpotlightItems = (items: SpotlightItemType[]) => {
-    const STORAGE_KEYS = profileId !== 'default' 
-      ? getStorageKeys(profileId)
-      : LEGACY_STORAGE_KEYS;
+    const STORAGE_KEYS = getStorageKeys(profileId);
     
     saveToStorage(STORAGE_KEYS.SPOTLIGHT, items);
     setSpotlightItems(items);
@@ -335,9 +328,7 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
   
   // Save media items to localStorage
   const saveMediaItems = (items: MediaItemType[]) => {
-    const STORAGE_KEYS = profileId !== 'default' 
-      ? getStorageKeys(profileId)
-      : LEGACY_STORAGE_KEYS;
+    const STORAGE_KEYS = getStorageKeys(profileId);
     
     saveToStorage(STORAGE_KEYS.MEDIA, items);
     setMediaItems(items);
@@ -346,9 +337,7 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
   
   // Save shop items to localStorage
   const saveShopItems = (items: ShopItemType[]) => {
-    const STORAGE_KEYS = profileId !== 'default' 
-      ? getStorageKeys(profileId)
-      : LEGACY_STORAGE_KEYS;
+    const STORAGE_KEYS = getStorageKeys(profileId);
     
     saveToStorage(STORAGE_KEYS.SHOP, items);
     setShopItems(items);
@@ -357,9 +346,7 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
   
   // Save sticker data to localStorage
   const saveStickerData = (stickerData: { visible: boolean; image: string }) => {
-    const STORAGE_KEYS = profileId !== 'default' 
-      ? getStorageKeys(profileId)
-      : LEGACY_STORAGE_KEYS;
+    const STORAGE_KEYS = getStorageKeys(profileId);
     
     saveToStorage(STORAGE_KEYS.STICKER, stickerData);
     setProfile(prev => ({
