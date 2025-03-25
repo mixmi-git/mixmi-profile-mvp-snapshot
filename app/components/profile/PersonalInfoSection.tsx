@@ -154,7 +154,7 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
                 onSave={(value) => onUpdateProfile?.('name', value)}
                 placeholder="Your Name"
                 className="inline-block"
-                labelClassName="text-2xl md:text-3xl lg:text-4xl font-bold text-cyan-300"
+                labelClassName="text-xl md:text-2xl lg:text-3xl font-bold text-cyan-300"
                 isAuthenticated={isAuthenticated}
                 fieldType="name"
               />
@@ -166,7 +166,7 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
                 onSave={(value) => onUpdateProfile?.('title', value)}
                 placeholder="What You Do"
                 className="inline-block"
-                labelClassName="text-xl md:text-2xl text-gray-300 mt-2"
+                labelClassName="text-base md:text-xl text-gray-300 mt-2"
                 isAuthenticated={isAuthenticated}
                 fieldType="title"
               />
@@ -181,7 +181,7 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
               multiline
               rows={4}
               className="w-full"
-              labelClassName="text-gray-300 leading-relaxed text-sm md:text-base"
+              labelClassName="text-xs md:text-sm leading-relaxed text-gray-300"
               isAuthenticated={isAuthenticated}
               fieldType="bio"
             />
