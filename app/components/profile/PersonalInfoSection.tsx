@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { Copy, ExternalLink, Instagram } from 'lucide-react';
+import { Copy, ExternalLink, Instagram, Edit } from 'lucide-react';
 import { FaYoutube, FaSpotify, FaSoundcloud, FaLinkedinIn } from 'react-icons/fa';
 import { FaXTwitter } from 'react-icons/fa6';
 import { SiTiktok } from 'react-icons/si';
@@ -11,6 +11,7 @@ import { EditableField } from '../ui/editable-field';
 import { HoverControls, EditButtonControl } from '../ui/hover-controls';
 import { Button } from '../ui/button';
 import { SocialLinksEditor } from './SocialLinksEditor';
+import { ProfileInfoEditor } from './ProfileInfoEditor';
 
 interface PersonalInfoSectionProps {
   profile: ProfileData;
@@ -23,6 +24,12 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
   isAuthenticated = false,
   onUpdateProfile
 }) => {
+  // State to control social links editor modal
+  const [isSocialLinksEditorOpen, setIsSocialLinksEditorOpen] = useState(false);
+  
+  // State to control profile info editor modal
+  const [isProfileInfoEditorOpen, setIsProfileInfoEditorOpen] = useState(false);
+  
   // Social media icon mapping
   const getSocialIcon = (platform: string) => {
     const iconSize = 18;
@@ -64,6 +71,22 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
     reader.readAsDataURL(file);
   };
 
+  // Handle social links update
+  const handleSocialLinksUpdate = (links: SocialLinkType[]) => {
+    if (onUpdateProfile) {
+      onUpdateProfile('socialLinks', links);
+    }
+  };
+  
+  // Handle profile info update
+  const handleProfileInfoUpdate = (updates: { name: string; title: string; bio: string }) => {
+    if (onUpdateProfile) {
+      onUpdateProfile('name', updates.name);
+      onUpdateProfile('title', updates.title);
+      onUpdateProfile('bio', updates.bio);
+    }
+  };
+  
   // Clipboard functionality for wallet address
   const [copied, setCopied] = useState(false);
   
@@ -74,128 +97,71 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
     });
   };
 
-  // State to control social links editor modal
-  const [isSocialLinksEditorOpen, setIsSocialLinksEditorOpen] = useState(false);
-  
-  // Handle social links update
-  const handleSocialLinksUpdate = (links: SocialLinkType[]) => {
-    if (onUpdateProfile) {
-      onUpdateProfile('socialLinks', links);
-    }
-  };
-
   return (
-    <div className="w-full max-w-4xl mx-auto px-4 py-8">
-      {/* Profile header with image and text */}
+    <section className="py-6 md:py-8 lg:py-10 w-full">
       <div className="flex flex-col md:flex-row items-center md:items-center gap-8 md:gap-12">
-        {/* Profile Image - left side */}
-        <div className="relative group flex-shrink-0">
-          {isAuthenticated ? (
-            <HoverControls
-              isAuthenticated={isAuthenticated}
-              controlsPosition="center-right"
-              controls={
-                <div className="relative">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                    aria-label="Change profile image"
-                  />
-                  <Button 
-                    size="sm" 
-                    variant="secondary"
-                    className="bg-gray-800/70 hover:bg-gray-700 text-white pointer-events-none"
-                  >
-                    Change
-                  </Button>
+        {/* Profile picture */}
+        <div className="relative w-32 h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 overflow-hidden rounded-full">
+          <Image
+            src={profile.image || '/placeholder-profile.jpg'}
+            alt={profile.name}
+            width={192}
+            height={192}
+            className="w-full h-full object-cover"
+          />
+          
+          {isAuthenticated && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 hover:opacity-100 transition-opacity">
+              <label htmlFor="profile-image" className="cursor-pointer">
+                <div className="bg-gray-800 hover:bg-gray-700 text-white p-2 rounded-full">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M16 16v1a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h1" />
+                    <path d="M17 9v7" />
+                    <path d="M12.5 3.5a2.12 2.12 0 0 1 3 3L9 13l-4 1 1-4Z" />
+                  </svg>
                 </div>
-              }
-            >
-              <div className="w-60 h-60 md:w-[360px] md:h-[360px] lg:w-[420px] lg:h-[420px] rounded-lg overflow-hidden border-2 border-cyan-600 bg-gray-800 flex items-center justify-center">
-                {profile.image ? (
-                  <Image
-                    src={profile.image}
-                    alt={profile.name || "Profile"}
-                    width={420}
-                    height={420}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <Image 
-                    src="/images/placeholder.png"
-                    alt="Profile placeholder"
-                    width={420}
-                    height={420}
-                    className="w-full h-full object-cover"
-                  />
-                )}
-              </div>
-            </HoverControls>
-          ) : (
-            <div className="w-60 h-60 md:w-[360px] md:h-[360px] lg:w-[420px] lg:h-[420px] rounded-lg overflow-hidden border-2 border-cyan-600 bg-gray-800 flex items-center justify-center">
-              {profile.image ? (
-                <Image
-                  src={profile.image}
-                  alt={profile.name || "Profile"}
-                  width={420}
-                  height={420}
-                  className="w-full h-full object-cover"
+                <input
+                  id="profile-image"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImageChange}
                 />
-              ) : (
-                <Image 
-                  src="/images/placeholder.png"
-                  alt="Profile placeholder"
-                  width={420}
-                  height={420}
-                  className="w-full h-full object-cover"
-                />
-              )}
+              </label>
             </div>
           )}
         </div>
         
-        {/* Profile info - right side with vertically centered text */}
+        {/* Profile text info */}
         <div className="flex-1 text-center flex flex-col items-center justify-center">
-          <div className="mb-8">
+          <div className="mb-8 relative">
             <div className="mb-1">
-              <EditableField
-                value={profile.name}
-                onSave={(value) => onUpdateProfile?.('name', value)}
-                placeholder="Your Name"
-                className="inline-block"
-                labelClassName="text-xl md:text-2xl lg:text-3xl font-bold text-cyan-300"
-                isAuthenticated={isAuthenticated}
-                fieldType="name"
-              />
+              <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-cyan-300">
+                {profile.name || "Your Name"}
+              </h1>
             </div>
             
             <div>
-              <EditableField
-                value={profile.title}
-                onSave={(value) => onUpdateProfile?.('title', value)}
-                placeholder="What You Do"
-                className="inline-block"
-                labelClassName="text-base md:text-xl text-gray-300 mt-2"
-                isAuthenticated={isAuthenticated}
-                fieldType="title"
-              />
+              <h2 className="text-base md:text-xl text-gray-300 mt-2">
+                {profile.title || "What You Do"}
+              </h2>
             </div>
+            
+            {isAuthenticated && (
+              <button 
+                onClick={() => setIsProfileInfoEditorOpen(true)}
+                className="absolute -right-8 top-1/2 transform -translate-y-1/2 bg-gray-800/70 hover:bg-gray-700 text-white p-1.5 rounded-full transition-colors sm:opacity-0 sm:group-hover:opacity-100"
+                aria-label="Edit profile info"
+              >
+                <Edit className="w-4 h-4" />
+              </button>
+            )}
           </div>
           
           <div className="mb-8 max-w-2xl w-full">
-            <EditableField
-              value={profile.bio}
-              onSave={(value) => onUpdateProfile?.('bio', value)}
-              placeholder="Tell your story here..."
-              multiline
-              rows={4}
-              className="w-full"
-              labelClassName="text-xs md:text-sm leading-relaxed text-gray-300"
-              isAuthenticated={isAuthenticated}
-              fieldType="bio"
-            />
+            <p className="text-xs md:text-sm leading-relaxed text-gray-300">
+              {profile.bio || "Tell your story here..."}
+            </p>
           </div>
           
           {/* Social links */}
@@ -254,6 +220,14 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
             onSave={handleSocialLinksUpdate}
           />
           
+          {/* Profile Info Editor Modal */}
+          <ProfileInfoEditor
+            isOpen={isProfileInfoEditorOpen}
+            onClose={() => setIsProfileInfoEditorOpen(false)}
+            profile={profile}
+            onSave={handleProfileInfoUpdate}
+          />
+          
           {/* Wallet address display - now inside the right column */}
           {profile.walletAddress && (
             <div className="w-full max-w-xs mx-auto px-3 py-2 bg-gray-800/50 rounded-lg flex items-center justify-between border border-gray-700/50 mt-4">
@@ -273,18 +247,23 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
                   <span className="text-xs bg-gray-700 text-gray-400 px-1.5 py-0.5 rounded">Hidden</span>
                 )}
               </div>
+              
               <button
                 onClick={() => copyToClipboard(profile.walletAddress || '')}
-                className="p-1 hover:bg-gray-700 rounded transition-colors"
-                aria-label={copied ? "Copied to clipboard" : "Copy wallet address"}
+                className="text-gray-400 hover:text-gray-300 p-1"
+                aria-label="Copy wallet address"
               >
-                <Copy size={14} className={copied ? "text-green-400" : "text-gray-400"} />
+                {copied ? (
+                  <span className="text-xs text-green-500">Copied!</span>
+                ) : (
+                  <Copy size={14} />
+                )}
               </button>
             </div>
           )}
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 
