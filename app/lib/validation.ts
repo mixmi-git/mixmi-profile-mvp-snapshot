@@ -41,6 +41,21 @@ export function validateSocialUrl(platform: string, url: string) {
         return { isValid: false, message: 'Must be a GitHub URL' };
       }
       break;
+    case 'soundcloud':
+      if (!url.includes('soundcloud.com')) {
+        return { isValid: false, message: 'Must be a SoundCloud URL' };
+      }
+      break;
+    case 'spotify':
+      if (!url.includes('spotify.com') && !url.includes('open.spotify.com')) {
+        return { isValid: false, message: 'Must be a Spotify URL' };
+      }
+      break;
+    case 'tiktok':
+      if (!url.includes('tiktok.com')) {
+        return { isValid: false, message: 'Must be a TikTok URL' };
+      }
+      break;
     case 'website':
       // No specific validation for personal websites
       break;
