@@ -102,7 +102,7 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
                 </div>
               }
             >
-              <div className="w-60 h-60 md:w-[360px] md:h-[360px] lg:w-[420px] lg:h-[420px] rounded-lg overflow-hidden border-2 border-cyan-600 bg-gray-800 flex items-center justify-center">
+              <div className="w-60 h-60 md:w-[360px] md:h-[360px] lg:w-[420px] lg:h-[420px] rounded-lg overflow-hidden border-2 border-cyan-600 bg-gray-800 flex items-center justify-center profile-image-container">
                 {profile.image ? (
                   <Image
                     src={profile.image}
@@ -120,7 +120,7 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
               </div>
             </HoverControls>
           ) : (
-            <div className="w-60 h-60 md:w-[360px] md:h-[360px] lg:w-[420px] lg:h-[420px] rounded-lg overflow-hidden border-2 border-cyan-600 bg-gray-800 flex items-center justify-center">
+            <div className="w-60 h-60 md:w-[360px] md:h-[360px] lg:w-[420px] lg:h-[420px] rounded-lg overflow-hidden border-2 border-cyan-600 bg-gray-800 flex items-center justify-center profile-image-container">
               {profile.image ? (
                 <Image
                   src={profile.image}
@@ -146,7 +146,7 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
               onSave={(value) => onUpdateProfile?.('name', value)}
               placeholder="Your Name"
               className="inline-block"
-              labelClassName="text-3xl md:text-4xl lg:text-5xl font-bold text-cyan-300"
+              labelClassName="text-3xl md:text-4xl lg:text-5xl font-bold text-cyan-300 profile-name"
               isAuthenticated={isAuthenticated}
             />
           </div>
@@ -157,7 +157,7 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
               onSave={(value) => onUpdateProfile?.('title', value)}
               placeholder="Your Title or Tagline"
               className="inline-block"
-              labelClassName="text-xl md:text-2xl text-gray-300 mt-2"
+              labelClassName="text-xl md:text-2xl text-gray-300 mt-2 profile-title"
               isAuthenticated={isAuthenticated}
             />
           </div>
@@ -170,7 +170,7 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
               multiline
               rows={4}
               className="w-full"
-              labelClassName="text-gray-300 leading-relaxed text-sm md:text-base"
+              labelClassName="text-gray-300 leading-relaxed text-sm md:text-base profile-bio"
               isAuthenticated={isAuthenticated}
             />
           </div>
