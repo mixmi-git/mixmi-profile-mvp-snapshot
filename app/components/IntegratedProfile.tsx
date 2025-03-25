@@ -10,7 +10,7 @@ import Link from 'next/link';
 const DEFAULT_PROFILE: ProfileData = {
   id: 'default',
   name: 'Your Name',
-  title: 'Your Title',
+  title: 'What You Do',
   bio: 'Tell your story here...',
   image: '',
   socialLinks: [],
