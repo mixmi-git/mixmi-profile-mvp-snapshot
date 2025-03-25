@@ -163,7 +163,7 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
               <EditableField
                 value={profile.title}
                 onSave={(value) => onUpdateProfile?.('title', value)}
-                placeholder="Your Title or Tagline"
+                placeholder="What You Do"
                 className="inline-block"
                 labelClassName="text-xl md:text-2xl text-gray-300 mt-2"
                 isAuthenticated={isAuthenticated}
