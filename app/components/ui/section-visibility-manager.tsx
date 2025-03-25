@@ -51,23 +51,23 @@ const SectionVisibilityManager = ({
   };
 
   return (
-    <Card className={cn('relative border border-gray-700/50', className)}>
+    <Card className={cn('relative border border-gray-700 bg-gray-800 text-white', className)}>
       <div 
-        className="flex items-center justify-between px-4 py-2 cursor-pointer bg-gray-800/30 hover:bg-gray-800/50 transition-colors"
+        className="flex items-center justify-between px-4 py-2 cursor-pointer bg-gray-800 hover:bg-gray-700 transition-colors rounded-t-lg"
         onClick={toggleExpanded}
       >
         <div className="flex items-center gap-2">
-          {isExpanded ? <EyeOff size={16} /> : <Eye size={16} />}
-          <h3 className="text-sm font-medium">Manage Sections</h3>
+          {isExpanded ? <EyeOff size={16} className="text-gray-300" /> : <Eye size={16} className="text-gray-300" />}
+          <h3 className="text-sm font-medium text-gray-200">Manage Sections</h3>
         </div>
-        {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+        {isExpanded ? <ChevronUp size={16} className="text-gray-300" /> : <ChevronDown size={16} className="text-gray-300" />}
       </div>
 
       {isExpanded && (
-        <CardContent className="pt-4">
+        <CardContent className="pt-4 bg-gray-800 text-white rounded-b-lg">
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <Label htmlFor="toggle-spotlight" className="flex items-center cursor-pointer">
+              <Label htmlFor="toggle-spotlight" className="flex items-center cursor-pointer text-gray-200">
                 Spotlight Section
               </Label>
               <Switch
@@ -78,7 +78,7 @@ const SectionVisibilityManager = ({
             </div>
 
             <div className="flex items-center justify-between">
-              <Label htmlFor="toggle-media" className="flex items-center cursor-pointer">
+              <Label htmlFor="toggle-media" className="flex items-center cursor-pointer text-gray-200">
                 Media Section
               </Label>
               <Switch
@@ -89,7 +89,7 @@ const SectionVisibilityManager = ({
             </div>
 
             <div className="flex items-center justify-between">
-              <Label htmlFor="toggle-shop" className="flex items-center cursor-pointer">
+              <Label htmlFor="toggle-shop" className="flex items-center cursor-pointer text-gray-200">
                 Shop Section
               </Label>
               <Switch
@@ -100,7 +100,7 @@ const SectionVisibilityManager = ({
             </div>
 
             <div className="flex items-center justify-between">
-              <Label htmlFor="toggle-sticker" className="flex items-center cursor-pointer">
+              <Label htmlFor="toggle-sticker" className="flex items-center cursor-pointer text-gray-200">
                 Sticker
               </Label>
               <Switch
