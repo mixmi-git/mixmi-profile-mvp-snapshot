@@ -5,22 +5,27 @@ import { ProfileData, SpotlightItem, MediaItem, ShopItem } from '@/types';
 import { exampleMediaItems, exampleSpotlightItems, exampleShopItems } from '@/lib/example-content';
 import ProfileView from './profile/ProfileView';
 import Link from 'next/link';
+import { useAuth } from '@/lib/auth';
+import PersonalInfoSection from './profile/PersonalInfoSection';
+import { SocialLinksEditor } from './profile/SocialLinksEditor';
+import { StickerSection } from './profile/StickerSection';
+import { ProfileMode } from '@/types/ProfileMode';
 
 // Default profile for development and testing
 const DEFAULT_PROFILE: ProfileData = {
-  id: 'default-profile',
+  id: 'default',
   name: 'Your Name',
   title: 'What You Do',
-  bio: 'Tell your story here...',
+  bio: 'Tell us about yourself...',
   image: '/images/placeholder.png',
-  walletAddress: '0x1234567890abcdef1234567890abcdef12345678',
-  showWalletAddress: true,
   socialLinks: [],
   sectionVisibility: {
     spotlight: true,
     media: true,
     shop: true
   },
+  walletAddress: '',
+  showWalletAddress: true,
   hasEditedProfile: false
 };
 

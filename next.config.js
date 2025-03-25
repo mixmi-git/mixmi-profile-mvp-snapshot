@@ -14,6 +14,26 @@ const nextConfig = {
       config.optimization = {
         ...config.optimization,
         runtimeChunk: false,
+        splitChunks: {
+          chunks: 'all',
+          minSize: 20000,
+          maxSize: 244000,
+          minChunks: 1,
+          maxAsyncRequests: 30,
+          maxInitialRequests: 30,
+          cacheGroups: {
+            defaultVendors: {
+              test: /[\\/]node_modules[\\/]/,
+              priority: -10,
+              reuseExistingChunk: true,
+            },
+            default: {
+              minChunks: 2,
+              priority: -20,
+              reuseExistingChunk: true,
+            },
+          },
+        },
       };
     }
     
@@ -29,6 +49,11 @@ const nextConfig = {
     maxInactiveAge: 60 * 60 * 1000,
     // Reduce the number of simultaneous pages to compile
     pagesBufferLength: 2,
+  },
+
+  // Add experimental features to fix CSS issues
+  experimental: {
+    optimizeCss: true
   },
 }
 

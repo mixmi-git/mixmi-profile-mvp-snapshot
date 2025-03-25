@@ -161,6 +161,23 @@ declare global {
   }
 }
 
+// Function to get available accounts from Leather wallet
+const getLeatherAccounts = async (): Promise<string[]> => {
+  if (typeof window === 'undefined') return [];
+  
+  try {
+    // Check for Leather provider
+    if (window.LeatherProvider?.getAccounts) {
+      const accounts = await window.LeatherProvider.getAccounts();
+      return accounts;
+    }
+    return [];
+  } catch (error) {
+    console.error('Error getting Leather accounts:', error);
+    return [];
+  }
+};
+
 export const useAuth = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userAddress, setUserAddress] = useState<string | null>(null);
@@ -635,75 +652,51 @@ export const useAuth = () => {
   }, [refreshAuthState]);
 
   // Function to switch between accounts
-  const switchAccount = useCallback((accountAddress: string) => {
-    console.log('Auth: Switching to account', accountAddress);
+  const switchAccount = async (address: string) => {
+    if (!address) return;
     
-    if (isAuthenticated && userAddress) {
-      // Update the current account in state
-      setCurrentAccount(accountAddress);
+    try {
+      // Update current account
+      setCurrentAccount(address);
       
-      // Check if this account has a profile ID
-      const profileId = getProfileIdForAddress(accountAddress);
-      if (!profileId) {
-        // Create a new profile ID for this account
-        const newProfileId = `profile_${Date.now()}`;
-        setProfileIdForAddress(accountAddress, newProfileId);
+      // Get or create profile ID for this account
+      const profileId = getProfileIdForAddress(address) || `profile_${Date.now()}`;
+      if (!getProfileIdForAddress(address)) {
+        setProfileIdForAddress(address, profileId);
       }
       
-      // Force a refresh to update the UI
-      forceRefresh();
+      // Store the current account
+      localStorage.setItem('mixmi-current-account', address);
+      
+      // Emit an event that components can listen to
+      const event = new CustomEvent('account-changed', { 
+        detail: { address, profileId } 
+      });
+      window.dispatchEvent(event);
+    } catch (error) {
+      console.error('Error switching accounts:', error);
     }
-  }, [isAuthenticated, userAddress, forceRefresh]);
+  };
 
-  // Update available accounts when authenticated
+  // Effect to check for Leather accounts when authenticated
   useEffect(() => {
-    if (isAuthenticated && userAddress) {
-      try {
-        // Try to get available accounts from the wallet
-        // @ts-ignore
-        if (window.StacksProvider && window.StacksProvider.getAccounts) {
-          // @ts-ignore
-          const accounts = window.StacksProvider.getAccounts();
-          if (accounts && accounts.length > 0) {
-            setAvailableAccounts(accounts);
-            
-            // Set current account if not already set
-            if (!currentAccount) {
-              setCurrentAccount(accounts[0]);
-            }
-          } else {
-            // Fallback to just the main address
-            setAvailableAccounts([userAddress]);
-            
-            // Set current account if not already set
-            if (!currentAccount) {
-              setCurrentAccount(userAddress);
-            }
-          }
-        } else {
-          // Fallback to just the main address
-          setAvailableAccounts([userAddress]);
+    if (isAuthenticated) {
+      getLeatherAccounts().then(accounts => {
+        if (accounts.length > 0) {
+          setAvailableAccounts(accounts);
           
-          // Set current account if not already set
+          // If no current account is set, use the first one
           if (!currentAccount) {
-            setCurrentAccount(userAddress);
+            const savedAccount = localStorage.getItem('mixmi-current-account');
+            const accountToUse = savedAccount && accounts.includes(savedAccount) 
+              ? savedAccount 
+              : accounts[0];
+            switchAccount(accountToUse);
           }
         }
-      } catch (error) {
-        console.error('Auth: Error getting available accounts', error);
-        // Fallback to just the main address
-        setAvailableAccounts([userAddress]);
-        
-        // Set current account if not already set
-        if (!currentAccount) {
-          setCurrentAccount(userAddress);
-        }
-      }
-    } else {
-      setAvailableAccounts([]);
-      setCurrentAccount(null);
+      });
     }
-  }, [isAuthenticated, userAddress, currentAccount]);
+  }, [isAuthenticated]);
 
   return {
     isAuthenticated,

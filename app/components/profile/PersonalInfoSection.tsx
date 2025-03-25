@@ -102,22 +102,13 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
       <div className="flex flex-col md:flex-row items-center justify-center gap-10 md:gap-16">
         {/* Profile picture */}
         <div className="relative w-64 h-64 md:w-[320px] md:h-[320px] lg:w-[380px] lg:h-[380px] overflow-hidden rounded-lg border-2 border-cyan-300 bg-gray-800">
-          {profile.image && profile.image.trim() ? (
-            <Image
-              src={profile.image}
-              alt={profile.name || 'Profile'}
-              width={400}
-              height={400}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-gray-500">
-              <svg xmlns="http://www.w3.org/2000/svg" width="30%" height="30%" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-              </svg>
-            </div>
-          )}
+          <Image
+            src={profile.image || '/images/placeholder.png'}
+            alt={profile.name || 'Profile'}
+            width={400}
+            height={400}
+            className="w-full h-full object-cover"
+          />
           
           {isAuthenticated && (
             <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 hover:opacity-100 transition-opacity">

@@ -122,6 +122,32 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
   // Profile ID (based on current account)
   const [profileId, setProfileId] = useState<string>('default');
   
+  // Listen for account changes
+  useEffect(() => {
+    const handleAccountChanged = (event: CustomEvent<{ address: string; profileId: string }>) => {
+      console.log('🔄 Account changed:', event.detail);
+      setProfileId(event.detail.profileId);
+      
+      // Load data for the new account
+      const STORAGE_KEYS = getStorageKeys(event.detail.profileId);
+      
+      // Load profile data
+      const savedProfile = getFromStorage<ProfileData>(STORAGE_KEYS.PROFILE, DEFAULT_PROFILE);
+      const savedSpotlightItems = getFromStorage<SpotlightItemType[]>(STORAGE_KEYS.SPOTLIGHT, []);
+      const savedShopItems = getFromStorage<ShopItemType[]>(STORAGE_KEYS.SHOP, []);
+      const savedMediaItems = getFromStorage<MediaItemType[]>(STORAGE_KEYS.MEDIA, []);
+      
+      // Update state with the loaded data
+      setProfile(savedProfile);
+      setSpotlightItems(savedSpotlightItems);
+      setShopItems(savedShopItems);
+      setMediaItems(savedMediaItems);
+    };
+    
+    window.addEventListener('account-changed', handleAccountChanged as EventListener);
+    return () => window.removeEventListener('account-changed', handleAccountChanged as EventListener);
+  }, []);
+  
   // Setup profile ID when authentication changes
   useEffect(() => {
     if (isAuthenticated && currentAccount) {
@@ -130,8 +156,9 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
       if (accountProfileId) {
         setProfileId(accountProfileId);
       } else {
-        // Default to the account address as a fallback
-        setProfileId(currentAccount.slice(0, 10)); // Use first 10 chars of address
+        // Create a new profile ID for this account
+        const newProfileId = `profile_${currentAccount.slice(0, 10)}`;
+        setProfileId(newProfileId);
       }
     } else {
       // Not authenticated, use default profile
