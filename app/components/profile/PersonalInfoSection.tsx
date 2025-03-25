@@ -234,11 +234,24 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
         </div>
       </div>
       
-      {/* Wallet address display (if enabled) */}
-      {profile.walletAddress && profile.showWalletAddress && (
+      {/* Wallet address display */}
+      {profile.walletAddress && (
         <div className="max-w-md mx-auto md:mx-0 mb-4 px-4 py-2 bg-gray-800/50 rounded-lg flex items-center justify-between border border-gray-700/50">
-          <div className="text-sm text-gray-300 truncate">
-            {profile.walletAddress.slice(0, 6)}...{profile.walletAddress.slice(-4)}
+          <div className="flex items-center gap-2">
+            <div className="text-sm text-gray-300 truncate">
+              {profile.walletAddress.slice(0, 6)}...{profile.walletAddress.slice(-4)}
+            </div>
+            {isAuthenticated && (
+              <button
+                onClick={() => onUpdateProfile?.('showWalletAddress', !(profile.showWalletAddress ?? true))}
+                className="text-xs text-gray-500 hover:text-gray-400"
+              >
+                {profile.showWalletAddress === false ? 'Show publicly' : 'Hide publicly'}
+              </button>
+            )}
+            {isAuthenticated && profile.showWalletAddress === false && (
+              <span className="text-xs bg-gray-700 text-gray-400 px-1.5 py-0.5 rounded">Hidden</span>
+            )}
           </div>
           <button
             onClick={() => copyToClipboard(profile.walletAddress || '')}
