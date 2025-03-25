@@ -112,10 +112,13 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="text-gray-400 text-center p-4">
-                    <div className="text-5xl mb-2">👤</div>
-                    <div className="text-xs">Add Photo</div>
-                  </div>
+                  <Image 
+                    src="/images/placeholder.png"
+                    alt="Profile placeholder"
+                    width={420}
+                    height={420}
+                    className="w-full h-full object-cover"
+                  />
                 )}
               </div>
             </HoverControls>
@@ -130,9 +133,13 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="text-gray-400 text-center p-4">
-                  <div className="text-5xl mb-2">👤</div>
-                </div>
+                <Image 
+                  src="/images/placeholder.png"
+                  alt="Profile placeholder"
+                  width={420}
+                  height={420}
+                  className="w-full h-full object-cover"
+                />
               )}
             </div>
           )}
