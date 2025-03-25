@@ -233,7 +233,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
       />
       
       {/* Section Visibility Controls - Only visible when authenticated */}
-      {effectiveAuth && onUpdateSectionVisibility && (
+      {effectiveAuth && onUpdateSectionVisibility ? (
         <div className="max-w-4xl mx-auto px-4 mb-8">
           <SectionVisibilityManager
             visibility={profile.sectionVisibility || {}}
@@ -245,11 +245,14 @@ const ProfileView: React.FC<ProfileViewProps> = ({
             isAuthenticated={effectiveAuth}
           />
         </div>
+      ) : (
+        // Placeholder div to maintain consistent spacing when section manager is not visible
+        <div className="max-w-4xl mx-auto px-4 mb-8 h-14"></div>
       )}
 
       {/* Spotlight Section */}
       {(profile.sectionVisibility?.spotlight !== false) && spotlightItems.length > 0 && (
-        <div className="mb-16 px-4">
+        <div className="mt-16 mb-16 px-4">
           <div className="max-w-6xl mx-auto">
             <h2 className="text-4xl font-bold text-white text-center mb-4 tracking-wider">
               SPOTLIGHT
