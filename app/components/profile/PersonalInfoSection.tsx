@@ -153,7 +153,7 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
               onSave={(value) => onUpdateProfile?.('name', value)}
               placeholder="Your Name"
               className="inline-block"
-              labelClassName="text-3xl md:text-4xl lg:text-5xl font-bold text-cyan-300"
+              labelClassName="text-2xl md:text-3xl lg:text-4xl font-bold text-cyan-300"
               isAuthenticated={isAuthenticated}
             />
           </div>
