@@ -234,7 +234,7 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
           
           {/* Wallet address display - now inside the right column */}
           {profile.walletAddress && (
-            <div className="w-full max-w-sm mx-auto px-4 py-2 bg-gray-800/50 rounded-lg flex items-center justify-between border border-gray-700/50 mt-4">
+            <div className="w-full max-w-xs mx-auto px-3 py-2 bg-gray-800/50 rounded-lg flex items-center justify-between border border-gray-700/50 mt-4">
               <div className="flex items-center gap-2">
                 <div className="text-sm text-gray-300 truncate">
                   {profile.walletAddress.slice(0, 6)}...{profile.walletAddress.slice(-4)}
