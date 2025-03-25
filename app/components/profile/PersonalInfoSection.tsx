@@ -99,9 +99,9 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
 
   return (
     <section className="py-8 md:py-12 lg:py-16 w-full max-w-6xl mx-auto px-4">
-      <div className="flex flex-col md:flex-row items-center md:items-start justify-center gap-10 md:gap-16">
+      <div className="flex flex-col md:flex-row items-center justify-center gap-10 md:gap-16">
         {/* Profile picture */}
-        <div className="relative w-64 h-64 md:w-[320px] md:h-[320px] lg:w-[380px] lg:h-[380px] overflow-hidden rounded-lg border-2 border-cyan-600 bg-gray-800">
+        <div className="relative w-64 h-64 md:w-[320px] md:h-[320px] lg:w-[380px] lg:h-[380px] overflow-hidden rounded-lg border-2 border-cyan-300 bg-gray-800">
           {profile.image && profile.image.trim() ? (
             <Image
               src={profile.image}
@@ -138,7 +138,7 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
         </div>
         
         {/* Profile text info */}
-        <div className="flex-1 text-center flex flex-col items-center justify-center">
+        <div className="flex-1 flex flex-col items-center md:items-center justify-center">
           <div className="mb-8 relative group">
             <div className="mb-1">
               <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-cyan-300">
