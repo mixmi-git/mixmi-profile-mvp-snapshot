@@ -103,7 +103,7 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
         {/* Profile picture */}
         <div className="relative w-64 h-64 md:w-[320px] md:h-[320px] lg:w-[380px] lg:h-[380px] overflow-hidden rounded-lg border-2 border-cyan-300 bg-gray-800">
           <Image
-            src={profile.image || '/images/placeholder.png'}
+            src={profile.image || '/images/placeholder-profile.jpg'}
             alt={profile.name || 'Profile'}
             width={400}
             height={400}

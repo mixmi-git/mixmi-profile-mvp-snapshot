@@ -71,10 +71,10 @@ export interface UserProfileContainerProps {
 // Default profile structure
 const DEFAULT_PROFILE: ProfileData = {
   id: '',
-  name: 'Your Name',
-  title: 'Your Title',
+  name: 'Add Your Name',
+  title: 'Add Your Title',
   bio: 'Tell your story here...',
-  image: '',
+  image: '/images/placeholder-profile.jpg',
   socialLinks: [],
   sectionVisibility: {
     spotlight: true,

@@ -14,10 +14,10 @@ import { ProfileMode } from '@/types/ProfileMode';
 // Default profile for development and testing
 const DEFAULT_PROFILE: ProfileData = {
   id: 'default',
-  name: 'Your Name',
-  title: 'What You Do',
+  name: 'Add Your Name',
+  title: 'Add Your Title',
   bio: 'Tell us about yourself...',
-  image: '/images/placeholder.png',
+  image: '/images/placeholder-profile.jpg',
   socialLinks: [],
   sectionVisibility: {
     spotlight: true,

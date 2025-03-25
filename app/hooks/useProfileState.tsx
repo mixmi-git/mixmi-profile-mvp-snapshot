@@ -39,7 +39,7 @@ const defaultProfile: Profile = {
   name: "Your Name",
   title: "What you do",
   bio: "Tell your story here...",
-  image: "/images/placeholder.png",
+  image: "/images/placeholder-profile.jpg",
   socialLinks: [
     { platform: "youtube", url: "" },
     { platform: "spotify", url: "" },
