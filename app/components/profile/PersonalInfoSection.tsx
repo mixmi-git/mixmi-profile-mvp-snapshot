@@ -146,7 +146,7 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
               </h1>
             </div>
             
-            <h2 className="text-base md:text-xl text-gray-300 mt-2">
+            <h2 className="text-base md:text-xl text-gray-300 mt-2 text-center">
               {profile.title || "What You Do"}
             </h2>
             
