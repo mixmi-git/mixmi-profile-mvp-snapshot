@@ -147,26 +147,28 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
         
         {/* Profile info - right side with vertically centered text */}
         <div className="flex-1 text-center flex flex-col items-center justify-center">
-          <div className="mb-3">
-            <EditableField
-              value={profile.name}
-              onSave={(value) => onUpdateProfile?.('name', value)}
-              placeholder="Your Name"
-              className="inline-block"
-              labelClassName="text-2xl md:text-3xl lg:text-4xl font-bold text-cyan-300"
-              isAuthenticated={isAuthenticated}
-            />
-          </div>
-          
-          <div className="mb-6">
-            <EditableField
-              value={profile.title}
-              onSave={(value) => onUpdateProfile?.('title', value)}
-              placeholder="Your Title or Tagline"
-              className="inline-block"
-              labelClassName="text-xl md:text-2xl text-gray-300 mt-2"
-              isAuthenticated={isAuthenticated}
-            />
+          <div className="mb-8">
+            <div className="mb-1">
+              <EditableField
+                value={profile.name}
+                onSave={(value) => onUpdateProfile?.('name', value)}
+                placeholder="Your Name"
+                className="inline-block"
+                labelClassName="text-2xl md:text-3xl lg:text-4xl font-bold text-cyan-300"
+                isAuthenticated={isAuthenticated}
+              />
+            </div>
+            
+            <div>
+              <EditableField
+                value={profile.title}
+                onSave={(value) => onUpdateProfile?.('title', value)}
+                placeholder="Your Title or Tagline"
+                className="inline-block"
+                labelClassName="text-xl md:text-2xl text-gray-300 mt-2"
+                isAuthenticated={isAuthenticated}
+              />
+            </div>
           </div>
           
           <div className="mb-8 max-w-2xl w-full">
