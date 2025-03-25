@@ -237,10 +237,10 @@ export function SocialLinksEditor({ isOpen, onClose, socialLinks, onSave }: Soci
         </div>
         
         <DialogFooter>
-          <Button variant="outline" onClick={handleCancel}>
+          <Button variant="outline" onClick={handleCancel} className="text-gray-300 hover:text-gray-900">
             Cancel
           </Button>
-          <Button onClick={handleSave}>
+          <Button onClick={handleSave} className="bg-cyan-600 hover:bg-cyan-500 text-white font-medium">
             Save Changes
           </Button>
         </DialogFooter>
