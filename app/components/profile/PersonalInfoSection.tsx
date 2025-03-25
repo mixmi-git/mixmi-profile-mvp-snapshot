@@ -6,7 +6,7 @@ import { Copy, ExternalLink, Instagram } from 'lucide-react';
 import { FaYoutube, FaSpotify, FaSoundcloud, FaLinkedinIn } from 'react-icons/fa';
 import { FaXTwitter } from 'react-icons/fa6';
 import { SiTiktok } from 'react-icons/si';
-import { ProfileData, SocialLinkType } from './UserProfileContainer';
+import { ProfileData, SocialLink as SocialLinkType } from '@/types';
 import { EditableField } from '../ui/editable-field';
 import { HoverControls, EditButtonControl } from '../ui/hover-controls';
 import { Button } from '../ui/button';
@@ -76,9 +76,9 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
   return (
     <div className="w-full max-w-4xl mx-auto px-4 py-8">
       {/* Profile header with image and text */}
-      <div className="flex flex-col md:flex-row items-center gap-8 mb-8">
+      <div className="flex flex-col md:flex-row items-center md:items-start gap-8 mb-8">
         {/* Profile Image - left side */}
-        <div className="relative group">
+        <div className="relative group flex-shrink-0">
           {isAuthenticated ? (
             <HoverControls
               isAuthenticated={isAuthenticated}
@@ -138,8 +138,8 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
           )}
         </div>
         
-        {/* Profile info - center justified in its container */}
-        <div className="flex-1 text-center flex flex-col items-center">
+        {/* Profile info - left aligned on desktop, center on mobile */}
+        <div className="flex-1 text-center md:text-left flex flex-col items-center md:items-start">
           <div className="mb-3">
             <EditableField
               value={profile.name}
@@ -176,8 +176,8 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
           </div>
           
           {/* Social links */}
-          <div className="flex flex-wrap justify-center gap-3">
-            {profile.socialLinks && profile.socialLinks.map((link, index) => (
+          <div className="flex flex-wrap md:justify-start justify-center gap-3">
+            {profile.socialLinks && profile.socialLinks.map((link: SocialLinkType, index: number) => (
               <a
                 key={`${link.platform}-${index}`}
                 href={link.url}

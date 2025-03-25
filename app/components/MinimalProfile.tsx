@@ -105,7 +105,8 @@ export function MinimalProfile() {
   const [profileData, setProfileData] = useState({
     name: 'Your Name',
     title: 'Your Title',
-    bio: 'Tell your story here...'
+    bio: 'Tell your story here...',
+    image: ''
   });
   const [mediaItems, setMediaItems] = useState<any[]>([]);
   const [shopItems, setShopItems] = useState<any[]>([]);
@@ -173,7 +174,8 @@ export function MinimalProfile() {
         setProfileData({
           name: parsed.name || 'Your Name',
           title: parsed.title || 'Your Title',
-          bio: parsed.bio || 'Tell your story here...'
+          bio: parsed.bio || 'Tell your story here...',
+          image: parsed.image || ''
         });
         
         // Also load sticker data if it exists in the profile
@@ -381,29 +383,46 @@ export function MinimalProfile() {
       <main className="flex-grow">
         <div className="container mx-auto py-12 px-4">
           {/* User Profile */}
-          <div className="max-w-3xl mx-auto mb-16">
-            <div className="text-center">
-              <div className="relative w-32 h-32 mx-auto mb-6 bg-gray-800 rounded-full overflow-hidden">
-                <div className="absolute inset-0 flex items-center justify-center text-gray-600">
-                  No Image
+          <div className="max-w-4xl mx-auto mb-16">
+            <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
+              {/* Profile Image - left side */}
+              <div className="flex-shrink-0">
+                <div className="w-60 h-60 rounded-lg overflow-hidden border-2 border-cyan-600 bg-gray-800 flex items-center justify-center">
+                  {profileData.image ? (
+                    <img
+                      src={profileData.image}
+                      alt={profileData.name || "Profile"}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="text-gray-400 text-center p-4">
+                      <div className="text-5xl mb-2">👤</div>
+                      <div className="text-xs">No Image</div>
+                    </div>
+                  )}
                 </div>
               </div>
               
-              <h1 className="text-4xl font-bold mb-2">{profileData.name}</h1>
-              <p className="text-xl text-gray-400 mb-6">{profileData.title}</p>
-              
-              <div className="max-w-2xl mx-auto">
-                <p className="text-gray-300 mb-8">{profileData.bio}</p>
-              </div>
-              
-              {isWalletConnected && (
-                <div className="flex justify-center items-center mt-4 text-sm text-gray-400">
-                  <span className="mr-2">Wallet:</span>
-                  <span className="bg-gray-800 rounded px-3 py-1 font-mono">
-                    {walletAddress.slice(0, 8)}...{walletAddress.slice(-8)}
-                  </span>
+              {/* Profile info - text aligned left on desktop, centered on mobile */}
+              <div className="flex-1 text-center md:text-left">
+                <h1 className="text-3xl md:text-4xl font-bold mb-2 text-cyan-300">{profileData.name}</h1>
+                <p className="text-xl text-gray-300 mb-4">{profileData.title}</p>
+                
+                <div className="max-w-2xl">
+                  <p className="text-gray-300 mb-6 text-base">{profileData.bio}</p>
                 </div>
-              )}
+                
+                {/* Social links would go here */}
+                
+                {isWalletConnected && (
+                  <div className="flex md:justify-start justify-center items-center mt-4 text-sm text-gray-400">
+                    <span className="mr-2">Wallet:</span>
+                    <span className="bg-gray-800 rounded px-3 py-1 font-mono">
+                      {walletAddress.slice(0, 8)}...{walletAddress.slice(-8)}
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
           
