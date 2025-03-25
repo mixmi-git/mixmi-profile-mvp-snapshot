@@ -14,6 +14,8 @@ const DEFAULT_PROFILE: ProfileData = {
   bio: 'Tell your story here...',
   image: '',
   socialLinks: [],
+  walletAddress: '0x1234567890abcdef1234567890abcdef12345678',
+  showWalletAddress: true,
   sectionVisibility: {
     spotlight: true,
     media: true,
