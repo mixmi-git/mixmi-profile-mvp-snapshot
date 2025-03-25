@@ -340,6 +340,20 @@ export function IntegratedProfile() {
               localStorage.setItem('simple-wallet-connected', 'true');
               localStorage.setItem('simple-wallet-address', address);
               
+              // Update the profile with the wallet address
+              setProfile(prev => ({
+                ...prev,
+                walletAddress: address,
+                showWalletAddress: true
+              }));
+              
+              // Also save the updated profile to localStorage
+              localStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify({
+                ...profile,
+                walletAddress: address,
+                showWalletAddress: true
+              }));
+              
               // Automatically clear status after 5 seconds
               setTimeout(() => setWalletStatus(null), 5000);
             } else {
