@@ -76,7 +76,7 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
   return (
     <div className="w-full max-w-4xl mx-auto px-4 py-8">
       {/* Profile header with image and text */}
-      <div className="flex flex-col md:flex-row items-center md:items-start gap-8 mb-8">
+      <div className="flex flex-col md:flex-row items-center md:items-start gap-8 md:gap-12 lg:gap-16 mb-8">
         {/* Profile Image - left side */}
         <div className="relative group flex-shrink-0">
           {isAuthenticated ? (
@@ -102,13 +102,13 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
                 </div>
               }
             >
-              <div className="w-60 h-60 rounded-lg overflow-hidden border-2 border-cyan-600 bg-gray-800 flex items-center justify-center">
+              <div className="w-60 h-60 md:w-[360px] md:h-[360px] lg:w-[420px] lg:h-[420px] rounded-lg overflow-hidden border-2 border-cyan-600 bg-gray-800 flex items-center justify-center">
                 {profile.image ? (
                   <Image
                     src={profile.image}
                     alt={profile.name || "Profile"}
-                    width={240}
-                    height={240}
+                    width={420}
+                    height={420}
                     className="w-full h-full object-cover"
                   />
                 ) : (
@@ -120,13 +120,13 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
               </div>
             </HoverControls>
           ) : (
-            <div className="w-60 h-60 rounded-lg overflow-hidden border-2 border-cyan-600 bg-gray-800 flex items-center justify-center">
+            <div className="w-60 h-60 md:w-[360px] md:h-[360px] lg:w-[420px] lg:h-[420px] rounded-lg overflow-hidden border-2 border-cyan-600 bg-gray-800 flex items-center justify-center">
               {profile.image ? (
                 <Image
                   src={profile.image}
                   alt={profile.name || "Profile"}
-                  width={240}
-                  height={240}
+                  width={420}
+                  height={420}
                   className="w-full h-full object-cover"
                 />
               ) : (
@@ -146,23 +146,23 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
               onSave={(value) => onUpdateProfile?.('name', value)}
               placeholder="Your Name"
               className="inline-block"
-              labelClassName="text-2xl md:text-3xl font-bold text-cyan-300"
+              labelClassName="text-3xl md:text-4xl lg:text-5xl font-bold text-cyan-300"
               isAuthenticated={isAuthenticated}
             />
           </div>
           
-          <div className="mb-4">
+          <div className="mb-6">
             <EditableField
               value={profile.title}
               onSave={(value) => onUpdateProfile?.('title', value)}
               placeholder="Your Title or Tagline"
               className="inline-block"
-              labelClassName="text-lg md:text-xl text-gray-300"
+              labelClassName="text-xl md:text-2xl text-gray-300 mt-2"
               isAuthenticated={isAuthenticated}
             />
           </div>
           
-          <div className="mb-6 max-w-2xl w-full">
+          <div className="mb-8 max-w-2xl w-full">
             <EditableField
               value={profile.bio}
               onSave={(value) => onUpdateProfile?.('bio', value)}
