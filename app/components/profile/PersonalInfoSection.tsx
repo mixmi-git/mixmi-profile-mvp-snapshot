@@ -146,11 +146,9 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
               </h1>
             </div>
             
-            <div>
-              <h2 className="text-base md:text-xl text-gray-300 mt-2">
-                {profile.title || "What You Do"}
-              </h2>
-            </div>
+            <h2 className="text-base md:text-xl text-gray-300 mt-2">
+              {profile.title || "What You Do"}
+            </h2>
             
             {isAuthenticated && (
               <button 
