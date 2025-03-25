@@ -98,16 +98,16 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
   };
 
   return (
-    <section className="py-6 md:py-8 lg:py-10 w-full">
-      <div className="flex flex-col md:flex-row items-center md:items-center gap-8 md:gap-12">
+    <section className="py-8 md:py-12 lg:py-16 w-full max-w-6xl mx-auto px-4">
+      <div className="flex flex-col md:flex-row items-center md:items-start justify-center gap-10 md:gap-16">
         {/* Profile picture */}
-        <div className="relative w-60 h-60 md:w-[280px] md:h-[280px] lg:w-[320px] lg:h-[320px] overflow-hidden rounded-lg border-2 border-cyan-600 bg-gray-800">
+        <div className="relative w-64 h-64 md:w-[320px] md:h-[320px] lg:w-[380px] lg:h-[380px] overflow-hidden rounded-lg border-2 border-cyan-600 bg-gray-800">
           {profile.image && profile.image.trim() ? (
             <Image
               src={profile.image}
               alt={profile.name || 'Profile'}
-              width={320}
-              height={320}
+              width={400}
+              height={400}
               className="w-full h-full object-cover"
             />
           ) : (
