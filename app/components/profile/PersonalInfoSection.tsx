@@ -76,7 +76,7 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
   return (
     <div className="w-full max-w-4xl mx-auto px-4 py-8">
       {/* Profile header with image and text */}
-      <div className="profile-container mb-8">
+      <div className="profile-container">
         {/* Profile Image - left side */}
         <div className="relative group">
           {isAuthenticated ? (
@@ -102,7 +102,7 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
                 </div>
               }
             >
-              <div className="w-60 h-60 md:w-[360px] md:h-[360px] lg:w-[420px] lg:h-[420px] rounded-lg overflow-hidden border-2 border-cyan-600 bg-gray-800 flex items-center justify-center profile-image-container">
+              <div className="profile-image-container">
                 {profile.image ? (
                   <Image
                     src={profile.image}
@@ -120,7 +120,7 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
               </div>
             </HoverControls>
           ) : (
-            <div className="w-60 h-60 md:w-[360px] md:h-[360px] lg:w-[420px] lg:h-[420px] rounded-lg overflow-hidden border-2 border-cyan-600 bg-gray-800 flex items-center justify-center profile-image-container">
+            <div className="profile-image-container">
               {profile.image ? (
                 <Image
                   src={profile.image}

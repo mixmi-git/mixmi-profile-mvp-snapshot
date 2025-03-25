@@ -1,0 +1,75 @@
+/* Layout styles to ensure horizontal arrangement */
+@media (min-width: 768px) {
+  /* Force horizontal layout on desktop */
+  .profile-container {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 3rem;
+  }
+  
+  /* Text alignment on desktop */
+  .profile-text-container {
+    text-align: left;
+    align-items: flex-start;
+  }
+}
+
+/* Mobile layout (vertical stacking) */
+.profile-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Text container always centered on mobile */
+.profile-text-container {
+  text-align: center;
+  align-items: center;
+  margin-top: 1.5rem;
+}
+
+/* Profile image sizing */
+.profile-image-container {
+  width: 420px;
+  height: 420px;
+  border: 2px solid #22d3ee;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  flex-shrink: 0; /* Prevent image from shrinking */
+}
+
+/* Text styling */
+.profile-name {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #22d3ee;
+  margin-bottom: 0.5rem;
+}
+
+.profile-title {
+  font-size: 1.5rem;
+  color: #e2e8f0;
+  margin-bottom: 1rem;
+}
+
+.profile-bio {
+  color: #cbd5e1;
+  margin-bottom: 1.5rem;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .profile-image-container {
+    width: 240px;
+    height: 240px;
+  }
+  
+  .profile-name {
+    font-size: 2rem;
+  }
+  
+  .profile-title {
+    font-size: 1.25rem;
+  }
+} 
