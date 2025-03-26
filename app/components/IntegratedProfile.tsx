@@ -407,49 +407,42 @@ export function IntegratedProfile() {
           </div>
           
           <div className="flex items-center space-x-4">
-            {walletStatus && (
-              <div className="text-sm text-cyan-400 animate-pulse mr-2">
-                {walletStatus}
+            {isAuthenticated && userAddress && (
+              <div className="hidden md:flex items-center space-x-2 px-3 py-1.5 bg-gray-800/50 rounded-lg border border-gray-700">
+                <span className="text-sm text-gray-300">
+                  {userAddress.slice(0, 6)}...{userAddress.slice(-4)}
+                </span>
               </div>
             )}
             
             <button
               onClick={connectWallet}
-              disabled={isLoading && !isAuthenticated} // Only disable if loading and not authenticated
-              className={`px-4 py-2 rounded text-white ${
-                isAuthenticated ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'
+              disabled={isLoading && !isAuthenticated}
+              className={`px-4 py-2 rounded-lg flex items-center space-x-2 transition-all duration-200 ${
+                isAuthenticated 
+                  ? 'bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700' 
+                  : 'bg-cyan-600 hover:bg-cyan-500 text-white'
               } ${isLoading && !isAuthenticated ? 'opacity-70 cursor-not-allowed' : ''}`}
             >
               {isLoading && !isAuthenticated ? (
                 <span className="flex items-center space-x-2">
-                  <svg className="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
                   <span>Connecting...</span>
                 </span>
               ) : isAuthenticated ? (
-                <span>✓ Disconnect Wallet</span>
+                <span className="flex items-center">
+                  <span className="hidden md:inline">Disconnect</span>
+                  <span className="md:hidden">✕</span>
+                </span>
               ) : (
-                <span>🔑 Connect Wallet</span>
+                <span className="flex items-center space-x-2">
+                  <span>Connect Wallet</span>
+                </span>
               )}
             </button>
-            
-            <div className="flex space-x-2">
-              <Link 
-                href="/wallet"
-                className="px-3 py-1 bg-purple-600 text-white rounded-md text-sm"
-              >
-                Wallet Test
-              </Link>
-              
-              <Link 
-                href="/debug"
-                className="px-3 py-1 bg-green-600 text-white rounded-md text-sm"
-              >
-                Debug
-              </Link>
-            </div>
           </div>
         </div>
       </header>
