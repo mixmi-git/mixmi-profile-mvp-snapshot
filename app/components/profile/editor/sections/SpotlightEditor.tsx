@@ -19,6 +19,8 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { cn } from '@/lib/utils';
+import { Input } from '@/components/ui/input';
 
 interface SpotlightEditorProps {
   items: SpotlightItem[];
@@ -26,85 +28,84 @@ interface SpotlightEditorProps {
   onCancel: () => void;
 }
 
-// Individual sortable item component
-const SortableSpotlightItem = ({ 
-  item, 
-  onUpdate, 
-  onDelete 
-}: { 
-  item: SpotlightItem; 
-  onUpdate: (id: string, updates: Partial<SpotlightItem>) => void;
+interface SortableSpotlightItemProps {
+  item: SpotlightItem;
+  onUpdate: (id: string, field: string, value: string) => void;
   onDelete: (id: string) => void;
-}) => {
+}
+
+// Individual sortable item component
+const SortableSpotlightItem = ({ item, onUpdate, onDelete }: SortableSpotlightItemProps) => {
   const {
     attributes,
     listeners,
     setNodeRef,
     transform,
     transition,
+    isDragging
   } = useSortable({ id: item.id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
+    zIndex: isDragging ? 2 : 1,
   };
 
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-start gap-4 bg-gray-800/50 rounded-lg p-4 border border-gray-700"
+      className={cn(
+        "relative rounded-lg bg-gray-800/50 border border-gray-700/50",
+        isDragging && "opacity-50"
+      )}
     >
-      {/* Drag handle */}
-      <button
-        className="mt-2 p-2 hover:bg-gray-700/50 rounded cursor-grab active:cursor-grabbing"
-        {...attributes}
-        {...listeners}
-      >
-        <GripVertical className="w-4 h-4 text-gray-400" />
-      </button>
+      <div className="flex flex-col sm:flex-row items-start gap-4 p-4">
+        <button
+          {...attributes}
+          {...listeners}
+          className="p-2 hover:bg-gray-700/50 rounded hidden sm:block"
+        >
+          <GripVertical className="w-4 h-4 text-gray-400" />
+        </button>
 
-      {/* Image upload */}
-      <ImageUpload
-        currentImage={item.image}
-        onImageChange={(imageDataUrl) => onUpdate(item.id, { image: imageDataUrl })}
-        className="w-24 flex-shrink-0"
-      />
+        <div className="w-full sm:w-36 flex-shrink-0">
+          <ImageUpload
+            currentImage={item.image}
+            onImageChange={(file) => onUpdate(item.id, 'image', file)}
+            aspectRatio="square"
+            className="rounded-md overflow-hidden"
+          />
+        </div>
 
-      {/* Text fields */}
-      <div className="flex-grow space-y-3">
-        <input
-          type="text"
-          value={item.title}
-          onChange={(e) => onUpdate(item.id, { title: e.target.value })}
-          placeholder="Title"
-          className="w-full bg-gray-900/50 border border-gray-700 rounded px-3 py-1.5 text-sm text-gray-100 placeholder:text-gray-500"
-        />
-        <input
-          type="text"
-          value={item.description}
-          onChange={(e) => onUpdate(item.id, { description: e.target.value })}
-          placeholder="Description"
-          className="w-full bg-gray-900/50 border border-gray-700 rounded px-3 py-1.5 text-sm text-gray-100 placeholder:text-gray-500"
-        />
-        <input
-          type="text"
-          value={item.link}
-          onChange={(e) => onUpdate(item.id, { link: e.target.value })}
-          placeholder="Link"
-          className="w-full bg-gray-900/50 border border-gray-700 rounded px-3 py-1.5 text-sm text-gray-100 placeholder:text-gray-500"
-        />
+        <div className="flex-grow space-y-2 min-w-0 w-full">
+          <Input
+            value={item.title}
+            onChange={(e) => onUpdate(item.id, 'title', e.target.value)}
+            placeholder="Enter title"
+            className="bg-gray-900/50"
+          />
+          <Input
+            value={item.description}
+            onChange={(e) => onUpdate(item.id, 'description', e.target.value)}
+            placeholder="Enter description"
+            className="bg-gray-900/50"
+          />
+          <Input
+            value={item.link}
+            onChange={(e) => onUpdate(item.id, 'link', e.target.value)}
+            placeholder="https://"
+            className="bg-gray-900/50"
+          />
+        </div>
+
+        <button
+          onClick={() => onDelete(item.id)}
+          className="absolute top-2 right-2 sm:static p-2 hover:bg-gray-700/50 rounded group"
+        >
+          <Trash2 className="w-4 h-4 text-gray-400 group-hover:text-red-400" />
+        </button>
       </div>
-
-      {/* Delete button */}
-      <Button
-        variant="ghost"
-        size="sm"
-        className="text-gray-400 hover:text-red-400 hover:bg-red-950/20"
-        onClick={() => onDelete(item.id)}
-      >
-        <Trash2 className="w-4 h-4" />
-      </Button>
     </div>
   );
 };
@@ -125,9 +126,9 @@ export const SpotlightEditor: React.FC<SpotlightEditorProps> = ({
   );
 
   // Handle item updates
-  const handleUpdate = (id: string, updates: Partial<SpotlightItem>) => {
+  const handleUpdate = (id: string, field: string, value: string) => {
     setItems(items.map(item => 
-      item.id === id ? { ...item, ...updates } : item
+      item.id === id ? { ...item, [field]: value } : item
     ));
   };
 
@@ -163,18 +164,9 @@ export const SpotlightEditor: React.FC<SpotlightEditorProps> = ({
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium">Edit Spotlight Items</h3>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleAddItem}
-          className="text-cyan-400 border-cyan-800 hover:bg-cyan-950/30"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Add Item
-        </Button>
+    <div className="space-y-2">
+      <div className="sticky top-0 bg-gray-900/95 backdrop-blur-sm py-2 z-10">
+        <h2 className="text-xl font-medium text-white">Edit Spotlight Section</h2>
       </div>
 
       <DndContext
@@ -186,7 +178,7 @@ export const SpotlightEditor: React.FC<SpotlightEditorProps> = ({
           items={items}
           strategy={verticalListSortingStrategy}
         >
-          <div className="space-y-3">
+          <div className="space-y-1.5">
             {items.map((item) => (
               <SortableSpotlightItem
                 key={item.id}
@@ -199,20 +191,24 @@ export const SpotlightEditor: React.FC<SpotlightEditorProps> = ({
         </SortableContext>
       </DndContext>
 
-      <div className="flex justify-end gap-3 pt-4">
+      <div className="flex justify-between items-center gap-3 pt-1.5">
         <Button
-          variant="ghost"
-          onClick={onCancel}
+          variant="outline"
+          size="sm"
+          onClick={handleAddItem}
+          className="text-cyan-400 border-cyan-800 hover:bg-cyan-950/50 hover:text-cyan-300 hover:border-cyan-600"
         >
-          Cancel
+          <Plus className="w-4 h-4 mr-2" />
+          Add Item
         </Button>
-        <Button
-          variant="default"
-          onClick={() => onSave(items)}
-          className="bg-cyan-600 hover:bg-cyan-700"
-        >
-          Save Changes
-        </Button>
+        <div className="flex gap-3">
+          <Button variant="ghost" onClick={onCancel} className="text-gray-300 hover:text-gray-100">
+            Cancel
+          </Button>
+          <Button variant="default" onClick={() => onSave(items)} className="bg-cyan-600 hover:bg-cyan-700">
+            Save Changes
+          </Button>
+        </div>
       </div>
     </div>
   );

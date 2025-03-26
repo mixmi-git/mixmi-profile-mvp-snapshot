@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { SpotlightEditor } from '../sections/SpotlightEditor';
 import { SpotlightItem } from '@/types';
 
@@ -18,11 +18,8 @@ export const SpotlightEditorModal: React.FC<SpotlightEditorModalProps> = ({
 }) => {
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[800px] bg-gray-900 border-gray-800">
-        <DialogHeader>
-          <DialogTitle>Edit Spotlight Section</DialogTitle>
-        </DialogHeader>
-        <div className="max-h-[80vh] overflow-y-auto pr-2 -mr-2">
+      <DialogContent className="sm:max-w-[800px] bg-gray-900 border-gray-800 p-2 sm:pt-4 sm:px-4 sm:pb-4">
+        <div className="max-h-[80vh] overflow-y-auto">
           <SpotlightEditor
             items={items}
             onSave={(updatedItems) => {
