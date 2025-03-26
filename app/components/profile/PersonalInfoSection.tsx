@@ -16,7 +16,7 @@ import { ProfileInfoEditor } from './ProfileInfoEditor';
 interface PersonalInfoSectionProps {
   profile: ProfileData;
   isAuthenticated?: boolean;
-  onUpdateProfile?: (field: keyof ProfileData, value: any) => void;
+  onUpdateProfile?: (field: keyof ProfileData | 'profileInfo', value: any) => void;
 }
 
 const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
@@ -81,9 +81,12 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
   // Handle profile info update
   const handleProfileInfoUpdate = (updates: { name: string; title: string; bio: string }) => {
     if (onUpdateProfile) {
-      onUpdateProfile('name', updates.name);
-      onUpdateProfile('title', updates.title);
-      onUpdateProfile('bio', updates.bio);
+      // Update all fields at once to avoid race conditions
+      onUpdateProfile('profileInfo', {
+        name: updates.name,
+        title: updates.title,
+        bio: updates.bio
+      });
     }
   };
   

@@ -257,10 +257,10 @@ export function IntegratedProfile() {
   };
   
   // Handle profile field updates
-  const handleProfileUpdate = (field: keyof ProfileData, value: any) => {
+  const handleProfileUpdate = (field: keyof ProfileData | 'profileInfo', value: any) => {
     const updatedProfile = {
       ...profile,
-      [field]: value,
+      ...(field === 'profileInfo' ? value : { [field]: value }),
       hasEditedProfile: true
     };
     

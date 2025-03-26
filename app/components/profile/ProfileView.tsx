@@ -109,8 +109,7 @@ interface ProfileViewProps {
   isAuthenticated?: boolean;
   isTransitioning?: boolean;
   onEditProfile?: () => void;
-  // New props for edit-in-place functionality
-  onUpdateProfile?: (field: keyof ProfileData, value: any) => void;
+  onUpdateProfile?: (field: keyof ProfileData | 'profileInfo', value: any) => void;
   onUpdateSpotlightItems?: (items: SpotlightItemType[]) => void;
   onUpdateMediaItems?: (items: MediaItemType[]) => void;
   onUpdateShopItems?: (items: ShopItemType[]) => void;
