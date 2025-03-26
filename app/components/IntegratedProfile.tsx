@@ -98,17 +98,29 @@ export function IntegratedProfile() {
   useEffect(() => {
     if (!isMounted) return;
 
-    // TEMPORARY FIX: Clear localStorage to prevent infinite loading loop
-    // Alternative: Only clear profile data if there's an issue
-    localStorage.removeItem(STORAGE_KEYS.PROFILE);
-    localStorage.removeItem(STORAGE_KEYS.SHOP);
-    console.log('🧹 Cleared profile and shop data from localStorage to prevent potential loading issues');
-    
-    // Immediately set some example data to show content while loading
-    setProfile(DEFAULT_PROFILE);
-    setSpotlightItems(exampleSpotlightItems);
-    setShopItems(exampleShopItems);
-    setMediaItems(exampleMediaItems);
+    // Remove the localStorage clearing - it's causing issues
+    // Instead, only set example data if no data exists
+    const hasExistingProfile = localStorage.getItem(STORAGE_KEYS.PROFILE);
+    const hasExistingSpotlight = localStorage.getItem(STORAGE_KEYS.SPOTLIGHT);
+    const hasExistingShop = localStorage.getItem(STORAGE_KEYS.SHOP);
+    const hasExistingMedia = localStorage.getItem(STORAGE_KEYS.MEDIA);
+
+    if (!hasExistingProfile) {
+      setProfile(DEFAULT_PROFILE);
+      localStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify(DEFAULT_PROFILE));
+    }
+    if (!hasExistingSpotlight) {
+      setSpotlightItems(exampleSpotlightItems);
+      localStorage.setItem(STORAGE_KEYS.SPOTLIGHT, JSON.stringify(exampleSpotlightItems));
+    }
+    if (!hasExistingShop) {
+      setShopItems(exampleShopItems);
+      localStorage.setItem(STORAGE_KEYS.SHOP, JSON.stringify(exampleShopItems));
+    }
+    if (!hasExistingMedia) {
+      setMediaItems(exampleMediaItems);
+      localStorage.setItem(STORAGE_KEYS.MEDIA, JSON.stringify(exampleMediaItems));
+    }
     
     // Force loading complete after a very short delay
     const timer = setTimeout(() => setIsLoading(false), 100);
@@ -121,63 +133,41 @@ export function IntegratedProfile() {
 
     console.log('🔄 IntegratedProfile: Loading data from localStorage...');
     
-    // Start with example data
-    let currentProfile = {...DEFAULT_PROFILE};
-    let currentSpotlightItems = [...exampleSpotlightItems];
-    let currentShopItems = [...exampleShopItems];
-    let currentMediaItems = [...exampleMediaItems];
-    
     try {
-      // Check if we have saved data
+      // Load saved data if it exists
       const savedProfile = localStorage.getItem(STORAGE_KEYS.PROFILE);
+      const savedSpotlight = localStorage.getItem(STORAGE_KEYS.SPOTLIGHT);
+      const savedShop = localStorage.getItem(STORAGE_KEYS.SHOP);
+      const savedMedia = localStorage.getItem(STORAGE_KEYS.MEDIA);
+      
       if (savedProfile) {
-        currentProfile = JSON.parse(savedProfile);
+        setProfile(JSON.parse(savedProfile));
         console.log('📦 Loaded profile from localStorage');
       }
       
-      const savedSpotlight = localStorage.getItem(STORAGE_KEYS.SPOTLIGHT);
       if (savedSpotlight) {
-        currentSpotlightItems = JSON.parse(savedSpotlight);
+        setSpotlightItems(JSON.parse(savedSpotlight));
         console.log('📦 Loaded spotlight items from localStorage');
       }
       
-      const savedShop = localStorage.getItem(STORAGE_KEYS.SHOP);
       if (savedShop) {
-        currentShopItems = JSON.parse(savedShop);
+        setShopItems(JSON.parse(savedShop));
         console.log('📦 Loaded shop items from localStorage');
       }
       
-      const savedMedia = localStorage.getItem(STORAGE_KEYS.MEDIA);
       if (savedMedia) {
-        currentMediaItems = JSON.parse(savedMedia);
+        setMediaItems(JSON.parse(savedMedia));
         console.log('📦 Loaded media items from localStorage');
       }
     } catch (error) {
       console.error('Error loading data from localStorage:', error);
       console.log('⚠️ Using example data as fallback');
-    }
-    
-    // Update state
-    setProfile(currentProfile);
-    setSpotlightItems(currentSpotlightItems);
-    setShopItems(currentShopItems);
-    setMediaItems(currentMediaItems);
-    
-    // Save any example data to localStorage if nothing was there
-    if (!localStorage.getItem(STORAGE_KEYS.PROFILE)) {
-      localStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify(currentProfile));
-    }
-    
-    if (!localStorage.getItem(STORAGE_KEYS.SPOTLIGHT)) {
-      localStorage.setItem(STORAGE_KEYS.SPOTLIGHT, JSON.stringify(currentSpotlightItems));
-    }
-    
-    if (!localStorage.getItem(STORAGE_KEYS.SHOP)) {
-      localStorage.setItem(STORAGE_KEYS.SHOP, JSON.stringify(currentShopItems));
-    }
-    
-    if (!localStorage.getItem(STORAGE_KEYS.MEDIA)) {
-      localStorage.setItem(STORAGE_KEYS.MEDIA, JSON.stringify(currentMediaItems));
+      
+      // Set example data as fallback
+      setProfile(DEFAULT_PROFILE);
+      setSpotlightItems(exampleSpotlightItems);
+      setShopItems(exampleShopItems);
+      setMediaItems(exampleMediaItems);
     }
     
     // Ensure loading is complete
@@ -434,20 +424,23 @@ export function IntegratedProfile() {
       ) : (
         <main className="flex-grow">
           <div className="mt-8 max-w-7xl mx-auto">
-            <ProfileView
-              profile={profile}
-              mediaItems={mediaItems}
-              spotlightItems={spotlightItems}
-              shopItems={shopItems}
-              isAuthenticated={isAuthenticated}
-              isTransitioning={false}
-              onUpdateProfile={handleProfileUpdate}
-              onUpdateSpotlightItems={saveSpotlightItems}
-              onUpdateMediaItems={saveMediaItems}
-              onUpdateShopItems={saveShopItems}
-              onUpdateStickerData={saveStickerData}
-              onUpdateSectionVisibility={handleSectionVisibilityChange}
-            />
+            {/* Wait for isMounted before rendering ProfileView to prevent hydration issues */}
+            {isMounted && (
+              <ProfileView
+                profile={profile}
+                mediaItems={mediaItems}
+                spotlightItems={spotlightItems}
+                shopItems={shopItems}
+                isAuthenticated={isAuthenticated}
+                isTransitioning={false}
+                onUpdateProfile={handleProfileUpdate}
+                onUpdateSpotlightItems={saveSpotlightItems}
+                onUpdateMediaItems={saveMediaItems}
+                onUpdateShopItems={saveShopItems}
+                onUpdateStickerData={saveStickerData}
+                onUpdateSectionVisibility={handleSectionVisibilityChange}
+              />
+            )}
           </div>
         </main>
       )}

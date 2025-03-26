@@ -6,11 +6,12 @@
  * SpotlightItem represents content featured in the Spotlight section
  */
 export interface SpotlightItem {
-  id: number;
+  id: string;
   title: string;
   description: string;
   image: string;
   link: string;
+  isPlaceholder?: boolean;
 }
 
 /**
