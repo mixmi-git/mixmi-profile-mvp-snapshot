@@ -256,12 +256,12 @@ const ProfileView: React.FC<ProfileViewProps> = ({
             <h2 className="text-4xl font-bold text-white text-center mb-4 tracking-wider">
               SPOTLIGHT
             </h2>
-            {!profile.hasEditedProfile && (
+            {effectiveAuth && (
               <p className="text-sm text-gray-400 text-center mb-12">
                 Share your work and favorite projects
               </p>
             )}
-            {profile.hasEditedProfile && <div className="mb-12"></div>}
+            {!effectiveAuth && <div className="mb-8"></div>}
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {spotlightItems.map((item) => (
@@ -306,12 +306,12 @@ const ProfileView: React.FC<ProfileViewProps> = ({
           <h2 className="text-4xl font-bold text-white text-center mb-4 tracking-wider">
             MEDIA
           </h2>
-          {!profile.hasEditedProfile && (
+          {effectiveAuth && (
             <p className="text-sm text-gray-400 text-center mb-12">
-              Share your music, videos, DJ mixes, and playlists
+              Share your music, DJ mixes, playlists and videos
             </p>
           )}
-          {profile.hasEditedProfile && <div className="mb-12"></div>}
+          {!effectiveAuth && <div className="mb-8"></div>}
           
           {mediaItems && mediaItems.length > 0 ? (
             mediaItems.length === 1 ? (
@@ -409,12 +409,12 @@ const ProfileView: React.FC<ProfileViewProps> = ({
           <h2 className="text-4xl font-bold text-white text-center mb-4 tracking-wider">
             SHOP
           </h2>
-          {!profile.hasEditedProfile && (
+          {effectiveAuth && (
             <p className="text-sm text-gray-400 text-center mb-12">
               Connect visitors to your shop and products
             </p>
           )}
-          {profile.hasEditedProfile && <div className="mb-12"></div>}
+          {!effectiveAuth && <div className="mb-8"></div>}
           
           {shopItems && shopItems.length > 0 ? (
             <>
