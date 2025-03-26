@@ -63,6 +63,7 @@ export function IntegratedProfile() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userAddress, setUserAddress] = useState<string | null>(null);
   const [walletStatus, setWalletStatus] = useState<string | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
   
   // Simple storage keys
   const STORAGE_KEYS = {
@@ -72,35 +73,36 @@ export function IntegratedProfile() {
     MEDIA: 'mixmi_media_items',
     STICKER: 'mixmi_sticker_data'
   };
+
+  // Set mounted state
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
   
   // Check localStorage on mount for existing wallet connection
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      // Check for wallet connection
-      const connected = localStorage.getItem('simple-wallet-connected') === 'true';
-      const address = localStorage.getItem('simple-wallet-address');
-      
-      if (connected && address) {
-        setIsAuthenticated(true);
-        setUserAddress(address);
-        console.log('✅ Restored wallet connection from localStorage:', address);
-      }
+    if (!isMounted) return;
+
+    // Check for wallet connection
+    const connected = localStorage.getItem('simple-wallet-connected') === 'true';
+    const address = localStorage.getItem('simple-wallet-address');
+    
+    if (connected && address) {
+      setIsAuthenticated(true);
+      setUserAddress(address);
+      console.log('✅ Restored wallet connection from localStorage:', address);
     }
-  }, []);
+  }, [isMounted]);
   
   // Quick initial setup to avoid blank screen
   useEffect(() => {
+    if (!isMounted) return;
+
     // TEMPORARY FIX: Clear localStorage to prevent infinite loading loop
-    if (typeof window !== 'undefined') {
-      // Only clear if you're experiencing infinite loading
-      // Uncomment the next line to reset all data
-      // localStorage.clear();
-      
-      // Alternative: Only clear profile data if there's an issue
-      localStorage.removeItem(STORAGE_KEYS.PROFILE);
-      localStorage.removeItem(STORAGE_KEYS.SHOP);
-      console.log('🧹 Cleared profile and shop data from localStorage to prevent potential loading issues');
-    }
+    // Alternative: Only clear profile data if there's an issue
+    localStorage.removeItem(STORAGE_KEYS.PROFILE);
+    localStorage.removeItem(STORAGE_KEYS.SHOP);
+    console.log('🧹 Cleared profile and shop data from localStorage to prevent potential loading issues');
     
     // Immediately set some example data to show content while loading
     setProfile(DEFAULT_PROFILE);
@@ -109,13 +111,14 @@ export function IntegratedProfile() {
     setMediaItems(exampleMediaItems);
     
     // Force loading complete after a very short delay
-    // This ensures the UI is responsive immediately
     const timer = setTimeout(() => setIsLoading(false), 100);
     return () => clearTimeout(timer);
-  }, []);
+  }, [isMounted]);
   
   // Main content loading - more comprehensive but may take longer
   useEffect(() => {
+    if (!isMounted) return;
+
     console.log('🔄 IntegratedProfile: Loading data from localStorage...');
     
     // Start with example data
@@ -124,71 +127,35 @@ export function IntegratedProfile() {
     let currentShopItems = [...exampleShopItems];
     let currentMediaItems = [...exampleMediaItems];
     
-    // Debug log - initial example data counts
-    console.log('📊 Initial example data counts:', {
-      spotlightItems: exampleSpotlightItems.length,
-      mediaItems: exampleMediaItems.length,
-      shopItems: exampleShopItems.length
-    });
-    
-    // Try to load from localStorage
-    if (typeof window !== 'undefined') {
-      try {
-        // Check if we have saved data
-        const savedProfile = localStorage.getItem(STORAGE_KEYS.PROFILE);
-        if (savedProfile) {
-          currentProfile = JSON.parse(savedProfile);
-          console.log('📦 Loaded profile from localStorage');
-        }
-        
-        const savedSpotlight = localStorage.getItem(STORAGE_KEYS.SPOTLIGHT);
-        if (savedSpotlight) {
-          currentSpotlightItems = JSON.parse(savedSpotlight);
-          console.log('📦 Loaded spotlight items from localStorage');
-        }
-        
-        const savedShop = localStorage.getItem(STORAGE_KEYS.SHOP);
-        if (savedShop) {
-          currentShopItems = JSON.parse(savedShop);
-          console.log('📦 Loaded shop items from localStorage');
-        }
-        
-        const savedMedia = localStorage.getItem(STORAGE_KEYS.MEDIA);
-        if (savedMedia) {
-          currentMediaItems = JSON.parse(savedMedia);
-          console.log('📦 Loaded media items from localStorage');
-        }
-      } catch (error) {
-        console.error('Error loading data from localStorage:', error);
-        console.log('⚠️ Using example data as fallback');
+    try {
+      // Check if we have saved data
+      const savedProfile = localStorage.getItem(STORAGE_KEYS.PROFILE);
+      if (savedProfile) {
+        currentProfile = JSON.parse(savedProfile);
+        console.log('📦 Loaded profile from localStorage');
       }
+      
+      const savedSpotlight = localStorage.getItem(STORAGE_KEYS.SPOTLIGHT);
+      if (savedSpotlight) {
+        currentSpotlightItems = JSON.parse(savedSpotlight);
+        console.log('📦 Loaded spotlight items from localStorage');
+      }
+      
+      const savedShop = localStorage.getItem(STORAGE_KEYS.SHOP);
+      if (savedShop) {
+        currentShopItems = JSON.parse(savedShop);
+        console.log('📦 Loaded shop items from localStorage');
+      }
+      
+      const savedMedia = localStorage.getItem(STORAGE_KEYS.MEDIA);
+      if (savedMedia) {
+        currentMediaItems = JSON.parse(savedMedia);
+        console.log('📦 Loaded media items from localStorage');
+      }
+    } catch (error) {
+      console.error('Error loading data from localStorage:', error);
+      console.log('⚠️ Using example data as fallback');
     }
-    
-    // Always ensure we have example data if nothing is loaded
-    if (currentSpotlightItems.length === 0) {
-      currentSpotlightItems = exampleSpotlightItems;
-      console.log('⚠️ No spotlight items found, using example data');
-    }
-    
-    if (currentMediaItems.length === 0) {
-      currentMediaItems = exampleMediaItems;
-      console.log('⚠️ No media items found, using example data');
-    }
-    
-    if (currentShopItems.length === 0) {
-      currentShopItems = exampleShopItems;
-      console.log('⚠️ No shop items found, using example data');
-    }
-    
-    // Debug log - final data counts
-    console.log('📊 Final data counts after loading:', {
-      spotlightItems: currentSpotlightItems.length,
-      mediaItems: currentMediaItems.length,
-      shopItems: currentShopItems.length
-    });
-    
-    // Debug - show section visibility
-    console.log('👁️ Section visibility settings:', currentProfile.sectionVisibility);
     
     // Update state
     setProfile(currentProfile);
@@ -197,27 +164,25 @@ export function IntegratedProfile() {
     setMediaItems(currentMediaItems);
     
     // Save any example data to localStorage if nothing was there
-    if (typeof window !== 'undefined') {
-      if (!localStorage.getItem(STORAGE_KEYS.PROFILE)) {
-        localStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify(currentProfile));
-      }
-      
-      if (!localStorage.getItem(STORAGE_KEYS.SPOTLIGHT)) {
-        localStorage.setItem(STORAGE_KEYS.SPOTLIGHT, JSON.stringify(currentSpotlightItems));
-      }
-      
-      if (!localStorage.getItem(STORAGE_KEYS.SHOP)) {
-        localStorage.setItem(STORAGE_KEYS.SHOP, JSON.stringify(currentShopItems));
-      }
-      
-      if (!localStorage.getItem(STORAGE_KEYS.MEDIA)) {
-        localStorage.setItem(STORAGE_KEYS.MEDIA, JSON.stringify(currentMediaItems));
-      }
+    if (!localStorage.getItem(STORAGE_KEYS.PROFILE)) {
+      localStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify(currentProfile));
+    }
+    
+    if (!localStorage.getItem(STORAGE_KEYS.SPOTLIGHT)) {
+      localStorage.setItem(STORAGE_KEYS.SPOTLIGHT, JSON.stringify(currentSpotlightItems));
+    }
+    
+    if (!localStorage.getItem(STORAGE_KEYS.SHOP)) {
+      localStorage.setItem(STORAGE_KEYS.SHOP, JSON.stringify(currentShopItems));
+    }
+    
+    if (!localStorage.getItem(STORAGE_KEYS.MEDIA)) {
+      localStorage.setItem(STORAGE_KEYS.MEDIA, JSON.stringify(currentMediaItems));
     }
     
     // Ensure loading is complete
     setIsLoading(false);
-  }, []);
+  }, [isMounted]);
   
   // Save profile data to localStorage
   const saveProfileData = (updatedProfile: ProfileData) => {

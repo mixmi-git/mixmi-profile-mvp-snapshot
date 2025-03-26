@@ -138,7 +138,7 @@ const renderEditForm = (item: SpotlightItem, index: number, errors: SpotlightErr
 const SpotlightCard = ({ item, isEditing = false }: { item: SpotlightItem, isEditing?: boolean }) => {
   console.log('SpotlightCard render:', { title: item.title, link: item.link });
   return (
-    <Card className={`w-full overflow-hidden group ${isEditing ? 'max-w-sm' : 'max-w-md'}`}>
+    <Card className="w-full overflow-hidden group">
       <CardContent className="p-0">
         <a
           href={item.link}
@@ -146,7 +146,7 @@ const SpotlightCard = ({ item, isEditing = false }: { item: SpotlightItem, isEdi
           rel="noopener noreferrer"
           className="block"
         >
-          <div className={`relative ${isEditing ? 'aspect-[3/2]' : 'aspect-[16/9]'} w-full bg-gray-800`}>
+          <div className="relative aspect-[4/3] w-full bg-gray-800">
             <Image
               src={item.image || '/images/next-event-placeholder.jpg'}
               alt={item.title || 'Spotlight image'}
@@ -156,7 +156,7 @@ const SpotlightCard = ({ item, isEditing = false }: { item: SpotlightItem, isEdi
             />
           </div>
           <div className="p-4">
-            <div className="font-semibold mb-2 text-lg">
+            <div className="font-semibold mb-2 text-lg line-clamp-2 whitespace-pre-wrap break-words">
               {item.title}
             </div>
             <div className="text-sm text-gray-400">

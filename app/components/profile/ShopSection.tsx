@@ -121,7 +121,7 @@ export function ShopSection({
 
 export const ShopItemCard = ({ item }: { item: ShopItem }) => {
   return (
-    <Card className="w-full overflow-hidden group">
+    <Card className="w-full overflow-hidden group max-w-md">
       <CardContent className="p-0">
         <a
           href={item.link}
@@ -129,7 +129,7 @@ export const ShopItemCard = ({ item }: { item: ShopItem }) => {
           rel="noopener noreferrer"
           className="block"
         >
-          <div className="relative aspect-[4/3] w-full bg-gray-800">
+          <div className="relative aspect-[16/9] w-full bg-gray-800">
             <Image
               src={item.image || '/images/shop-placeholder.jpg'}
               alt={item.title || 'Store image'}
@@ -140,9 +140,14 @@ export const ShopItemCard = ({ item }: { item: ShopItem }) => {
             />
           </div>
           <div className="p-4">
-            <div className="font-semibold mb-2 text-lg line-clamp-2 whitespace-pre-wrap break-words">
+            <div className="font-semibold mb-2 text-lg">
               {item.title || 'Untitled Store'}
             </div>
+            {item.description && (
+              <div className="text-sm text-gray-400">
+                {item.description}
+              </div>
+            )}
           </div>
         </a>
       </CardContent>

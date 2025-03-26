@@ -265,41 +265,33 @@ const ProfileView: React.FC<ProfileViewProps> = ({
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {spotlightItems.map((item) => (
-                <div key={item.id} className="flex justify-center">
-                  <Card className="w-full overflow-hidden group max-w-md">
-                    <CardContent className="p-0">
-                      <a
-                        href={item.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block"
-                      >
-                        <div className="relative aspect-square w-full bg-gray-800">
-                          <Image
-                            src={item.image || '/images/next-event-placeholder.jpg'}
-                            alt={item.title || 'Spotlight image'}
-                            fill
-                            className="object-cover transition-transform duration-300 group-hover:scale-105"
-                            unoptimized
-                          />
-                          
-                          {/* Corner badge with title */}
-                          <div className="absolute bottom-0 left-0 bg-black bg-opacity-70 p-2 
-                            max-w-[90%] md:max-w-[80%] transition-all duration-300 
-                            md:group-hover:max-w-full rounded-tr-md">
-                            <div className="border-l-2 border-cyan-400 pl-2">
-                              <div className="flex items-center gap-2">
-                                <h4 className="text-white text-sm font-medium truncate">{item.title || "Untitled"}</h4>
-                              </div>
-                              <p className="text-xs text-gray-300 mt-1 line-clamp-2 hidden md:group-hover:block md:hidden">
-                                {item.description}
-                              </p>
-                            </div>
-                          </div>
+                <div 
+                  key={item.id}
+                  className="group block relative rounded-lg overflow-hidden"
+                >
+                  <div className="aspect-square relative bg-gray-800">
+                    <Image
+                      src={item.image || '/images/next-event-placeholder.jpg'}
+                      alt={item.title || 'Spotlight image'}
+                      fill
+                      className="object-cover transition-transform duration-300 group-hover:scale-105"
+                      unoptimized
+                    />
+                    
+                    {/* Corner badge with title */}
+                    <div className="absolute bottom-0 left-0 bg-black bg-opacity-70 p-2 
+                      max-w-[90%] md:max-w-[80%] transition-all duration-300 
+                      md:group-hover:max-w-full rounded-tr-md">
+                      <div className="border-l-2 border-cyan-400 pl-2">
+                        <div className="flex items-center gap-2">
+                          <h4 className="text-white text-sm font-medium truncate">{item.title || "Untitled"}</h4>
                         </div>
-                      </a>
-                    </CardContent>
-                  </Card>
+                        <p className="text-xs text-gray-300 mt-1 line-clamp-2 hidden md:group-hover:block md:hidden">
+                          {item.description}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
