@@ -283,13 +283,17 @@ export function IntegratedProfile() {
       setWalletStatus('Disconnecting wallet...');
       
       try {
-        // Clear localStorage
+        // Clear localStorage wallet connection state
         localStorage.removeItem('simple-wallet-connected');
         localStorage.removeItem('simple-wallet-address');
         
+        // Update authentication state
         setIsAuthenticated(false);
         setUserAddress(null);
         setWalletStatus('Wallet disconnected');
+        
+        // Don't clear the wallet address or showWalletAddress setting from the profile
+        // This allows the visibility setting to persist and be respected in read-only mode
         
         // Automatically clear status after 3 seconds
         setTimeout(() => setWalletStatus(null), 3000);
@@ -342,18 +346,14 @@ export function IntegratedProfile() {
               localStorage.setItem('simple-wallet-address', address);
               
               // Update the profile with the wallet address
-              setProfile(prev => ({
-                ...prev,
-                walletAddress: address,
-                showWalletAddress: true
-              }));
-              
-              // Also save the updated profile to localStorage
-              localStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify({
+              const updatedProfile = {
                 ...profile,
                 walletAddress: address,
-                showWalletAddress: true
-              }));
+                showWalletAddress: profile.showWalletAddress ?? true // Preserve existing setting or default to true
+              };
+              
+              // Save the updated profile
+              saveProfileData(updatedProfile);
               
               // Automatically clear status after 5 seconds
               setTimeout(() => setWalletStatus(null), 5000);
