@@ -372,20 +372,6 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                             </div>
                           )}
                           
-                          {/* Edit button for authenticated users */}
-                          {mounted && effectiveAuth && (
-                            <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="bg-black/50 hover:bg-black/70 border-gray-600"
-                                onClick={() => setIsSpotlightEditorOpen(true)}
-                              >
-                                <Edit2 className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          )}
-                          
                           {/* Corner badge */}
                           <div className="absolute bottom-0 left-0 bg-black bg-opacity-70 p-2 
                             max-w-[90%] md:max-w-[80%] transition-all duration-300 

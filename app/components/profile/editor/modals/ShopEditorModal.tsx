@@ -140,7 +140,7 @@ export function ShopEditorModal({
                             <Textarea
                               value={item.description}
                               onChange={(e) => handleFieldChange(index, 'description', e.target.value)}
-                              placeholder="Description"
+                              placeholder="Description (optional)"
                               className="bg-gray-800 border-gray-700 min-h-[60px]"
                             />
 

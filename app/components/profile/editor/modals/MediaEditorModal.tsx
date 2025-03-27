@@ -29,6 +29,7 @@ export function MediaEditorModal({
   onSave,
 }: MediaEditorModalProps) {
   const [mediaItems, setMediaItems] = useState<MediaItem[]>(items);
+  const [error, setError] = useState<string | null>(null);
 
   // Add a new empty media item
   const addMediaItem = () => {
@@ -43,18 +44,22 @@ export function MediaEditorModal({
 
   // Handle URL change and auto-detect platform
   const handleUrlChange = (index: number, url: string) => {
-    const cleanUrl = url.trim();
-    const type = detectMediaType(cleanUrl) as MediaType;
-    const embedUrl = transformMediaUrl(cleanUrl, type);
-
-    const updatedItems = [...mediaItems];
-    updatedItems[index] = {
-      id: cleanUrl,
-      type,
-      rawUrl: cleanUrl,
-      embedUrl
-    };
-    setMediaItems(updatedItems);
+    try {
+      const type = detectMediaType(url) as MediaType;
+      const embedUrl = transformMediaUrl(url, type);
+      setError(null);
+      // Success handling
+      const updatedItems = [...mediaItems];
+      updatedItems[index] = {
+        id: url,
+        type,
+        rawUrl: url,
+        embedUrl
+      };
+      setMediaItems(updatedItems);
+    } catch (error) {
+      setError("Couldn't process this URL. Please check that it's a valid share URL.");
+    }
   };
 
   // Move an item up or down in the list
@@ -66,10 +71,14 @@ export function MediaEditorModal({
   };
 
   const handleSave = () => {
-    // Filter out empty items
-    const validItems = mediaItems.filter(item => item.rawUrl && item.type);
-    onSave(validItems);
-    onClose();
+    try {
+      const validItems = mediaItems.filter(item => item.rawUrl && item.type);
+      onSave(validItems);
+      setError(null);
+      onClose();
+    } catch (error) {
+      setError("Couldn't save your changes. Please try again.");
+    }
   };
 
   const handleDragEnd = (result: any) => {
@@ -93,6 +102,12 @@ export function MediaEditorModal({
             Add (up to 3) or remove media from YouTube, SoundCloud, Spotify, and more. Just paste the share URL and we'll handle the rest.
           </DialogDescription>
         </DialogHeader>
+
+        {error && (
+          <div className="bg-red-900/20 border border-red-500/50 rounded-md p-3 mb-4">
+            <p className="text-red-400 text-sm">{error}</p>
+          </div>
+        )}
 
         <div className="space-y-6 py-4">
           {/* Media Items List */}
