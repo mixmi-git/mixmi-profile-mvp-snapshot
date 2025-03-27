@@ -167,9 +167,14 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
             </div>
             
             <div className="mb-6 w-full">
-              <p className="text-sm md:text-base leading-relaxed text-gray-300 text-center max-w-lg mx-auto">
-                {profile.bio || "Tell your story here..."}
-              </p>
+              <div className="relative group">
+                <p className="text-sm md:text-base leading-relaxed text-gray-300 text-center max-w-lg mx-auto line-clamp-3 group-hover:line-clamp-none transition-all duration-300">
+                  {profile.bio || "Tell your story here..."}
+                </p>
+                {profile.bio && profile.bio.length > 150 && (
+                  <div className="absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-gray-900 group-hover:opacity-0 transition-opacity duration-300"></div>
+                )}
+              </div>
             </div>
             
             {/* Social links */}
