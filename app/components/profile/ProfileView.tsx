@@ -24,6 +24,7 @@ import { Card, CardContent } from '../ui/card';
 import { HoverControls, EditButtonControl } from '../ui/hover-controls';
 import { SpotlightEditorModal } from './editor/modals/SpotlightEditorModal';
 import { MediaEditorModal } from './editor/modals/MediaEditorModal';
+import { ShopEditorModal } from './editor/modals/ShopEditorModal';
 
 // Media embed component for rendering different types of media
 const MediaEmbed = ({ item }: { item: MediaItem }) => {
@@ -192,6 +193,9 @@ const ProfileView: React.FC<ProfileViewProps> = ({
   // Add state for media editor modal
   const [isMediaEditorOpen, setIsMediaEditorOpen] = useState(false);
 
+  // Add state for shop editor modal
+  const [isShopEditorOpen, setIsShopEditorOpen] = useState(false);
+
   // For debugging
   const handleEditClick = useCallback(() => {
     if (process.env.NODE_ENV === 'development') {
@@ -258,6 +262,11 @@ const ProfileView: React.FC<ProfileViewProps> = ({
     setIsMediaEditorOpen(false);
   };
 
+  const handleShopUpdate = (updatedItems: ShopItemType[]) => {
+    onUpdateShopItems?.(updatedItems);
+    setIsShopEditorOpen(false);
+  };
+
   return (
     <div className="min-h-screen bg-gray-900 text-white pb-20">
       <MediaEditorModal
@@ -265,6 +274,12 @@ const ProfileView: React.FC<ProfileViewProps> = ({
         onClose={() => setIsMediaEditorOpen(false)}
         items={mediaItems}
         onSave={handleMediaUpdate}
+      />
+      <ShopEditorModal
+        isOpen={isShopEditorOpen}
+        onClose={() => setIsShopEditorOpen(false)}
+        items={shopItems}
+        onSave={handleShopUpdate}
       />
       
       <div className="relative min-h-screen bg-gray-900">
@@ -533,14 +548,27 @@ const ProfileView: React.FC<ProfileViewProps> = ({
           {/* Shop Section */}
           {(profile.sectionVisibility?.shop !== false) && shopItems.length > 0 && (
             <div className="mt-24 sm:mt-32 mb-24 opacity-0 animate-fadeIn"
-                 style={{ animationDelay: '250ms', animationFillMode: 'forwards' }}>
+                 style={{ animationDelay: '150ms', animationFillMode: 'forwards' }}>
               <div className="max-w-6xl mx-auto">
-                <h2 className="text-4xl font-bold text-white mb-4 tracking-wider">
-                  SHOP
-                </h2>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-4xl font-bold text-white tracking-wider">
+                    SHOP
+                  </h2>
+                  {effectiveAuth && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsShopEditorOpen(true)}
+                      className="text-cyan-400 border-cyan-800 hover:bg-cyan-950/30"
+                    >
+                      <Edit2 className="w-4 h-4 mr-2" />
+                      Edit Section
+                    </Button>
+                  )}
+                </div>
                 {effectiveAuth && (
                   <p className="text-sm text-gray-400 mb-12">
-                    Connect visitors to your shop and products
+                    Share anything you want to sell - physical products, digital downloads, or Web3 experiences
                   </p>
                 )}
                 {!effectiveAuth && <div className="mb-8"></div>}
@@ -602,7 +630,6 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                                   )}
                                   <p className="text-xs text-gray-300 mt-1 line-clamp-2 hidden md:group-hover:block md:hidden">
                                     {item.description}
-                                    {item.price && <span className="ml-1 text-cyan-300">{item.price}</span>}
                                   </p>
                                 </div>
                               </div>
@@ -665,7 +692,6 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                                   )}
                                   <p className="text-xs text-gray-300 mt-1 line-clamp-2 hidden md:group-hover:block md:hidden">
                                     {item.description}
-                                    {item.price && <span className="ml-1 text-cyan-300">{item.price}</span>}
                                   </p>
                                 </div>
                               </div>
