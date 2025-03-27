@@ -1,3 +1,5 @@
+import { MediaType } from '@/types/media';
+
 export const getMediaDisplayName = (url: string): string => {
   try {
     const urlObj = new URL(url);
@@ -175,23 +177,9 @@ export const transformTikTokUrl = (url: string): string => {
   }
 };
 
-export const detectMediaType = (url: string): string => {
-  const cleanUrl = url.toLowerCase();
-  console.log('detectMediaType checking URL:', cleanUrl);
-  
-  // Check Instagram first - handle both reel and embed URLs
-  if (cleanUrl.includes('instagram.com') && 
-     (cleanUrl.includes('/reel/') || 
-      cleanUrl.includes('/p/') || 
-      cleanUrl.includes('?utm_source=ig_web_copy_link'))) {
-    console.log('Detected as Instagram Reel');
-    return 'instagram-reel';
-  }
+export function detectMediaType(url: string): MediaType {
+  const cleanUrl = url.toLowerCase().trim();
 
-  if (cleanUrl.includes('mixcloud.com') || cleanUrl.includes('player-widget.mixcloud.com')) {
-    return 'mixcloud';
-  }
-  
   if (cleanUrl.includes('youtube.com') || cleanUrl.includes('youtu.be')) {
     return 'youtube';
   }
@@ -202,15 +190,24 @@ export const detectMediaType = (url: string): string => {
     return cleanUrl.includes('/playlist/') ? 'spotify-playlist' : 'spotify';
   }
   if (cleanUrl.includes('music.apple.com')) {
-    if (cleanUrl.includes('/album/')) return 'apple-music-album';
     if (cleanUrl.includes('/playlist/')) return 'apple-music-playlist';
-    return 'apple-music-station';
+    if (cleanUrl.includes('/album/')) return 'apple-music-album';
+    if (cleanUrl.includes('/station/')) return 'apple-music-station';
+    return 'apple-music-playlist';
+  }
+  if (cleanUrl.includes('mixcloud.com')) {
+    return 'mixcloud';
+  }
+  if (cleanUrl.includes('instagram.com') && (cleanUrl.includes('/reel/') || cleanUrl.includes('/p/'))) {
+    return 'instagram-reel';
   }
   if (cleanUrl.includes('tiktok.com')) {
     return 'tiktok';
   }
-  return 'unknown';
-};
+
+  // Default to YouTube as it's the most common
+  return 'youtube';
+}
 
 export const transformYouTubeUrl = (url: string): string => {
   try {
@@ -255,4 +252,28 @@ export function transformSpotifyUrl(url: string): string {
   
   // Return the appropriate embed URL
   return `https://open.spotify.com/embed/${type}/${id}`;
+}
+
+export function transformMediaUrl(url: string, type: string): string {
+  switch (type) {
+    case 'youtube':
+      return transformYouTubeUrl(url);
+    case 'soundcloud':
+    case 'soundcloud-playlist':
+      return transformSoundCloudUrl(url);
+    case 'spotify':
+    case 'spotify-playlist':
+      return transformSpotifyUrl(url);
+    case 'apple-music':
+    case 'apple-music-playlist':
+      return transformAppleMusicUrl(url);
+    case 'mixcloud':
+      return transformMixcloudUrl(url);
+    case 'instagram-reel':
+      return transformInstagramUrl(url);
+    case 'tiktok':
+      return transformTikTokUrl(url);
+    default:
+      return url;
+  }
 }
