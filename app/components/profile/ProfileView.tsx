@@ -25,6 +25,7 @@ import { HoverControls, EditButtonControl } from '../ui/hover-controls';
 import { SpotlightEditorModal } from './editor/modals/SpotlightEditorModal';
 import { MediaEditorModal } from './editor/modals/MediaEditorModal';
 import { ShopEditorModal } from './editor/modals/ShopEditorModal';
+import { StickerEditorModal } from './editor/modals/StickerEditorModal';
 
 // Media embed component for rendering different types of media
 const MediaEmbed = ({ item }: { item: MediaItem }) => {
@@ -195,6 +196,9 @@ const ProfileView: React.FC<ProfileViewProps> = ({
 
   // Add state for shop editor modal
   const [isShopEditorOpen, setIsShopEditorOpen] = useState(false);
+
+  // Add state for sticker editor modal
+  const [isStickerEditorOpen, setIsStickerEditorOpen] = useState(false);
 
   // For debugging
   const handleEditClick = useCallback(() => {
@@ -737,9 +741,37 @@ const ProfileView: React.FC<ProfileViewProps> = ({
           )}
           
           {/* Sticker display */}
-          <StickerDisplay 
-            sticker={profile.sticker} 
-            sectionVisibility={profile.sectionVisibility}
+          <div className="relative">
+            <StickerDisplay 
+              sticker={profile.sticker} 
+              sectionVisibility={profile.sectionVisibility}
+            />
+            {mounted && effectiveAuth && onUpdateStickerData && (
+              <div className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsStickerEditorOpen(true)}
+                  className="text-cyan-400 border-cyan-800 hover:bg-cyan-950/30"
+                >
+                  <Edit2 className="w-4 h-4 mr-2" />
+                  Edit Sticker
+                </Button>
+              </div>
+            )}
+          </div>
+
+          {/* Add the StickerEditorModal */}
+          <StickerEditorModal
+            isOpen={isStickerEditorOpen}
+            onClose={() => setIsStickerEditorOpen(false)}
+            sticker={profile.sticker || { visible: true, image: '/images/stickers/daisy-blue.png' }}
+            onSave={(updatedSticker) => {
+              if (onUpdateStickerData) {
+                onUpdateStickerData(updatedSticker);
+              }
+              setIsStickerEditorOpen(false);
+            }}
           />
 
           {effectiveAuth && onEditProfile && (
