@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { Copy, ExternalLink, Instagram, Edit } from 'lucide-react';
+import { Copy, ExternalLink, Instagram, Edit, Edit2 } from 'lucide-react';
 import { FaYoutube, FaSpotify, FaSoundcloud, FaLinkedinIn } from 'react-icons/fa';
 import { FaXTwitter } from 'react-icons/fa6';
 import { SiTiktok } from 'react-icons/si';
@@ -12,6 +12,7 @@ import { HoverControls, EditButtonControl } from '../ui/hover-controls';
 import { Button } from '../ui/button';
 import { SocialLinksEditor } from './SocialLinksEditor';
 import { ProfileInfoEditor } from './ProfileInfoEditor';
+import { PersonalInfoEditorModal } from './editor/modals/PersonalInfoEditorModal';
 
 interface PersonalInfoSectionProps {
   profile: ProfileData;
@@ -24,12 +25,40 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
   isAuthenticated = false,
   onUpdateProfile
 }) => {
-  // State to control social links editor modal
-  const [isSocialLinksEditorOpen, setIsSocialLinksEditorOpen] = useState(false);
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
   
-  // State to control profile info editor modal
-  const [isProfileInfoEditorOpen, setIsProfileInfoEditorOpen] = useState(false);
-  
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  const handleSave = (updates: Partial<ProfileData>) => {
+    if (onUpdateProfile) {
+      // Always send all profile info fields together
+      if (updates.name !== undefined || updates.title !== undefined || updates.bio !== undefined) {
+        onUpdateProfile('profileInfo', {
+          name: updates.name ?? profile.name,
+          title: updates.title ?? profile.title,
+          bio: updates.bio ?? profile.bio
+        });
+      }
+      
+      // Send social links update separately if changed
+      if (updates.socialLinks) {
+        onUpdateProfile('socialLinks', updates.socialLinks);
+      }
+      
+      // Send wallet visibility update separately if changed
+      if (updates.showWalletAddress !== undefined) {
+        onUpdateProfile('showWalletAddress', updates.showWalletAddress);
+      }
+    }
+    setIsEditorOpen(false);
+  };
+
   // Social media icon mapping
   const getSocialIcon = (platform: string) => {
     const iconSize = 18;
@@ -71,35 +100,6 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
     reader.readAsDataURL(file);
   };
 
-  // Handle social links update
-  const handleSocialLinksUpdate = (links: SocialLinkType[]) => {
-    if (onUpdateProfile) {
-      onUpdateProfile('socialLinks', links);
-    }
-  };
-  
-  // Handle profile info update
-  const handleProfileInfoUpdate = (updates: { name: string; title: string; bio: string }) => {
-    if (onUpdateProfile) {
-      // Update all fields at once to avoid race conditions
-      onUpdateProfile('profileInfo', {
-        name: updates.name,
-        title: updates.title,
-        bio: updates.bio
-      });
-    }
-  };
-  
-  // Clipboard functionality for wallet address
-  const [copied, setCopied] = useState(false);
-  
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
-  };
-
   return (
     <section className="py-8 md:py-12 lg:py-16 w-full max-w-6xl mx-auto px-4">
       <div className="flex flex-col md:flex-row items-center justify-center gap-10 md:gap-16">
@@ -132,8 +132,20 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
         </div>
         
         {/* Profile text info */}
-        <div className="flex-1 flex flex-col items-center md:items-center justify-center">
-          <div className="mb-8 relative group">
+        <div className="flex-1 flex flex-col items-center md:items-center justify-center relative">
+          {isAuthenticated && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsEditorOpen(true)}
+              className="absolute -top-8 right-0 text-cyan-400 border-cyan-800 hover:bg-cyan-950/50 hover:text-cyan-300 hover:border-cyan-600"
+            >
+              <Edit2 className="w-4 h-4 mr-2" />
+              Edit Section
+            </Button>
+          )}
+
+          <div className="mb-8">
             <div className="mb-1">
               <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-cyan-300">
                 {profile.name || "Your Name"}
@@ -143,16 +155,6 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
             <h2 className="text-base md:text-xl text-gray-300 mt-2 text-center">
               {profile.title || "What You Do"}
             </h2>
-            
-            {isAuthenticated && (
-              <button 
-                onClick={() => setIsProfileInfoEditorOpen(true)}
-                className="absolute -right-8 top-1/2 transform -translate-y-1/2 bg-gray-800/70 hover:bg-gray-700 text-white p-1.5 rounded-full transition-colors opacity-100 md:opacity-70 md:group-hover:opacity-100"
-                aria-label="Edit profile info"
-              >
-                <Edit className="w-4 h-4" />
-              </button>
-            )}
           </div>
           
           <div className="mb-8 max-w-2xl w-full">
@@ -164,8 +166,7 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
           {/* Social links */}
           <div className="flex flex-wrap justify-center gap-3 mb-4">
             {profile.socialLinks && profile.socialLinks.length > 0 ? (
-              // Display actual social links if they exist
-              profile.socialLinks.map((link: SocialLinkType, index: number) => (
+              profile.socialLinks.map((link, index) => (
                 <a
                   key={`${link.platform}-${index}`}
                   href={link.url}
@@ -178,7 +179,6 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
                 </a>
               ))
             ) : (
-              // Display placeholder icons when no social links exist
               <>
                 <div className="inline-flex items-center justify-center p-2 bg-gray-800/60 rounded-full cursor-default opacity-60">
                   <Instagram size={18} className="text-gray-400" />
@@ -194,53 +194,16 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
                 </div>
               </>
             )}
-            
-            {isAuthenticated && (
-              <EditButtonControl
-                onEdit={() => setIsSocialLinksEditorOpen(true)}
-                label="Edit Links"
-                isAuthenticated={isAuthenticated}
-                className="p-2 rounded-full"
-              >
-                <div className="w-[18px] h-[18px] flex items-center justify-center bg-gray-800 hover:bg-gray-700 rounded-full transition-colors">
-                  <span className="text-xs text-gray-300">+</span>
-                </div>
-              </EditButtonControl>
-            )}
           </div>
           
-          {/* Social Links Editor Modal */}
-          <SocialLinksEditor
-            isOpen={isSocialLinksEditorOpen}
-            onClose={() => setIsSocialLinksEditorOpen(false)}
-            socialLinks={profile.socialLinks || []}
-            onSave={handleSocialLinksUpdate}
-          />
-          
-          {/* Profile Info Editor Modal */}
-          <ProfileInfoEditor
-            isOpen={isProfileInfoEditorOpen}
-            onClose={() => setIsProfileInfoEditorOpen(false)}
-            profile={profile}
-            onSave={handleProfileInfoUpdate}
-          />
-          
-          {/* Wallet address display - now inside the right column */}
+          {/* Wallet address display */}
           {profile.walletAddress && (
             <div className="w-full max-w-xs mx-auto px-3 py-2 bg-gray-800/50 rounded-lg flex items-center justify-between border border-gray-700/50 mt-4">
               <div className="flex items-center gap-2">
                 <div className="text-sm text-gray-300 truncate">
                   {profile.walletAddress.slice(0, 6)}...{profile.walletAddress.slice(-4)}
                 </div>
-                {isAuthenticated && (
-                  <button
-                    onClick={() => onUpdateProfile?.('showWalletAddress', !(profile.showWalletAddress ?? true))}
-                    className="text-xs text-gray-500 hover:text-gray-400"
-                  >
-                    {profile.showWalletAddress === false ? 'Show publicly' : 'Hide publicly'}
-                  </button>
-                )}
-                {isAuthenticated && profile.showWalletAddress === false && (
+                {profile.showWalletAddress === false && (
                   <span className="text-xs bg-gray-700 text-gray-400 px-1.5 py-0.5 rounded">Hidden</span>
                 )}
               </div>
@@ -260,6 +223,13 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
           )}
         </div>
       </div>
+
+      <PersonalInfoEditorModal
+        isOpen={isEditorOpen}
+        onClose={() => setIsEditorOpen(false)}
+        profile={profile}
+        onSave={handleSave}
+      />
     </section>
   );
 };
