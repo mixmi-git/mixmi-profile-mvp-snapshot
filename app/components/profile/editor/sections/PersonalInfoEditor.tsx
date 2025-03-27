@@ -18,6 +18,12 @@ const SOCIAL_PLATFORMS = [
   { id: 'linkedin', label: 'LinkedIn', icon: FaLinkedinIn },
 ];
 
+const MAX_LENGTHS = {
+  name: 30,
+  title: 40,
+  bio: 350
+} as const;
+
 export const PersonalInfoEditor: React.FC<PersonalInfoEditorProps> = ({
   profile,
   onSave,
@@ -25,7 +31,10 @@ export const PersonalInfoEditor: React.FC<PersonalInfoEditorProps> = ({
 }) => {
   const [formData, setFormData] = useState<ProfileData>({
     ...profile,
-    socialLinks: [...(profile.socialLinks || []), { platform: '', url: '' }], // Always have one empty row
+    name: profile.name || '',
+    title: profile.title || '',
+    bio: profile.bio || '',
+    socialLinks: [...(profile.socialLinks || []), { platform: '', url: '' }],
   });
 
   // Use a ref to track if the component is mounted
@@ -39,6 +48,15 @@ export const PersonalInfoEditor: React.FC<PersonalInfoEditorProps> = ({
 
   const handleInputChange = (field: keyof ProfileData, value: any) => {
     if (!isMounted.current) return;
+    
+    // Apply character limits for text fields
+    if (field === 'name' || field === 'title' || field === 'bio') {
+      const maxLength = MAX_LENGTHS[field];
+      if (typeof value === 'string' && value.length > maxLength) {
+        return;
+      }
+    }
+    
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -82,20 +100,34 @@ export const PersonalInfoEditor: React.FC<PersonalInfoEditorProps> = ({
       // Only send fields that have changed
       const updates: Partial<ProfileData> = {};
       
-      // Check each field
-      if (formData.name !== profile.name) updates.name = formData.name;
-      if (formData.title !== profile.title) updates.title = formData.title;
-      if (formData.bio !== profile.bio) updates.bio = formData.bio;
+      // Check each field, ensuring we handle empty strings correctly
+      if (formData.name !== profile.name) {
+        updates.name = formData.name;
+      }
+      if (formData.title !== profile.title) {
+        updates.title = formData.title;
+      }
+      if (formData.bio !== profile.bio) {
+        updates.bio = formData.bio;
+      }
       if (formData.showWalletAddress !== profile.showWalletAddress) {
         updates.showWalletAddress = formData.showWalletAddress;
       }
       
       // Clean up social links before comparing (remove empty ones)
-      const cleanedLinks = formData.socialLinks.filter(link => link.platform !== '' || link.url !== '');
-      if (JSON.stringify(cleanedLinks) !== JSON.stringify(profile.socialLinks)) {
+      const cleanedLinks = formData.socialLinks.filter(link => 
+        link.platform !== '' && link.url !== ''
+      );
+      
+      // Only update if links have changed
+      const currentLinks = JSON.stringify(profile.socialLinks || []);
+      const newLinks = JSON.stringify(cleanedLinks);
+      if (currentLinks !== newLinks) {
         updates.socialLinks = cleanedLinks;
       }
 
+      console.log('Saving updates:', updates); // Add logging
+      
       if (Object.keys(updates).length > 0) {
         await onSave(updates);
       }
@@ -112,34 +144,52 @@ export const PersonalInfoEditor: React.FC<PersonalInfoEditorProps> = ({
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-4">
         <div>
-          <Label htmlFor="name">Name</Label>
+          <div className="flex justify-between items-baseline mb-2">
+            <Label htmlFor="name">Name</Label>
+            <span className="text-xs text-gray-400">
+              {formData.name.length}/{MAX_LENGTHS.name}
+            </span>
+          </div>
           <Input
             id="name"
             value={formData.name}
             onChange={(e) => handleInputChange('name', e.target.value)}
             placeholder="Your name"
+            maxLength={MAX_LENGTHS.name}
             className="bg-gray-800 border-gray-700"
           />
         </div>
 
         <div>
-          <Label htmlFor="title">Title</Label>
+          <div className="flex justify-between items-baseline mb-2">
+            <Label htmlFor="title">Title</Label>
+            <span className="text-xs text-gray-400">
+              {formData.title.length}/{MAX_LENGTHS.title}
+            </span>
+          </div>
           <Input
             id="title"
             value={formData.title}
             onChange={(e) => handleInputChange('title', e.target.value)}
             placeholder="What you do"
+            maxLength={MAX_LENGTHS.title}
             className="bg-gray-800 border-gray-700"
           />
         </div>
 
         <div>
-          <Label htmlFor="bio">Bio</Label>
+          <div className="flex justify-between items-baseline mb-2">
+            <Label htmlFor="bio">Bio</Label>
+            <span className="text-xs text-gray-400">
+              {formData.bio.length}/{MAX_LENGTHS.bio}
+            </span>
+          </div>
           <Textarea
             id="bio"
             value={formData.bio}
             onChange={(e) => handleInputChange('bio', e.target.value)}
             placeholder="Tell your story..."
+            maxLength={MAX_LENGTHS.bio}
             className="bg-gray-800 border-gray-700 min-h-[100px]"
           />
         </div>

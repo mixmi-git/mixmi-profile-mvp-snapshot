@@ -37,22 +37,30 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
 
   const handleSave = (updates: Partial<ProfileData>) => {
     if (onUpdateProfile) {
-      // Always send all profile info fields together
-      if (updates.name !== undefined || updates.title !== undefined || updates.bio !== undefined) {
-        onUpdateProfile('profileInfo', {
-          name: updates.name ?? profile.name,
-          title: updates.title ?? profile.title,
-          bio: updates.bio ?? profile.bio
-        });
+      // Send profile info update
+      const profileInfoUpdated = updates.name !== undefined || 
+                               updates.title !== undefined || 
+                               updates.bio !== undefined;
+      
+      if (profileInfoUpdated) {
+        const profileInfo = {
+          name: updates.name ?? profile.name ?? '',
+          title: updates.title ?? profile.title ?? '',
+          bio: updates.bio ?? profile.bio ?? ''
+        };
+        console.log('Updating profile info:', profileInfo);
+        onUpdateProfile('profileInfo', profileInfo);
       }
       
-      // Send social links update separately if changed
-      if (updates.socialLinks) {
+      // Send social links update if changed
+      if (updates.socialLinks !== undefined) {
+        console.log('Updating social links:', updates.socialLinks);
         onUpdateProfile('socialLinks', updates.socialLinks);
       }
       
-      // Send wallet visibility update separately if changed
+      // Send wallet visibility update if changed
       if (updates.showWalletAddress !== undefined) {
+        console.log('Updating wallet visibility:', updates.showWalletAddress);
         onUpdateProfile('showWalletAddress', updates.showWalletAddress);
       }
     }
