@@ -233,499 +233,505 @@ const ProfileView: React.FC<ProfileViewProps> = ({
 
   return (
     <div className="min-h-screen bg-gray-900 text-white pb-20">
-      {/* Profile Section */}
-      <PersonalInfoSection
-        profile={profile}
-        isAuthenticated={effectiveAuth}
-        onUpdateProfile={onUpdateProfile}
-      />
-      
-      {/* Section Visibility Controls - Only visible when authenticated */}
-      {mounted && effectiveAuth && onUpdateSectionVisibility ? (
-        <div className="max-w-sm ml-4 lg:ml-auto lg:mr-auto px-4 mb-8">
-          <SectionVisibilityManager
-            visibility={profile.sectionVisibility || {}}
-            onVisibilityChange={(field, value) => {
-              if (onUpdateSectionVisibility) {
-                onUpdateSectionVisibility(field as keyof ProfileData['sectionVisibility'], value);
-              }
-            }}
-            isAuthenticated={effectiveAuth}
-          />
-        </div>
-      ) : (
-        // Placeholder div to maintain consistent spacing when section manager is not visible
-        <div className="max-w-sm ml-4 lg:ml-auto lg:mr-auto px-4 mb-8 h-12"></div>
-      )}
+      <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16">
+        {/* Profile Section */}
+        <PersonalInfoSection
+          profile={profile}
+          isAuthenticated={effectiveAuth}
+          onUpdateProfile={onUpdateProfile}
+        />
+        
+        {/* Section Visibility Controls - Only visible when authenticated */}
+        {mounted && effectiveAuth && onUpdateSectionVisibility ? (
+          <div className="max-w-sm ml-4 lg:ml-auto lg:mr-auto mb-8">
+            <SectionVisibilityManager
+              visibility={profile.sectionVisibility || {}}
+              onVisibilityChange={(field, value) => {
+                if (onUpdateSectionVisibility) {
+                  onUpdateSectionVisibility(field as keyof ProfileData['sectionVisibility'], value);
+                }
+              }}
+              isAuthenticated={effectiveAuth}
+            />
+          </div>
+        ) : (
+          // Placeholder div to maintain consistent spacing when section manager is not visible
+          <div className="max-w-sm ml-4 lg:ml-auto lg:mr-auto mb-8 h-12"></div>
+        )}
 
-      {/* Spotlight Section */}
-      {(profile.sectionVisibility?.spotlight !== false) && (
-        <div className="mt-16 mb-16 px-4">
-          <div className="max-w-6xl mx-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-4xl font-bold text-white text-center tracking-wider">
-                SPOTLIGHT
-              </h2>
-              {mounted && effectiveAuth && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsSpotlightEditorOpen(true)}
-                  className="text-cyan-400 border-cyan-800 hover:bg-cyan-950/30"
-                >
-                  <Edit2 className="w-4 h-4 mr-2" />
-                  Edit Section
-                </Button>
-              )}
-            </div>
-            {mounted && effectiveAuth && (
-              <p className="text-sm text-gray-400 text-center mb-12">
-                Share your work and favorite projects
-              </p>
-            )}
-            {(!mounted || !effectiveAuth) && <div className="mb-8"></div>}
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {spotlightItems.length > 0 ? (
-                // Render actual spotlight items
-                spotlightItems.map((item, index) => (
-                  <div 
-                    key={item.id}
-                    className="group relative rounded-lg overflow-hidden bg-gray-800"
+        {/* Spotlight Section */}
+        {(profile.sectionVisibility?.spotlight !== false) && (
+          <div className="mt-16 mb-16">
+            <div className="max-w-6xl mx-auto">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-4xl font-bold text-white text-center tracking-wider">
+                  SPOTLIGHT
+                </h2>
+                {mounted && effectiveAuth && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsSpotlightEditorOpen(true)}
+                    className="text-cyan-400 border-cyan-800 hover:bg-cyan-950/30"
                   >
-                    <div className="aspect-square relative">
-                      {item.image ? (
-                        item.image.startsWith('data:') ? (
-                          <img
-                            src={item.image}
-                            alt={item.title}
-                            className="absolute w-full h-full object-cover"
-                            style={{ imageRendering: 'auto' }}
-                          />
+                    <Edit2 className="w-4 h-4 mr-2" />
+                    Edit Section
+                  </Button>
+                )}
+              </div>
+              {mounted && effectiveAuth && (
+                <p className="text-sm text-gray-400 text-center mb-12">
+                  Share your work and favorite projects
+                </p>
+              )}
+              {(!mounted || !effectiveAuth) && <div className="mb-8"></div>}
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {spotlightItems.length > 0 ? (
+                  // Render actual spotlight items
+                  spotlightItems.map((item, index) => (
+                    <div 
+                      key={item.id}
+                      className="group relative rounded-lg overflow-hidden bg-gray-800"
+                    >
+                      <div className="aspect-square relative">
+                        {item.image ? (
+                          item.image.startsWith('data:') ? (
+                            <img
+                              src={item.image}
+                              alt={item.title}
+                              className="absolute w-full h-full object-cover"
+                              style={{ imageRendering: 'auto' }}
+                            />
+                          ) : (
+                            <Image
+                              src={item.image}
+                              alt={item.title}
+                              fill
+                              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                              className="object-cover"
+                            />
+                          )
                         ) : (
+                          <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
+                            <p className="text-gray-500">No image</p>
+                          </div>
+                        )}
+                        
+                        {/* Edit button for authenticated users */}
+                        {mounted && effectiveAuth && (
+                          <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="bg-black/50 hover:bg-black/70 border-gray-600"
+                              onClick={() => setIsSpotlightEditorOpen(true)}
+                            >
+                              <Edit2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        )}
+                        
+                        {/* Corner badge */}
+                        <div className="absolute bottom-0 left-0 bg-black bg-opacity-70 p-2 
+                          max-w-[90%] md:max-w-[80%] transition-all duration-300 
+                          md:group-hover:max-w-full rounded-tr-md">
+                          <div className="border-l-2 border-cyan-400 pl-2">
+                            <a href={item.link} target="_blank" rel="noopener noreferrer" className="group/title">
+                              <div className="flex items-center gap-2">
+                                <h4 className="text-white text-sm font-medium truncate group-hover/title:underline">
+                                  {item.title}
+                                </h4>
+                              </div>
+                            </a>
+                            <p className="text-xs text-gray-300 mt-1 line-clamp-2 hidden md:group-hover:block md:hidden">
+                              {item.description}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : mounted && effectiveAuth ? (
+                  // Render placeholder content when authenticated but no items
+                  <>
+                    {[
+                      {
+                        image: '/images/next-event-placeholder.jpg',
+                        title: 'Your Next Event',
+                        description: 'Share details about your upcoming shows, releases, or collaborations'
+                      },
+                      {
+                        image: '/images/featured-artist-placeholder.jpg',
+                        title: 'Featured Artist',
+                        description: 'Highlight collaborations and share the spotlight with other artists'
+                      },
+                      {
+                        image: '/images/latest-project-placeholder.jpg',
+                        title: 'Latest Project',
+                        description: 'Share your latest music, art, or creative projects'
+                      }
+                    ].map((placeholder, index) => (
+                      <div key={index} className="group relative rounded-lg overflow-hidden bg-gray-800/50 cursor-pointer"
+                           onClick={() => {
+                             if (onEditProfile) {
+                               onEditProfile();
+                             }
+                           }}>
+                        <div className="aspect-square relative">
                           <Image
-                            src={item.image}
-                            alt={item.title}
+                            src={placeholder.image}
+                            alt={placeholder.title}
                             fill
                             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                            className="object-cover"
+                            className="object-cover opacity-60"
+                            priority
                           />
-                        )
-                      ) : (
-                        <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
-                          <p className="text-gray-500">No image</p>
+                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <Button 
+                              variant="outline" 
+                              className="border-cyan-500 text-cyan-300 hover:bg-cyan-950/50"
+                            >
+                              <Edit2 className="w-4 h-4 mr-2" />
+                              Add Content
+                            </Button>
+                          </div>
+                          <div className="absolute bottom-0 left-0 bg-black bg-opacity-70 p-2 
+                            max-w-[90%] md:max-w-[80%] transition-all duration-300 
+                            md:group-hover:max-w-full rounded-tr-md">
+                            <div className="border-l-2 border-cyan-400 pl-2">
+                              <div className="flex items-center gap-2">
+                                <h4 className="text-white text-sm font-medium truncate">{placeholder.title}</h4>
+                              </div>
+                              <p className="text-xs text-gray-300 mt-1 line-clamp-2">
+                                {placeholder.description}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </>
+                ) : null}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Add the SpotlightEditorModal */}
+        <SpotlightEditorModal
+          isOpen={isSpotlightEditorOpen}
+          onClose={() => setIsSpotlightEditorOpen(false)}
+          items={spotlightItems}
+          onSave={(updatedItems) => {
+            if (onUpdateSpotlightItems) {
+              onUpdateSpotlightItems(updatedItems);
+            }
+          }}
+        />
+
+        {/* Media Section */}
+        {(profile.sectionVisibility?.media !== false) && mediaItems.length > 0 && (
+          <div className="mt-24 sm:mt-32 mb-24 opacity-0 animate-fadeIn"
+               style={{ animationDelay: '150ms', animationFillMode: 'forwards' }}>
+            <div className="max-w-6xl mx-auto">
+              <h2 className="text-4xl font-bold text-white text-center mb-4 tracking-wider">
+                MEDIA
+              </h2>
+              {effectiveAuth && (
+                <p className="text-sm text-gray-400 text-center mb-12">
+                  Share your music, DJ mixes, playlists and videos
+                </p>
+              )}
+              {!effectiveAuth && <div className="mb-8"></div>}
+              
+              {mediaItems && mediaItems.length > 0 ? (
+                mediaItems.length === 1 ? (
+                  // Single media item - centered with constrained width
+                  <div className="flex justify-center">
+                    <div className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] rounded-lg overflow-hidden">
+                      <div className="w-full">
+                        <MediaEmbed item={mediaItems[0]} />
+                      </div>
+                      {mediaItems[0].title && (
+                        <div className="py-3">
+                          <h3 className="text-xl font-medium text-white">{mediaItems[0].title}</h3>
                         </div>
                       )}
-                      
-                      {/* Edit button for authenticated users */}
-                      {mounted && effectiveAuth && (
-                        <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="bg-black/50 hover:bg-black/70 border-gray-600"
-                            onClick={() => setIsSpotlightEditorOpen(true)}
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </Button>
+                    </div>
+                  </div>
+                ) : mediaItems.length === 2 ? (
+                  // Two media items - centered with constrained width
+                  <div className="flex flex-col sm:flex-row justify-center gap-6">
+                    {mediaItems.slice(0, 2).map((item, index) => (
+                      <div key={index} className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] rounded-lg overflow-hidden">
+                        <div className="w-full">
+                          <MediaEmbed item={item} />
                         </div>
-                      )}
+                        {item.title && (
+                          <div className="py-3">
+                            <h3 className="text-xl font-medium text-white">{item.title}</h3>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  // 3-6 items - grid layout
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {mediaItems.slice(0, 6).map((item, index) => (
+                      <div key={index} className="rounded-lg overflow-hidden">
+                        <div className="w-full">
+                          <MediaEmbed item={item} />
+                        </div>
+                        {item.title && (
+                          <div className="py-3">
+                            <h3 className="text-xl font-medium text-white">{item.title}</h3>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )
+              ) : (
+                // Example placeholder media items (2 items) - should be center-justified
+                <div className="flex flex-col sm:flex-row justify-center gap-6">
+                  {/* YouTube Example */}
+                  <div className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] rounded-lg overflow-hidden">
+                    <div className="w-full bg-transparent">
+                      {/* YouTube embed */}
+                      <div className="aspect-video">
+                        <iframe 
+                          width="100%" 
+                          height="100%" 
+                          src="https://www.youtube.com/embed/coh2TB6B2EA" 
+                          title="YouTube video player" 
+                          frameBorder="0" 
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                          allowFullScreen
+                          className="rounded-lg"
+                        ></iframe>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Spotify Example */}
+                  <div className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] rounded-lg overflow-hidden">
+                    <div className="w-full bg-transparent">
+                      {/* Spotify embed */}
+                      <iframe 
+                        src="https://open.spotify.com/embed/playlist/37i9dQZEVXbNG2KDcFcKOF?si=O2aB8rkiQqqQhUtBfx8I_g" 
+                        width="100%" 
+                        height="380" 
+                        frameBorder="0" 
+                        allow="encrypted-media"
+                        className="rounded-lg"
+                      ></iframe>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Shop Section */}
+        {(profile.sectionVisibility?.shop !== false) && shopItems.length > 0 && (
+          <div className="mt-24 sm:mt-32 mb-24 opacity-0 animate-fadeIn"
+               style={{ animationDelay: '250ms', animationFillMode: 'forwards' }}>
+            <div className="max-w-6xl mx-auto">
+              <h2 className="text-4xl font-bold text-white text-center mb-4 tracking-wider">
+                SHOP
+              </h2>
+              {effectiveAuth && (
+                <p className="text-sm text-gray-400 text-center mb-12">
+                  Connect visitors to your shop and products
+                </p>
+              )}
+              {!effectiveAuth && <div className="mb-8"></div>}
+              
+              {shopItems && shopItems.length > 0 ? (
+                <>
+                  {shopItems.length < 3 ? (
+                    // 1-2 items - center justified 
+                    <div className="flex flex-col sm:flex-row justify-center gap-6">
+                      {shopItems.slice(0, 3).map((item, index) => (
+                        <div 
+                          key={index}
+                          className="group block relative rounded-lg overflow-hidden w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)]"
+                        >
+                          <div className="aspect-square relative bg-gray-800">
+                            {item.image ? (
+                              item.image.startsWith('data:') ? (
+                                <img
+                                  src={item.image}
+                                  alt={item.title}
+                                  className="absolute w-full h-full object-cover"
+                                  style={{ imageRendering: 'auto' }} // Ensures GIFs animate properly
+                                />
+                              ) : (
+                                <Image
+                                  src={item.image}
+                                  alt={item.title}
+                                  fill
+                                  priority
+                                  className="object-cover"
+                                />
+                              )
+                            ) : (
+                              <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
+                                <p className="text-gray-500">No image</p>
+                              </div>
+                            )}
+                            
+                            {/* Corner badge - similar to the editor but optimized for viewing */}
+                            <div className="absolute bottom-0 left-0 bg-black bg-opacity-70 p-2 
+                              max-w-[90%] md:max-w-[80%] transition-all duration-300 
+                              md:group-hover:max-w-full rounded-tr-md">
+                              <div className="border-l-2 border-cyan-400 pl-2">
+                                {item.link ? (
+                                  <a 
+                                    href={item.link} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="group/title"
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <h4 className="text-white text-sm font-medium truncate group-hover/title:underline">{item.title || "Untitled"}</h4>
+                                    </div>
+                                  </a>
+                                ) : (
+                                  <div className="flex items-center gap-2">
+                                    <h4 className="text-white text-sm font-medium truncate">{item.title || "Untitled"}</h4>
+                                  </div>
+                                )}
+                                <p className="text-xs text-gray-300 mt-1 line-clamp-2 hidden md:group-hover:block md:hidden">
+                                  {item.description}
+                                  {item.price && <span className="ml-1 text-cyan-300">{item.price}</span>}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    // 3 items - grid layout
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {shopItems.slice(0, 3).map((item, index) => (
+                        <div 
+                          key={index}
+                          className="group block relative rounded-lg overflow-hidden"
+                        >
+                          <div className="aspect-square relative bg-gray-800">
+                            {item.image ? (
+                              item.image.startsWith('data:') ? (
+                                <img
+                                  src={item.image}
+                                  alt={item.title}
+                                  className="absolute w-full h-full object-cover"
+                                  style={{ imageRendering: 'auto' }} // Ensures GIFs animate properly
+                                />
+                              ) : (
+                                <Image
+                                  src={item.image}
+                                  alt={item.title}
+                                  fill
+                                  priority
+                                  className="object-cover"
+                                />
+                              )
+                            ) : (
+                              <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
+                                <p className="text-gray-500">No image</p>
+                              </div>
+                            )}
+                            
+                            {/* Corner badge - similar to the editor but optimized for viewing */}
+                            <div className="absolute bottom-0 left-0 bg-black bg-opacity-70 p-2 
+                              max-w-[90%] md:max-w-[80%] transition-all duration-300 
+                              md:group-hover:max-w-full rounded-tr-md">
+                              <div className="border-l-2 border-cyan-400 pl-2">
+                                {item.link ? (
+                                  <a 
+                                    href={item.link} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="group/title"
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <h4 className="text-white text-sm font-medium truncate group-hover/title:underline">{item.title || "Untitled"}</h4>
+                                    </div>
+                                  </a>
+                                ) : (
+                                  <div className="flex items-center gap-2">
+                                    <h4 className="text-white text-sm font-medium truncate">{item.title || "Untitled"}</h4>
+                                  </div>
+                                )}
+                                <p className="text-xs text-gray-300 mt-1 line-clamp-2 hidden md:group-hover:block md:hidden">
+                                  {item.description}
+                                  {item.price && <span className="ml-1 text-cyan-300">{item.price}</span>}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              ) : (
+                // Shop placeholder - center justified like other sections
+                <div className="flex justify-center">
+                  <div className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] relative rounded-lg overflow-hidden group">
+                    <div className="aspect-square relative bg-gray-800/50">
+                      <Image
+                        src="/images/shop-placeholder.jpg"
+                        alt="Shop item example"
+                        fill
+                        className="object-cover"
+                      />
                       
                       {/* Corner badge */}
                       <div className="absolute bottom-0 left-0 bg-black bg-opacity-70 p-2 
                         max-w-[90%] md:max-w-[80%] transition-all duration-300 
                         md:group-hover:max-w-full rounded-tr-md">
                         <div className="border-l-2 border-cyan-400 pl-2">
-                          <a href={item.link} target="_blank" rel="noopener noreferrer" className="group/title">
+                          <a href="#" className="group/title">
                             <div className="flex items-center gap-2">
-                              <h4 className="text-white text-sm font-medium truncate group-hover/title:underline">
-                                {item.title}
-                              </h4>
+                              <h4 className="text-white text-sm font-medium truncate group-hover/title:underline">Exclusive Content</h4>
                             </div>
                           </a>
                           <p className="text-xs text-gray-300 mt-1 line-clamp-2 hidden md:group-hover:block md:hidden">
-                            {item.description}
+                            Link to anywhere you sell your stuff, including merch, NFT's or token gated content
                           </p>
                         </div>
                       </div>
                     </div>
                   </div>
-                ))
-              ) : mounted && effectiveAuth ? (
-                // Render placeholder content when authenticated but no items
-                <>
-                  {[
-                    {
-                      image: '/images/next-event-placeholder.jpg',
-                      title: 'Your Next Event',
-                      description: 'Share details about your upcoming shows, releases, or collaborations'
-                    },
-                    {
-                      image: '/images/featured-artist-placeholder.jpg',
-                      title: 'Featured Artist',
-                      description: 'Highlight collaborations and share the spotlight with other artists'
-                    },
-                    {
-                      image: '/images/latest-project-placeholder.jpg',
-                      title: 'Latest Project',
-                      description: 'Share your latest music, art, or creative projects'
-                    }
-                  ].map((placeholder, index) => (
-                    <div key={index} className="group relative rounded-lg overflow-hidden bg-gray-800/50 cursor-pointer"
-                         onClick={() => {
-                           if (onEditProfile) {
-                             onEditProfile();
-                           }
-                         }}>
-                      <div className="aspect-square relative">
-                        <Image
-                          src={placeholder.image}
-                          alt={placeholder.title}
-                          fill
-                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                          className="object-cover opacity-60"
-                          priority
-                        />
-                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <Button 
-                            variant="outline" 
-                            className="border-cyan-500 text-cyan-300 hover:bg-cyan-950/50"
-                          >
-                            <Edit2 className="w-4 h-4 mr-2" />
-                            Add Content
-                          </Button>
-                        </div>
-                        <div className="absolute bottom-0 left-0 bg-black bg-opacity-70 p-2 
-                          max-w-[90%] md:max-w-[80%] transition-all duration-300 
-                          md:group-hover:max-w-full rounded-tr-md">
-                          <div className="border-l-2 border-cyan-400 pl-2">
-                            <div className="flex items-center gap-2">
-                              <h4 className="text-white text-sm font-medium truncate">{placeholder.title}</h4>
-                            </div>
-                            <p className="text-xs text-gray-300 mt-1 line-clamp-2">
-                              {placeholder.description}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </>
-              ) : null}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Add the SpotlightEditorModal */}
-      <SpotlightEditorModal
-        isOpen={isSpotlightEditorOpen}
-        onClose={() => setIsSpotlightEditorOpen(false)}
-        items={spotlightItems}
-        onSave={(updatedItems) => {
-          if (onUpdateSpotlightItems) {
-            onUpdateSpotlightItems(updatedItems);
-          }
-        }}
-      />
-
-      {/* Media Section */}
-      {(profile.sectionVisibility?.media !== false) && mediaItems.length > 0 && (
-        <div className="mt-24 sm:mt-32 max-w-6xl mx-auto px-4 mb-24 opacity-0 animate-fadeIn"
-             style={{ animationDelay: '150ms', animationFillMode: 'forwards' }}>
-          <h2 className="text-4xl font-bold text-white text-center mb-4 tracking-wider">
-            MEDIA
-          </h2>
-          {effectiveAuth && (
-            <p className="text-sm text-gray-400 text-center mb-12">
-              Share your music, DJ mixes, playlists and videos
-            </p>
-          )}
-          {!effectiveAuth && <div className="mb-8"></div>}
-          
-          {mediaItems && mediaItems.length > 0 ? (
-            mediaItems.length === 1 ? (
-              // Single media item - centered with constrained width
-              <div className="flex justify-center">
-                <div className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] rounded-lg overflow-hidden">
-                  <div className="w-full">
-                    <MediaEmbed item={mediaItems[0]} />
-                  </div>
-                  {mediaItems[0].title && (
-                    <div className="py-3">
-                      <h3 className="text-xl font-medium text-white">{mediaItems[0].title}</h3>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ) : mediaItems.length === 2 ? (
-              // Two media items - centered with constrained width
-              <div className="flex flex-col sm:flex-row justify-center gap-6">
-                {mediaItems.slice(0, 2).map((item, index) => (
-                  <div key={index} className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] rounded-lg overflow-hidden">
-                    <div className="w-full">
-                      <MediaEmbed item={item} />
-                    </div>
-                    {item.title && (
-                      <div className="py-3">
-                        <h3 className="text-xl font-medium text-white">{item.title}</h3>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              // 3-6 items - grid layout
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {mediaItems.slice(0, 6).map((item, index) => (
-                  <div key={index} className="rounded-lg overflow-hidden">
-                    <div className="w-full">
-                      <MediaEmbed item={item} />
-                    </div>
-                    {item.title && (
-                      <div className="py-3">
-                        <h3 className="text-xl font-medium text-white">{item.title}</h3>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )
-          ) : (
-            // Example placeholder media items (2 items) - should be center-justified
-            <div className="flex flex-col sm:flex-row justify-center gap-6">
-              {/* YouTube Example */}
-              <div className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] rounded-lg overflow-hidden">
-                <div className="w-full bg-transparent">
-                  {/* YouTube embed */}
-                  <div className="aspect-video">
-                    <iframe 
-                      width="100%" 
-                      height="100%" 
-                      src="https://www.youtube.com/embed/coh2TB6B2EA" 
-                      title="YouTube video player" 
-                      frameBorder="0" 
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                      allowFullScreen
-                      className="rounded-lg"
-                    ></iframe>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Spotify Example */}
-              <div className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] rounded-lg overflow-hidden">
-                <div className="w-full bg-transparent">
-                  {/* Spotify embed */}
-                  <iframe 
-                    src="https://open.spotify.com/embed/playlist/37i9dQZEVXbNG2KDcFcKOF?si=O2aB8rkiQqqQhUtBfx8I_g" 
-                    width="100%" 
-                    height="380" 
-                    frameBorder="0" 
-                    allow="encrypted-media"
-                    className="rounded-lg"
-                  ></iframe>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Shop Section */}
-      {(profile.sectionVisibility?.shop !== false) && shopItems.length > 0 && (
-        <div className="mt-24 sm:mt-32 max-w-6xl mx-auto px-4 mb-24 opacity-0 animate-fadeIn"
-             style={{ animationDelay: '250ms', animationFillMode: 'forwards' }}>
-          <h2 className="text-4xl font-bold text-white text-center mb-4 tracking-wider">
-            SHOP
-          </h2>
-          {effectiveAuth && (
-            <p className="text-sm text-gray-400 text-center mb-12">
-              Connect visitors to your shop and products
-            </p>
-          )}
-          {!effectiveAuth && <div className="mb-8"></div>}
-          
-          {shopItems && shopItems.length > 0 ? (
-            <>
-              {shopItems.length < 3 ? (
-                // 1-2 items - center justified 
-                <div className="flex flex-col sm:flex-row justify-center gap-6">
-                  {shopItems.slice(0, 3).map((item, index) => (
-                    <div 
-                      key={index}
-                      className="group block relative rounded-lg overflow-hidden w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)]"
-                    >
-                      <div className="aspect-square relative bg-gray-800">
-                        {item.image ? (
-                          item.image.startsWith('data:') ? (
-                            <img
-                              src={item.image}
-                              alt={item.title}
-                              className="absolute w-full h-full object-cover"
-                              style={{ imageRendering: 'auto' }} // Ensures GIFs animate properly
-                            />
-                          ) : (
-                            <Image
-                              src={item.image}
-                              alt={item.title}
-                              fill
-                              priority
-                              className="object-cover"
-                            />
-                          )
-                        ) : (
-                          <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
-                            <p className="text-gray-500">No image</p>
-                          </div>
-                        )}
-                        
-                        {/* Corner badge - similar to the editor but optimized for viewing */}
-                        <div className="absolute bottom-0 left-0 bg-black bg-opacity-70 p-2 
-                          max-w-[90%] md:max-w-[80%] transition-all duration-300 
-                          md:group-hover:max-w-full rounded-tr-md">
-                          <div className="border-l-2 border-cyan-400 pl-2">
-                            {item.link ? (
-                              <a 
-                                href={item.link} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="group/title"
-                              >
-                                <div className="flex items-center gap-2">
-                                  <h4 className="text-white text-sm font-medium truncate group-hover/title:underline">{item.title || "Untitled"}</h4>
-                                </div>
-                              </a>
-                            ) : (
-                              <div className="flex items-center gap-2">
-                                <h4 className="text-white text-sm font-medium truncate">{item.title || "Untitled"}</h4>
-                              </div>
-                            )}
-                            <p className="text-xs text-gray-300 mt-1 line-clamp-2 hidden md:group-hover:block md:hidden">
-                              {item.description}
-                              {item.price && <span className="ml-1 text-cyan-300">{item.price}</span>}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                // 3 items - grid layout
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {shopItems.slice(0, 3).map((item, index) => (
-                    <div 
-                      key={index}
-                      className="group block relative rounded-lg overflow-hidden"
-                    >
-                      <div className="aspect-square relative bg-gray-800">
-                        {item.image ? (
-                          item.image.startsWith('data:') ? (
-                            <img
-                              src={item.image}
-                              alt={item.title}
-                              className="absolute w-full h-full object-cover"
-                              style={{ imageRendering: 'auto' }} // Ensures GIFs animate properly
-                            />
-                          ) : (
-                            <Image
-                              src={item.image}
-                              alt={item.title}
-                              fill
-                              priority
-                              className="object-cover"
-                            />
-                          )
-                        ) : (
-                          <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
-                            <p className="text-gray-500">No image</p>
-                          </div>
-                        )}
-                        
-                        {/* Corner badge - similar to the editor but optimized for viewing */}
-                        <div className="absolute bottom-0 left-0 bg-black bg-opacity-70 p-2 
-                          max-w-[90%] md:max-w-[80%] transition-all duration-300 
-                          md:group-hover:max-w-full rounded-tr-md">
-                          <div className="border-l-2 border-cyan-400 pl-2">
-                            {item.link ? (
-                              <a 
-                                href={item.link} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="group/title"
-                              >
-                                <div className="flex items-center gap-2">
-                                  <h4 className="text-white text-sm font-medium truncate group-hover/title:underline">{item.title || "Untitled"}</h4>
-                                </div>
-                              </a>
-                            ) : (
-                              <div className="flex items-center gap-2">
-                                <h4 className="text-white text-sm font-medium truncate">{item.title || "Untitled"}</h4>
-                              </div>
-                            )}
-                            <p className="text-xs text-gray-300 mt-1 line-clamp-2 hidden md:group-hover:block md:hidden">
-                              {item.description}
-                              {item.price && <span className="ml-1 text-cyan-300">{item.price}</span>}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
                 </div>
               )}
-            </>
-          ) : (
-            // Shop placeholder - center justified like other sections
-            <div className="flex justify-center">
-              <div className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] relative rounded-lg overflow-hidden group">
-                <div className="aspect-square relative bg-gray-800/50">
-                  <Image
-                    src="/images/shop-placeholder.jpg"
-                    alt="Shop item example"
-                    fill
-                    className="object-cover"
-                  />
-                  
-                  {/* Corner badge */}
-                  <div className="absolute bottom-0 left-0 bg-black bg-opacity-70 p-2 
-                    max-w-[90%] md:max-w-[80%] transition-all duration-300 
-                    md:group-hover:max-w-full rounded-tr-md">
-                    <div className="border-l-2 border-cyan-400 pl-2">
-                      <a href="#" className="group/title">
-                        <div className="flex items-center gap-2">
-                          <h4 className="text-white text-sm font-medium truncate group-hover/title:underline">Exclusive Content</h4>
-                        </div>
-                      </a>
-                      <p className="text-xs text-gray-300 mt-1 line-clamp-2 hidden md:group-hover:block md:hidden">
-                        Link to anywhere you sell your stuff, including merch, NFT's or token gated content
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
-          )}
-        </div>
-      )}
-      
-      {/* Sticker display - now positioned after the shop section */}
-      <StickerDisplay sticker={profile.sticker} />
+          </div>
+        )}
+        
+        {/* Sticker display */}
+        <StickerDisplay sticker={profile.sticker} />
 
-      {effectiveAuth && onEditProfile && (
-        <div className="mt-4">
-          <button
-            onClick={handleEditClick}
-            className="px-4 py-2 bg-transparent border border-cyan-500 text-cyan-300 rounded-md hover:bg-cyan-900 transition-colors"
-          >
-            <div className="flex items-center gap-2">
-              <Edit2 className="w-4 h-4" />
-              <span>Edit Profile (View)</span>
-            </div>
-          </button>
-        </div>
-      )}
+        {effectiveAuth && onEditProfile && (
+          <div className="mt-4">
+            <button
+              onClick={handleEditClick}
+              className="px-4 py-2 bg-transparent border border-cyan-500 text-cyan-300 rounded-md hover:bg-cyan-900 transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                <Edit2 className="w-4 h-4" />
+                <span>Edit Profile (View)</span>
+              </div>
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
