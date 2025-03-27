@@ -197,13 +197,13 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
           </div>
           
           {/* Wallet address display */}
-          {profile.walletAddress && (
+          {profile.walletAddress && (isAuthenticated || profile.showWalletAddress !== false) && (
             <div className="w-full max-w-xs mx-auto px-3 py-2 bg-gray-800/50 rounded-lg flex items-center justify-between border border-gray-700/50 mt-4">
               <div className="flex items-center gap-2">
                 <div className="text-sm text-gray-300 truncate">
                   {profile.walletAddress.slice(0, 6)}...{profile.walletAddress.slice(-4)}
                 </div>
-                {profile.showWalletAddress === false && (
+                {isAuthenticated && profile.showWalletAddress === false && (
                   <span className="text-xs bg-gray-700 text-gray-400 px-1.5 py-0.5 rounded">Hidden</span>
                 )}
               </div>
