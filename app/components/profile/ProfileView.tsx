@@ -264,7 +264,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
           <div className="mt-16 mb-16">
             <div className="max-w-6xl mx-auto">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-4xl font-bold text-white text-center tracking-wider">
+                <h2 className="text-4xl font-bold text-white tracking-wider">
                   SPOTLIGHT
                 </h2>
                 {mounted && effectiveAuth && (
@@ -280,7 +280,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                 )}
               </div>
               {mounted && effectiveAuth && (
-                <p className="text-sm text-gray-400 text-center mb-12">
+                <p className="text-sm text-gray-400 mb-12">
                   Share your work and favorite projects
                 </p>
               )}
@@ -435,11 +435,11 @@ const ProfileView: React.FC<ProfileViewProps> = ({
           <div className="mt-24 sm:mt-32 mb-24 opacity-0 animate-fadeIn"
                style={{ animationDelay: '150ms', animationFillMode: 'forwards' }}>
             <div className="max-w-6xl mx-auto">
-              <h2 className="text-4xl font-bold text-white text-center mb-4 tracking-wider">
+              <h2 className="text-4xl font-bold text-white mb-4 tracking-wider">
                 MEDIA
               </h2>
               {effectiveAuth && (
-                <p className="text-sm text-gray-400 text-center mb-12">
+                <p className="text-sm text-gray-400 mb-12">
                   Share your music, DJ mixes, playlists and videos
                 </p>
               )}
@@ -540,11 +540,11 @@ const ProfileView: React.FC<ProfileViewProps> = ({
           <div className="mt-24 sm:mt-32 mb-24 opacity-0 animate-fadeIn"
                style={{ animationDelay: '250ms', animationFillMode: 'forwards' }}>
             <div className="max-w-6xl mx-auto">
-              <h2 className="text-4xl font-bold text-white text-center mb-4 tracking-wider">
+              <h2 className="text-4xl font-bold text-white mb-4 tracking-wider">
                 SHOP
               </h2>
               {effectiveAuth && (
-                <p className="text-sm text-gray-400 text-center mb-12">
+                <p className="text-sm text-gray-400 mb-12">
                   Connect visitors to your shop and products
                 </p>
               )}

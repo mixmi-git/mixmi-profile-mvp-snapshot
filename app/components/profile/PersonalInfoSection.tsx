@@ -109,126 +109,130 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
   };
 
   return (
-    <section className="py-8 md:py-12 lg:py-16 w-full max-w-6xl mx-auto px-4">
-      <div className="flex flex-col md:flex-row items-center justify-center gap-10 md:gap-16">
-        {/* Profile picture */}
-        <div className="relative w-64 h-64 md:w-[320px] md:h-[320px] lg:w-[380px] lg:h-[380px] overflow-hidden rounded-lg border-2 border-cyan-300 bg-gray-800">
-          <Image
-            src={profile.image || '/images/placeholder-profile.jpg'}
-            alt={profile.name || 'Profile'}
-            width={400}
-            height={400}
-            className="w-full h-full object-cover"
-          />
-          
-          {isAuthenticated && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 hover:opacity-100 transition-opacity">
-              <label htmlFor="profile-image" className="cursor-pointer">
-                <div className="bg-gray-800 hover:bg-gray-700 text-white px-3 py-2 rounded-md">
-                  Change Image
-                </div>
-                <input
-                  id="profile-image"
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleImageChange}
-                />
-              </label>
-            </div>
-          )}
-        </div>
-        
-        {/* Profile text info */}
-        <div className="flex-1 flex flex-col items-center md:items-center justify-center relative">
-          {isAuthenticated && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsEditorOpen(true)}
-              className="absolute -top-8 right-0 text-cyan-400 border-cyan-800 hover:bg-cyan-950/50 hover:text-cyan-300 hover:border-cyan-600"
-            >
-              <Edit2 className="w-4 h-4 mr-2" />
-              Edit Section
-            </Button>
-          )}
-
-          <div className="mb-8">
-            <div className="mb-1">
-              <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-cyan-300">
-                {profile.name || "Your Name"}
-              </h1>
-            </div>
+    <section className="w-full">
+      <div className="container mx-auto px-4 md:px-6 lg:px-8 py-8 md:py-12 lg:py-16">
+        <div className="flex flex-col md:flex-row items-center justify-center gap-10 md:gap-16">
+          {/* Profile picture */}
+          <div className="relative w-64 h-64 md:w-[320px] md:h-[320px] lg:w-[380px] lg:h-[380px] overflow-hidden rounded-lg border-2 border-cyan-300 bg-gray-800">
+            <Image
+              src={profile.image || '/images/placeholder-profile.jpg'}
+              alt={profile.name || 'Profile'}
+              width={400}
+              height={400}
+              className="w-full h-full object-cover"
+            />
             
-            <h2 className="text-base md:text-xl text-gray-300 mt-2 text-center">
-              {profile.title || "What You Do"}
-            </h2>
-          </div>
-          
-          <div className="mb-8 max-w-2xl w-full">
-            <p className="text-xs md:text-sm leading-relaxed text-gray-300 text-center">
-              {profile.bio || "Tell your story here..."}
-            </p>
-          </div>
-          
-          {/* Social links */}
-          <div className="flex flex-wrap justify-center gap-3 mb-4">
-            {profile.socialLinks && profile.socialLinks.length > 0 ? (
-              profile.socialLinks.map((link, index) => (
-                <a
-                  key={`${link.platform}-${index}`}
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center p-2 bg-gray-800 hover:bg-gray-700 rounded-full transition-colors"
-                  aria-label={link.platform}
-                >
-                  {getSocialIcon(link.platform)}
-                </a>
-              ))
-            ) : (
-              <>
-                <div className="inline-flex items-center justify-center p-2 bg-gray-800/60 rounded-full cursor-default opacity-60">
-                  <Instagram size={18} className="text-gray-400" />
-                </div>
-                <div className="inline-flex items-center justify-center p-2 bg-gray-800/60 rounded-full cursor-default opacity-60">
-                  <FaYoutube size={18} className="text-gray-400" />
-                </div>
-                <div className="inline-flex items-center justify-center p-2 bg-gray-800/60 rounded-full cursor-default opacity-60">
-                  <FaXTwitter size={18} className="text-gray-400" />
-                </div>
-                <div className="inline-flex items-center justify-center p-2 bg-gray-800/60 rounded-full cursor-default opacity-60">
-                  <FaSpotify size={18} className="text-gray-400" />
-                </div>
-              </>
+            {isAuthenticated && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 hover:opacity-100 transition-opacity">
+                <label htmlFor="profile-image" className="cursor-pointer">
+                  <div className="bg-gray-800 hover:bg-gray-700 text-white px-3 py-2 rounded-md">
+                    Change Image
+                  </div>
+                  <input
+                    id="profile-image"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleImageChange}
+                  />
+                </label>
+              </div>
             )}
           </div>
           
-          {/* Wallet address display */}
-          {profile.walletAddress && (isAuthenticated || profile.showWalletAddress !== false) && (
-            <div className="w-full max-w-xs mx-auto px-3 py-2 bg-gray-800/50 rounded-lg flex items-center justify-between border border-gray-700/50 mt-4">
-              <div className="flex items-center gap-2">
-                <div className="text-sm text-gray-300 truncate">
-                  {profile.walletAddress.slice(0, 6)}...{profile.walletAddress.slice(-4)}
-                </div>
-                {isAuthenticated && profile.showWalletAddress === false && (
-                  <span className="text-xs bg-gray-700 text-gray-400 px-1.5 py-0.5 rounded">Hidden</span>
-                )}
+          {/* Profile text info */}
+          <div className="flex-1 flex flex-col items-center justify-center relative w-64 md:w-[320px] lg:w-[380px]">
+            {isAuthenticated && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsEditorOpen(true)}
+                className="absolute -top-8 right-0 text-cyan-400 border-cyan-800 hover:bg-cyan-950/50 hover:text-cyan-300 hover:border-cyan-600"
+              >
+                <Edit2 className="w-4 h-4 mr-2" />
+                Edit Section
+              </Button>
+            )}
+
+            <div className="mb-6 w-full">
+              <div className="mb-2">
+                <h1 className="text-3xl md:text-4xl font-bold text-cyan-300 text-center truncate" title={profile.name || "Your Name"}>
+                  {profile.name || "Your Name"}
+                </h1>
               </div>
               
-              <button
-                onClick={() => copyToClipboard(profile.walletAddress || '')}
-                className="text-gray-400 hover:text-gray-300 p-1"
-                aria-label="Copy wallet address"
-              >
-                {copied ? (
-                  <span className="text-xs text-green-500">Copied!</span>
-                ) : (
-                  <Copy size={14} />
-                )}
-              </button>
+              <h2 className="text-lg md:text-xl text-gray-400 text-center truncate" title={profile.title || "What You Do"}>
+                {profile.title || "What You Do"}
+              </h2>
             </div>
-          )}
+            
+            <div className="mb-6 w-full">
+              <p className="text-sm md:text-base leading-relaxed text-gray-300 text-center max-w-lg mx-auto">
+                {profile.bio || "Tell your story here..."}
+              </p>
+            </div>
+            
+            {/* Social links */}
+            <div className="flex flex-wrap justify-center gap-2.5 mb-4 w-full">
+              {profile.socialLinks && profile.socialLinks.length > 0 ? (
+                profile.socialLinks.map((link, index) => (
+                  <a
+                    key={`${link.platform}-${index}`}
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center p-2 bg-gray-800 hover:bg-gray-700 rounded-full transition-colors"
+                    aria-label={link.platform}
+                  >
+                    {getSocialIcon(link.platform)}
+                  </a>
+                ))
+              ) : (
+                <>
+                  <div className="inline-flex items-center justify-center p-2 bg-gray-800/60 rounded-full cursor-default opacity-60">
+                    <Instagram size={18} className="text-gray-400" />
+                  </div>
+                  <div className="inline-flex items-center justify-center p-2 bg-gray-800/60 rounded-full cursor-default opacity-60">
+                    <FaYoutube size={18} className="text-gray-400" />
+                  </div>
+                  <div className="inline-flex items-center justify-center p-2 bg-gray-800/60 rounded-full cursor-default opacity-60">
+                    <FaXTwitter size={18} className="text-gray-400" />
+                  </div>
+                  <div className="inline-flex items-center justify-center p-2 bg-gray-800/60 rounded-full cursor-default opacity-60">
+                    <FaSpotify size={18} className="text-gray-400" />
+                  </div>
+                </>
+              )}
+            </div>
+            
+            {/* Wallet address display */}
+            <div className="flex justify-center w-full">
+              {profile.walletAddress && (isAuthenticated || profile.showWalletAddress !== false) && (
+                <div className="max-w-[280px] w-full px-3 py-2 bg-gray-800/50 rounded-lg flex items-center justify-between border border-gray-700/50 mt-4">
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <div className="text-sm text-gray-300 truncate" title={profile.walletAddress}>
+                      {profile.walletAddress}
+                    </div>
+                    {isAuthenticated && profile.showWalletAddress === false && (
+                      <span className="text-xs bg-gray-700 text-gray-400 px-1.5 py-0.5 rounded shrink-0">Hidden</span>
+                    )}
+                  </div>
+                  
+                  <button
+                    onClick={() => copyToClipboard(profile.walletAddress || '')}
+                    className="text-gray-400 hover:text-gray-300 p-1 shrink-0 ml-2"
+                    aria-label="Copy wallet address"
+                  >
+                    {copied ? (
+                      <span className="text-xs text-green-500">Copied!</span>
+                    ) : (
+                      <Copy size={14} />
+                    )}
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
