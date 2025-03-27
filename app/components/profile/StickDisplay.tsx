@@ -21,14 +21,14 @@ export default function StickerDisplay({
   }
 
   return (
-    <div className="w-full flex justify-center mt-16 mb-12">
-      <div className="w-32 h-32 sticker-rotate">
+    <div className="w-full flex justify-center mt-12">
+      <div className="w-32 h-32 sticker-rotate [filter:drop-shadow(0_0_8px_rgba(180,180,255,0.3))]">
         <Image
           src={sticker.image}
           alt="Profile sticker"
           width={128}
           height={128}
-          className="w-full h-full object-contain drop-shadow-lg"
+          className="w-full h-full object-contain"
           priority
           unoptimized
         />
