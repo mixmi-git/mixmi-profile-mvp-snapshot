@@ -7,16 +7,20 @@ interface StickerDisplayProps {
     visible: boolean;
     image: string;
   };
+  sectionVisibility?: {
+    sticker?: boolean;
+  };
 }
 
 export default function StickerDisplay({
   sticker = { 
     visible: true, 
     image: "/images/stickers/daisy-blue.png" 
-  }
+  },
+  sectionVisibility = { sticker: true }
 }: StickerDisplayProps) {
-  // If sticker is not visible, don't render anything
-  if (!sticker.visible) {
+  // If sticker is not visible or section is hidden, don't render anything
+  if (!sticker.visible || sectionVisibility.sticker === false) {
     return null;
   }
 

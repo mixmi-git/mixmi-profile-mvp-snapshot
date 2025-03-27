@@ -737,7 +737,10 @@ const ProfileView: React.FC<ProfileViewProps> = ({
           )}
           
           {/* Sticker display */}
-          <StickerDisplay sticker={profile.sticker} />
+          <StickerDisplay 
+            sticker={profile.sticker} 
+            sectionVisibility={profile.sectionVisibility}
+          />
 
           {effectiveAuth && onEditProfile && (
             <div className="mt-4">
