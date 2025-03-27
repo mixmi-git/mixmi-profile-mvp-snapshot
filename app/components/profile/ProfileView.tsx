@@ -741,7 +741,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
           )}
           
           {/* Sticker display */}
-          <div className="relative">
+          <div className="relative group">
             <StickerDisplay 
               sticker={profile.sticker} 
               sectionVisibility={profile.sectionVisibility}
