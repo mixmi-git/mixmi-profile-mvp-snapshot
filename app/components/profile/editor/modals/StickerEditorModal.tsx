@@ -41,6 +41,34 @@ const STICKER_OPTIONS = [
   {
     color: 'Yellow',
     image: '/images/stickers/daisy-yellow.png'
+  },
+  {
+    color: 'Moto',
+    image: '/images/stickers/moto-wheel-2.png'
+  },
+  {
+    color: 'Lemon',
+    image: '/images/stickers/lemon-slice.png'
+  },
+  {
+    color: 'Lime',
+    image: '/images/stickers/lime-slice.png'
+  },
+  {
+    color: 'Orange',
+    image: '/images/stickers/orange-slice.png'
+  },
+  {
+    color: 'Pineapple',
+    image: '/images/stickers/pineapple-slice.png'
+  },
+  {
+    color: 'Strawberry',
+    image: '/images/stickers/strawberry-slice.png'
+  },
+  {
+    color: 'Gear',
+    image: '/images/stickers/gear-shiny.png'
   }
 ];
 
@@ -66,7 +94,7 @@ export function StickerEditorModal({
             Edit Profile Sticker
           </DialogTitle>
           <DialogDescription className="text-gray-400">
-            Choose your favorite daisy color
+            Choose a daisy, fruit slice, or mechanical design for your profile
           </DialogDescription>
         </DialogHeader>
 
@@ -83,7 +111,7 @@ export function StickerEditorModal({
           </div>
 
           {/* Sticker Grid */}
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-4 gap-3">
             {STICKER_OPTIONS.map((option) => (
               <button
                 key={option.color}
