@@ -197,7 +197,7 @@ export function ShopEditorModal({
           <Button
             variant="ghost"
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-300"
+            className="text-gray-300 hover:text-gray-700"
           >
             Cancel
           </Button>

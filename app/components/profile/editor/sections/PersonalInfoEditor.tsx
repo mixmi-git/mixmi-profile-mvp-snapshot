@@ -19,7 +19,7 @@ const SOCIAL_PLATFORMS = [
 ];
 
 const MAX_LENGTHS = {
-  name: 30,
+  name: 40,
   title: 40,
   bio: 350
 } as const;
@@ -262,7 +262,7 @@ export const PersonalInfoEditor: React.FC<PersonalInfoEditorProps> = ({
           type="button"
           variant="ghost"
           onClick={onClose}
-          className="text-gray-400 hover:text-gray-300"
+          className="text-gray-300 hover:text-gray-700"
         >
           Cancel
         </Button>
