@@ -326,7 +326,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                       variant="outline"
                       size="sm"
                       onClick={() => setIsSpotlightEditorOpen(true)}
-                      className="text-cyan-400 border-cyan-800 hover:bg-cyan-950/30"
+                      className="text-cyan-400 border-cyan-800 hover:bg-cyan-900/40 hover:text-cyan-300 hover:border-cyan-600"
                     >
                       <Edit2 className="w-4 h-4 mr-2" />
                       Edit Section
@@ -498,7 +498,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                       variant="outline"
                       size="sm"
                       onClick={() => setIsMediaEditorOpen(true)}
-                      className="text-cyan-400 border-cyan-800 hover:bg-cyan-950/30"
+                      className="text-cyan-400 border-cyan-800 hover:bg-cyan-900/40 hover:text-cyan-300 hover:border-cyan-600"
                     >
                       <Edit2 className="w-4 h-4 mr-2" />
                       Edit Section
@@ -563,7 +563,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                       variant="outline"
                       size="sm"
                       onClick={() => setIsShopEditorOpen(true)}
-                      className="text-cyan-400 border-cyan-800 hover:bg-cyan-950/30"
+                      className="text-cyan-400 border-cyan-800 hover:bg-cyan-900/40 hover:text-cyan-300 hover:border-cyan-600"
                     >
                       <Edit2 className="w-4 h-4 mr-2" />
                       Edit Section
@@ -752,7 +752,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                   variant="outline"
                   size="sm"
                   onClick={() => setIsStickerEditorOpen(true)}
-                  className="text-cyan-400 border-cyan-800 hover:bg-cyan-950/30"
+                  className="text-cyan-400 border-cyan-800 hover:bg-cyan-900/40 hover:text-cyan-300 hover:border-cyan-600"
                 >
                   <Edit2 className="w-4 h-4 mr-2" />
                   Edit Sticker
