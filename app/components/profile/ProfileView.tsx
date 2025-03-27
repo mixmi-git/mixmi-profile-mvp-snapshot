@@ -292,7 +292,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                   spotlightItems.map((item, index) => (
                     <div 
                       key={item.id}
-                      className="group relative rounded-lg overflow-hidden bg-gray-800"
+                      className="group relative rounded-lg overflow-hidden bg-gray-800 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
                     >
                       <div className="aspect-square relative">
                         {item.image ? (
@@ -372,7 +372,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                         description: 'Share your latest music, art, or creative projects'
                       }
                     ].map((placeholder, index) => (
-                      <div key={index} className="group relative rounded-lg overflow-hidden bg-gray-800/50 cursor-pointer"
+                      <div key={index} className="group relative rounded-lg overflow-hidden bg-gray-800/50 cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
                            onClick={() => {
                              if (onEditProfile) {
                                onEditProfile();
@@ -558,7 +558,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                       {shopItems.slice(0, 3).map((item, index) => (
                         <div 
                           key={index}
-                          className="group block relative rounded-lg overflow-hidden w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)]"
+                          className="group block relative rounded-lg overflow-hidden w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
                         >
                           <div className="aspect-square relative bg-gray-800">
                             {item.image ? (
@@ -621,7 +621,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
                       {shopItems.slice(0, 3).map((item, index) => (
                         <div 
                           key={index}
-                          className="group block relative rounded-lg overflow-hidden"
+                          className="group block relative rounded-lg overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
                         >
                           <div className="aspect-square relative bg-gray-800">
                             {item.image ? (
@@ -683,7 +683,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({
               ) : (
                 // Shop placeholder - center justified like other sections
                 <div className="flex justify-center">
-                  <div className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] relative rounded-lg overflow-hidden group">
+                  <div className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] relative rounded-lg overflow-hidden group transition-all duration-300 hover:scale-[1.02] hover:shadow-lg">
                     <div className="aspect-square relative bg-gray-800/50">
                       <Image
                         src="/images/shop-placeholder.jpg"
