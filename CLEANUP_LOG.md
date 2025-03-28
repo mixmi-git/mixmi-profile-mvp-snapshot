@@ -96,6 +96,29 @@ This document tracks all cleanup tasks performed on the codebase, including what
   - Verified application still functions correctly after removal
   - Tested that the app loads and the main features work
 
+### Task 9: Update Cleanup Log
+- **Branch:** `cleanup-task-9-update-log`
+- **Files Modified:**
+  - `CLEANUP_LOG.md` (updated with detailed information about tasks 7 & 8)
+- **Notes:**
+  - Added comprehensive details about type system investigation
+  - Added information about removing unused reset profile button
+  - Expanded documentation on lessons learned
+
+### Task 10: Remove Unused i18n Directory
+- **Branch:** `cleanup-task-10-remove-unused-i18n`
+- **Files Removed:**
+  - `app/i18n/index.ts`
+  - `app/i18n/locales/en.json`
+  - `app/i18n/locales/es.json`
+- **Notes:**
+  - Removed internationalization support that wasn't being used in the working app
+  - Confirmed no components were importing or using the i18n functionality
+  - Simplified the codebase by removing unused features
+- **Verification:**
+  - Verified application still functions correctly after removal
+  - Tested that the app loads and the main features work
+
 ## Notes for Future Tasks
 
 - **Checkpoint Files:** Our attempt to remove checkpoint/backup files caused issues, suggesting some may be in active use despite their names. Approach with caution.
