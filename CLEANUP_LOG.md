@@ -60,8 +60,27 @@ This document tracks all cleanup tasks performed on the codebase, including what
   - Verified application still functions correctly after removal
   - Tested that the app loads and the main features work
 
+### Task 6: Replace Root Page with Redirect
+- **Branch:** `cleanup-task-6-remove-root-page`
+- **Files Modified:**
+  - `app/page.tsx` (replaced component with redirect to `/integrated`)
+- **Notes:**
+  - The root page was using `UserProfileContainer`, but we're exclusively using `IntegratedProfile`
+  - Rather than removing the file entirely, replaced it with a redirect for better UX
+  - Ensures users accessing the root URL (`/`) are directed to our working implementation
+- **Verification:**
+  - Verified the redirect works properly
+  - Tested that the app still functions correctly
+  - Confirmed there are no regressions in functionality
+
 ## Notes for Future Tasks
 
+- **Checkpoint Files:** Our attempt to remove checkpoint/backup files caused issues, suggesting some may be in active use despite their names. Approach with caution.
+- **Types Refactoring:** The application has a complex type system with interdependencies:
+  - The working code in `IntegratedProfile` uses centralized types from `@/types`
+  - Many other components still import types from `UserProfileContainer` 
+  - Attempted to refactor these imports but encountered type compatibility issues
+  - Consider standardizing the type system in a dedicated refactoring task
 - **Preserving the Reset Functionality:**
   - Currently accessible via `/reset` route
   - The route is linked from the loading state in `IntegratedProfile.tsx`
@@ -82,4 +101,6 @@ This document tracks all cleanup tasks performed on the codebase, including what
 1. **Be Surgical in Cleanup:** When removing code, sometimes a more targeted approach is needed rather than removing entire directories
 2. **Check for Shared Dependencies:** Components and routes can share hooks, utilities, and other dependencies
 3. **Test After Each Change:** Even small changes can have unexpected impacts
-4. **Keep Good Backups:** Having branches for each task made it easy to revert when issues were encountered 
+4. **Keep Good Backups:** Having branches for each task made it easy to revert when issues were encountered
+5. **File Naming Can Be Misleading:** Files with names like "checkpoint" or "backup" might actually be in active use
+6. **Type System Complexity:** The project uses a mix of direct type imports and re-exports, making it challenging to refactor without a dedicated effort 
