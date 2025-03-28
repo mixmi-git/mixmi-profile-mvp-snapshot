@@ -1,9 +1,8 @@
-import { ProfileData as BaseProfileData, MediaItemType as BaseMediaItemType, SpotlightItemType as BaseSpotlightItemType, ShopItemType as BaseShopItemType } from '../../UserProfileContainer';
+import { ProfileData, MediaItem, SpotlightItem, ShopItem } from '@/types';
 
-export type ProfileData = BaseProfileData;
-export type MediaItemType = BaseMediaItemType;
-export type SpotlightItemType = BaseSpotlightItemType;
-export type ShopItemType = BaseShopItemType;
+export type MediaItemType = MediaItem;
+export type SpotlightItemType = SpotlightItem;
+export type ShopItemType = ShopItem;
 
 export interface SocialLinkError {
   platform: string;
