@@ -73,6 +73,29 @@ This document tracks all cleanup tasks performed on the codebase, including what
   - Tested that the app still functions correctly
   - Confirmed there are no regressions in functionality
 
+### Task 7: Investigate Type System for Refactoring
+- **Branch:** `cleanup-task-7-refactor-types`
+- **Notes:**
+  - Analyzed the type system and dependencies
+  - Found a mix of direct type imports and re-exports, with complex interdependencies
+  - Documented findings for future dedicated refactoring task
+- **Learning:**
+  - The project's type system requires a more focused effort to standardize
+  - Type changes can have subtle cascading effects across the codebase
+  - Marked this as a future dedicated task
+
+### Task 8: Remove Unused Reset Profile Button
+- **Branch:** `cleanup-task-8-remove-unused-reset-button`
+- **Files Removed:**
+  - `app/resetProfileButton.tsx`
+  - `app/resetProfileButton.checkpoint_media.tsx`
+- **Notes:**
+  - Found these components weren't imported or used anywhere in the codebase
+  - The reset functionality is already available through the `/reset` route
+- **Verification:**
+  - Verified application still functions correctly after removal
+  - Tested that the app loads and the main features work
+
 ## Notes for Future Tasks
 
 - **Checkpoint Files:** Our attempt to remove checkpoint/backup files caused issues, suggesting some may be in active use despite their names. Approach with caution.
