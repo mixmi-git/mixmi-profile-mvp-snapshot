@@ -119,9 +119,49 @@ This document tracks all cleanup tasks performed on the codebase, including what
   - Verified application still functions correctly after removal
   - Tested that the app loads and the main features work
 
+### Task 11: Update Cleanup Log Again
+- **Branch:** `cleanup-task-11-update-log`
+- **Files Modified:**
+  - `CLEANUP_LOG.md` (updated with details about tasks 9 & 10)
+- **Notes:**
+  - Ensured all tasks are thoroughly documented
+  - Maintained comprehensive documentation of the cleanup process
+
+### Task 12: Remove Remaining Test Files
+- **Branch:** `cleanup-task-12-remove-remaining-test-files`
+- **Files Removed:**
+  - `app/test-auth/simple-auth.tsx`
+  - Empty test directories (`app/test`, `app/test-auth`, `app/test-navbar`, `app/auth-test`)
+- **Notes:**
+  - Removed the last remaining test file that wasn't being used
+  - Cleaned up empty directories that were left after removing the test route pages
+- **Verification:**
+  - Verified application still functions correctly after removal
+  - Tested that the app loads and the main features work
+
+### Task 13: Attempted to Remove Checkpoint Files (Failed)
+- **Branch:** `cleanup-task-13-remove-checkpoint-file` (reverted)
+- **Attempted Changes:**
+  - Tried to remove `app/lib/checkpoints/example-content.checkpoint.ts`
+  - Tried to remove the checkpoints directory
+- **Issues:**
+  - Removing the checkpoint file caused the app to enter an infinite loading state
+  - No direct imports of this file were found via grep search, suggesting dynamic imports or indirect usage
+- **Learning:**
+  - Confirmed that some checkpoint files are actually used by the application even without explicit imports
+  - Highlights the complex interdependencies in the codebase
+  - Reinforces our earlier finding that checkpoint files need careful assessment
+- **Resolution:**
+  - Reverted changes to restore functionality
+  - Left the checkpoint file and directory in place
+
 ## Notes for Future Tasks
 
-- **Checkpoint Files:** Our attempt to remove checkpoint/backup files caused issues, suggesting some may be in active use despite their names. Approach with caution.
+- **Checkpoint Files:** Multiple attempts to remove checkpoint/backup files have confirmed they are critical to application functionality despite their names suggesting otherwise:
+  - `app/lib/checkpoints/example-content.checkpoint.ts` causes infinite loading when removed
+  - Some checkpoint files might be loaded dynamically or referenced indirectly
+  - A comprehensive dependency analysis would be needed before removing any more checkpoint files
+  - Consider renaming these files to better reflect their production status in a future task
 - **Types Refactoring:** The application has a complex type system with interdependencies:
   - The working code in `IntegratedProfile` uses centralized types from `@/types`
   - Many other components still import types from `UserProfileContainer` 
@@ -149,4 +189,6 @@ This document tracks all cleanup tasks performed on the codebase, including what
 3. **Test After Each Change:** Even small changes can have unexpected impacts
 4. **Keep Good Backups:** Having branches for each task made it easy to revert when issues were encountered
 5. **File Naming Can Be Misleading:** Files with names like "checkpoint" or "backup" might actually be in active use
-6. **Type System Complexity:** The project uses a mix of direct type imports and re-exports, making it challenging to refactor without a dedicated effort 
+6. **Type System Complexity:** The project uses a mix of direct type imports and re-exports, making it challenging to refactor without a dedicated effort
+7. **Hidden Dependencies:** Some files may have dependencies that aren't apparent through static code analysis or grep searches
+8. **Dynamic Imports:** The application may use dynamic imports or lazy loading that makes dependency tracking difficult 
