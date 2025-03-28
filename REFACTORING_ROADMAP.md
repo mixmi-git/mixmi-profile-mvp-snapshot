@@ -248,8 +248,57 @@ To successfully implement these refactoring tasks, we recommend:
    - Ensure code comments reflect architectural decisions
 
 4. **Branch Strategy**
-   - Create feature branches for each major task
-   - Use short-lived branches for subtasks
-   - Regular merges back to the main branch
+   - Use a dedicated branch for each refactoring task
+   - Consider feature flags for larger changes
+   - Merge frequently to avoid divergence
 
-By following this roadmap, the codebase will become more maintainable, with clearer architecture, better types, and more explicit dependencies - all while preserving the existing functionality.
+The end goal is a maintainable codebase with:
+- Clearer architecture
+- Consistent type system
+- Explicit dependencies
+- Better developer experience
+
+## Guided Refactoring Approach
+
+To ensure safe and effective implementation of the refactoring tasks, we'll follow these critical guidelines:
+
+### Critical Guidelines
+
+1. **Make only ONE small change at a time**
+   - Never combine multiple refactoring actions, even if they seem related
+   - Keep changes focused and minimal
+
+2. **Test after each change**
+   - Stop after each change to verify the application still works
+   - Never proceed to the next change until current one is confirmed working
+
+3. **For each proposed change, document**:
+   - WHY this specific change is needed
+   - HOW it addresses the problem
+   - Potential RISKS this change might introduce
+   - VERIFICATION steps to confirm it works correctly
+
+4. **Never assume anything about hidden dependencies**
+   - Treat files with unusual names (like "checkpoint" files) as potentially critical
+   - Verify dependencies before modifying any file
+
+5. **When working with types**:
+   - Show BEFORE and AFTER versions of affected types
+   - Highlight fields that changed from required to optional or vice versa
+   - Verify that new types are compatible with their usage
+
+6. **For component refactoring**:
+   - Never modify both parent and child components in the same step
+   - Preserve all existing props and state, even if they seem unused
+   - Ensure event handlers maintain their exact functionality
+
+### Working Process
+
+For each refactoring task, follow this process:
+
+1. **Analysis**: Analyze the specific issue without making any changes
+2. **Planning**: Propose a step-by-step plan with small, verifiable changes
+3. **Implementation**: Implement ONE change at a time, waiting for verification
+4. **Documentation**: Document what was changed and why
+
+This methodical approach will help maintain application stability throughout the refactoring process and minimize the risk of introducing regressions.
