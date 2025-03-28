@@ -120,6 +120,8 @@ export function StickerEditorModal({
                     fill
                     className="object-contain"
                     unoptimized
+                    onError={() => console.error(`Failed to load sticker: ${option.image}`)}
+                    onLoad={() => console.log(`Successfully loaded sticker: ${option.image}`)}
                   />
                 </div>
               </button>
