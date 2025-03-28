@@ -1,16 +1,7 @@
-'use client';
+export const dynamic = 'force-dynamic';
 
-import React, { Suspense } from 'react';
-import { UserProfileContainer } from '@/components/profile/UserProfileContainer';
+import { redirect } from 'next/navigation';
 
-export default function HomePage() {
-  return (
-    <Suspense fallback={
-      <div className="flex items-center justify-center min-h-screen bg-black text-white">
-        <p>Loading profile...</p>
-      </div>
-    }>
-      <UserProfileContainer />
-    </Suspense>
-  );
+export default function RootPage() {
+  redirect('/integrated');
 }
