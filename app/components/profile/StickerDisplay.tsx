@@ -19,8 +19,15 @@ export default function StickerDisplay({
   },
   sectionVisibility = { sticker: true }
 }: StickerDisplayProps) {
+  // Debug logging
+  console.log('🎯 StickerDisplay props:', {
+    sticker,
+    sectionVisibility,
+    willRender: sticker.visible !== false && sectionVisibility.sticker !== false
+  });
+
   // If sticker is not visible or section is hidden, don't render anything
-  if (!sticker.visible || sectionVisibility.sticker === false) {
+  if (sticker.visible === false || sectionVisibility.sticker === false) {
     return null;
   }
 

@@ -15,10 +15,10 @@ interface StickerEditorModalProps {
   isOpen: boolean;
   onClose: () => void;
   sticker: {
-    visible: boolean;
     image: string;
+    visible: boolean;
   };
-  onSave: (sticker: { visible: boolean; image: string }) => void;
+  onSave: (sticker: { image: string; visible: boolean }) => void;
 }
 
 const STICKER_OPTIONS = [
@@ -82,11 +82,10 @@ export function StickerEditorModal({
   onSave,
 }: StickerEditorModalProps) {
   const handleStickerChange = (newImage: string) => {
-    onSave({ ...sticker, image: newImage });
-  };
-
-  const handleVisibilityChange = (visible: boolean) => {
-    onSave({ ...sticker, visible });
+    onSave({ 
+      image: newImage,
+      visible: true // Always set visible to true when changing sticker
+    });
   };
 
   return (
@@ -102,17 +101,6 @@ export function StickerEditorModal({
         </DialogHeader>
 
         <div className="space-y-6 py-4">
-          {/* Visibility Toggle */}
-          <div className="flex items-center justify-between">
-            <Label htmlFor="sticker-visible" className="text-white">Show sticker</Label>
-            <Switch
-              id="sticker-visible"
-              checked={sticker.visible}
-              onCheckedChange={handleVisibilityChange}
-              className="data-[state=checked]:bg-cyan-600"
-            />
-          </div>
-
           {/* Sticker Grid */}
           <div className="grid grid-cols-4 gap-3">
             {STICKER_OPTIONS.map((option) => (

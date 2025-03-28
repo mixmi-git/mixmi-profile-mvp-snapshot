@@ -22,7 +22,12 @@ const DEFAULT_PROFILE: ProfileData = {
   sectionVisibility: {
     spotlight: true,
     media: true,
-    shop: true
+    shop: true,
+    sticker: true
+  },
+  sticker: {
+    visible: true,
+    image: '/images/stickers/daisy-blue.png'
   },
   walletAddress: '',
   showWalletAddress: true,
@@ -104,6 +109,7 @@ export function IntegratedProfile() {
     const hasExistingSpotlight = localStorage.getItem(STORAGE_KEYS.SPOTLIGHT);
     const hasExistingShop = localStorage.getItem(STORAGE_KEYS.SHOP);
     const hasExistingMedia = localStorage.getItem(STORAGE_KEYS.MEDIA);
+    const hasExistingSticker = localStorage.getItem(STORAGE_KEYS.STICKER);
 
     if (!hasExistingProfile) {
       setProfile(DEFAULT_PROFILE);
@@ -120,6 +126,17 @@ export function IntegratedProfile() {
     if (!hasExistingMedia) {
       setMediaItems(exampleMediaItems);
       localStorage.setItem(STORAGE_KEYS.MEDIA, JSON.stringify(exampleMediaItems));
+    }
+    if (!hasExistingSticker) {
+      const defaultSticker = {
+        visible: true,
+        image: '/images/stickers/daisy-blue.png'
+      };
+      localStorage.setItem(STORAGE_KEYS.STICKER, JSON.stringify(defaultSticker));
+      setProfile(prev => ({
+        ...prev,
+        sticker: defaultSticker
+      }));
     }
     
     // Force loading complete after a very short delay
@@ -139,9 +156,15 @@ export function IntegratedProfile() {
       const savedSpotlight = localStorage.getItem(STORAGE_KEYS.SPOTLIGHT);
       const savedShop = localStorage.getItem(STORAGE_KEYS.SHOP);
       const savedMedia = localStorage.getItem(STORAGE_KEYS.MEDIA);
+      const savedSticker = localStorage.getItem(STORAGE_KEYS.STICKER);
       
       if (savedProfile) {
-        setProfile(JSON.parse(savedProfile));
+        const parsedProfile = JSON.parse(savedProfile);
+        // Ensure sticker is always visible
+        if (parsedProfile.sticker) {
+          parsedProfile.sticker.visible = true;
+        }
+        setProfile(parsedProfile);
         console.log('📦 Loaded profile from localStorage');
       }
       
@@ -158,6 +181,17 @@ export function IntegratedProfile() {
       if (savedMedia) {
         setMediaItems(JSON.parse(savedMedia));
         console.log('📦 Loaded media items from localStorage');
+      }
+
+      if (savedSticker) {
+        const parsedSticker = JSON.parse(savedSticker);
+        // Always ensure sticker is visible
+        parsedSticker.visible = true;
+        setProfile(prev => ({
+          ...prev,
+          sticker: parsedSticker
+        }));
+        console.log('📦 Loaded sticker data from localStorage');
       }
     } catch (error) {
       console.error('Error loading data from localStorage:', error);

@@ -17,7 +17,7 @@ import { SiTiktok } from 'react-icons/si';
 import { ProfileData } from '@/types';
 import { MediaItem } from '@/types/media';
 import { SpotlightItem as SpotlightItemType, ShopItem as ShopItemType } from '@/types';
-import StickerDisplay from './StickDisplay';
+import StickerDisplay from './StickerDisplay';
 import PersonalInfoSection from './PersonalInfoSection';
 import { SectionVisibilityManager } from '../ui/section-visibility-manager';
 import { Card, CardContent } from '../ui/card';
@@ -199,6 +199,14 @@ const ProfileView: React.FC<ProfileViewProps> = ({
 
   // Add state for sticker editor modal
   const [isStickerEditorOpen, setIsStickerEditorOpen] = useState(false);
+
+  // Add debug logging for profile data
+  useEffect(() => {
+    console.log('🎯 ProfileView profile data:', {
+      sticker: profile.sticker,
+      sectionVisibility: profile.sectionVisibility
+    });
+  }, [profile.sticker, profile.sectionVisibility]);
 
   // For debugging
   const handleEditClick = useCallback(() => {
@@ -728,12 +736,25 @@ const ProfileView: React.FC<ProfileViewProps> = ({
           
           {/* Sticker display */}
           <div className="relative group">
+            {/* Temporary debug button */}
+            {process.env.NODE_ENV === 'development' && (
+              <button
+                onClick={() => {
+                  localStorage.removeItem('mixmi_sticker_data');
+                  localStorage.removeItem('mixmi_sticker_data_default');
+                  window.location.reload();
+                }}
+                className="absolute top-0 left-0 px-2 py-1 text-xs bg-red-600 text-white rounded"
+              >
+                Clear Sticker Data
+              </button>
+            )}
             <StickerDisplay 
               sticker={profile.sticker} 
               sectionVisibility={profile.sectionVisibility}
             />
             {mounted && effectiveAuth && onUpdateStickerData && (
-              <div className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="absolute top-0 right-0">
                 <Button
                   variant="outline"
                   size="sm"
@@ -751,10 +772,10 @@ const ProfileView: React.FC<ProfileViewProps> = ({
           <StickerEditorModal
             isOpen={isStickerEditorOpen}
             onClose={() => setIsStickerEditorOpen(false)}
-            sticker={profile.sticker || { visible: true, image: '/images/stickers/daisy-blue.png' }}
+            sticker={profile.sticker || { image: '/images/stickers/daisy-blue.png', visible: true }}
             onSave={(updatedSticker) => {
               if (onUpdateStickerData) {
-                onUpdateStickerData(updatedSticker);
+                onUpdateStickerData({ ...updatedSticker, visible: true });
               }
               setIsStickerEditorOpen(false);
             }}

@@ -141,9 +141,19 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
       const savedSpotlightItems = getFromStorage<SpotlightItemType[]>(STORAGE_KEYS.SPOTLIGHT, []);
       const savedShopItems = getFromStorage<ShopItemType[]>(STORAGE_KEYS.SHOP, []);
       const savedMediaItems = getFromStorage<MediaItemType[]>(STORAGE_KEYS.MEDIA, []);
+      const savedSticker = getFromStorage<{ visible: boolean; image: string }>(
+        STORAGE_KEYS.STICKER,
+        {
+          visible: true,
+          image: "/images/stickers/daisy-blue.png"
+        }
+      );
       
       // Update state with the loaded data
-      setProfile(savedProfile);
+      setProfile({
+        ...savedProfile,
+        sticker: savedSticker
+      });
       setSpotlightItems(savedSpotlightItems);
       setShopItems(savedShopItems);
       setMediaItems(savedMediaItems);
@@ -155,7 +165,8 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
         profile: savedProfile,
         spotlightItems: savedSpotlightItems.length,
         shopItems: savedShopItems.length,
-        mediaItems: savedMediaItems.length
+        mediaItems: savedMediaItems.length,
+        sticker: savedSticker
       });
     };
     
@@ -212,13 +223,18 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
       const savedSpotlightItems = getFromStorage<SpotlightItemType[]>(STORAGE_KEYS.SPOTLIGHT, []);
       const savedShopItems = getFromStorage<ShopItemType[]>(STORAGE_KEYS.SHOP, []);
       const savedMediaItems = getFromStorage<MediaItemType[]>(STORAGE_KEYS.MEDIA, []);
-      const savedSticker = getFromStorage<{ visible: boolean; image: string }>(
-        STORAGE_KEYS.STICKER, 
-        { 
-          visible: true, 
-          image: "/images/stickers/daisy-blue.png" 
-        }
-      );
+      
+      // Load sticker data
+      const savedSticker = getFromStorage<ProfileData['sticker']>(
+        STORAGE_KEYS.STICKER,
+        DEFAULT_PROFILE.sticker
+      ) as ProfileData['sticker'];
+
+      // Always ensure sticker is visible and has an image
+      const sticker = {
+        visible: true,
+        image: savedSticker?.image || DEFAULT_PROFILE.sticker?.image || "/images/stickers/daisy-blue.png"
+      };
       
       // Check if this is a first-time user for this profile
       const isFirstTimeUser = !localStorage.getItem(STORAGE_KEYS.PROFILE) || 
@@ -233,7 +249,8 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
         savedProfile,
         spotlightItems: savedSpotlightItems?.length || 0,
         mediaItems: savedMediaItems?.length || 0,
-        shopItems: savedShopItems?.length || 0
+        shopItems: savedShopItems?.length || 0,
+        savedSticker
       });
 
       if (isFirstTimeUser) {
@@ -250,10 +267,7 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
             shop: true,
             sticker: true
           },
-          sticker: {
-            visible: true,
-            image: "/images/stickers/daisy-blue.png"
-          }
+          sticker: sticker
         };
         
         setProfile(profileWithDefaults);
@@ -266,13 +280,16 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
         saveToStorage(STORAGE_KEYS.SPOTLIGHT, exampleSpotlightItems);
         saveToStorage(STORAGE_KEYS.SHOP, exampleShopItems);
         saveToStorage(STORAGE_KEYS.MEDIA, exampleMediaItems);
-        saveToStorage(STORAGE_KEYS.STICKER, savedSticker);
+        saveToStorage(STORAGE_KEYS.STICKER, sticker);
         
         devLog('📦 Saved example content for first-time user with profile ID:', profileId);
       } else {
         // Returning user - load their saved content
         devLog('🔄 Returning user with profile ID:', profileId, 'Loading saved content');
-        setProfile(savedProfile);
+        setProfile({
+          ...savedProfile,
+          sticker: sticker
+        });
         setSpotlightItems(savedSpotlightItems || []);
         setShopItems(savedShopItems || []);
         setMediaItems(savedMediaItems?.length > 0 ? savedMediaItems : [{
@@ -348,10 +365,16 @@ const UserProfileContainer: React.FC<UserProfileContainerProps> = ({
   const saveStickerData = (stickerData: { visible: boolean; image: string }) => {
     const STORAGE_KEYS = getStorageKeys(profileId);
     
-    saveToStorage(STORAGE_KEYS.STICKER, stickerData);
+    // Always ensure sticker is visible when saving
+    const stickerToSave = {
+      ...stickerData,
+      visible: true
+    };
+    
+    saveToStorage(STORAGE_KEYS.STICKER, stickerToSave);
     setProfile(prev => ({
       ...prev,
-      sticker: stickerData
+      sticker: stickerToSave
     }));
     devLog('📦 Saved sticker data for profile ID:', profileId);
   };
