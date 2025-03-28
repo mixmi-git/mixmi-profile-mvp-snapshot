@@ -11,6 +11,19 @@ This document outlines the step-by-step approach for cleaning up and refactoring
 5. Commit and push to GitHub after each successful change
 6. Create a new branch for major cleanup phases
 7. Keep debug logs during initial cleanup, remove them later
+8. **Always perform cleanup in a development environment** with debug tools enabled, never in a production build
+
+## Dependency Analysis
+
+Before removing any file:
+1. Check import statements in the `/integrated` route and its components
+2. Use a tool like `npm-check-unused` or grep to find all imports of the file
+3. Check for dynamic imports or lazy-loaded components
+4. Look for string references to component names (for dynamic rendering)
+5. Command to help analyze dependencies:
+   ```bash
+   grep -r "import.*from.*[filename]" --include="*.tsx" --include="*.ts" ./app
+   ```
 
 ## Testing Requirements After EVERY Change
 
@@ -26,13 +39,56 @@ This document outlines the step-by-step approach for cleaning up and refactoring
 5. **Test data persistence** - refresh the page and verify data is preserved
 6. **Test responsive behavior** - verify layout on mobile and desktop sizes
 
+## Git Strategy
+
+1. **Branch Naming**: Create a new branch for each cleanup task: `cleanup-task-1-remove-XYZ`, etc.
+2. **Commit Messages**: Use meaningful commit messages that follow this pattern:
+   ```
+   cleanup: remove unused component XYZ
+   
+   - Removed XYZ because it's not imported anywhere
+   - Verified with dependency check
+   - Tested all features still work
+   ```
+3. **Commit Frequency**: Commit after each significant change
+4. **Push Frequency**: Push to GitHub after each successful test
+5. **Pull Requests**: Consider creating PRs for major phases for better tracking
+
 ## Backup Strategy
 
-- Create a new branch for each cleanup task: `cleanup-task-1-remove-XYZ`, etc.
-- Create checkpoints with `git commit` after each significant change
-- Push to GitHub after each successful test with `git push`
+- Create a new branch before starting each cleanup task
+- Commit changes frequently with descriptive messages
+- Push to GitHub after each successful test
 - Never proceed to the next task without verifying current changes work correctly
-- If something breaks, revert to the last working commit
+
+## Rollback Plan
+
+If something breaks:
+
+1. **Quick Revert**: If you haven't committed changes:
+   ```bash
+   git checkout -- [file]        # Revert a specific file
+   git checkout -- .             # Revert all unstaged changes
+   ```
+
+2. **After Commit**: If you've committed but not pushed:
+   ```bash
+   git revert HEAD               # Create a new commit that undoes the last commit
+   # OR
+   git reset --hard HEAD~1       # Remove the last commit (use with caution)
+   ```
+
+3. **After Push**: If you've pushed to GitHub:
+   ```bash
+   git revert [commit-hash]      # Create a new commit that undoes the problematic commit
+   git push                      # Push the revert commit
+   ```
+
+4. **Emergency Fallback**: If all else fails:
+   ```bash
+   git checkout working-before-clean  # Go back to the known working state
+   git checkout -b cleanup-restart    # Create a new branch to restart cleanup
+   ```
 
 ## Phase 1: Identify and Remove Unused Files
 
@@ -123,6 +179,15 @@ This document outlines the step-by-step approach for cleaning up and refactoring
    - Ensure consistent styling across components
    - Backup to a new branch
    - Implement UI improvements
+
+## Future Migration Considerations
+
+When cleaning up code, preserve or document:
+
+1. **Data Structures**: Keep well-documented data schemas that could be reused with a backend
+2. **Storage Logic**: Clean implementations of data handling could be adapted for database operations
+3. **Authentication Flow**: Preserve the core authentication logic that could be extended for server auth
+4. **Key Business Logic**: Document any complex business logic that would need to be replicated in a future version
 
 ## Final Phase: Documentation Update
 
