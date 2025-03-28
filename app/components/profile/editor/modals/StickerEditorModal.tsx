@@ -22,6 +22,7 @@ interface StickerEditorModalProps {
 }
 
 const STICKER_OPTIONS = [
+  // Daisies
   {
     color: 'Blue',
     image: '/images/stickers/daisy-blue.png'
@@ -42,10 +43,16 @@ const STICKER_OPTIONS = [
     color: 'Yellow',
     image: '/images/stickers/daisy-yellow.png'
   },
+  // Mechanical
   {
     color: 'Moto',
     image: '/images/stickers/moto-wheel-2.png'
   },
+  {
+    color: 'Gear',
+    image: '/images/stickers/gear-shiny.png'
+  },
+  // Fruit Slices
   {
     color: 'Lemon',
     image: '/images/stickers/lemon-slice.png'
@@ -65,10 +72,6 @@ const STICKER_OPTIONS = [
   {
     color: 'Strawberry',
     image: '/images/stickers/strawberry-slice.png'
-  },
-  {
-    color: 'Gear',
-    image: '/images/stickers/gear-shiny.png'
   }
 ];
 
