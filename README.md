@@ -1,57 +1,73 @@
-# Profile App Overview
+# Mixmi Profile - Web3 Profile Application
 
-## Project Description
-This app provides creators with a customizable profile page that they can modify after authenticating with their Stacks wallet. The profile allows creators to showcase their work, social links, shop items, and other personalized content.
+## Overview
 
-## Current Architecture
+This application is a web3-enabled profile page that allows users to create and manage their digital presence with various sections including personal information, spotlight items, media embeds, shop items, and decorative stickers. The application leverages the Leather wallet for authentication and uses localStorage for data persistence.
 
-### Authentication Flow
-1. User arrives at their profile page (initially in read-only mode)
-2. User connects their Stacks wallet through the navbar button
-3. Stacks wallets allow multiple accounts after the initial seed phrase authentication
-4. The profile page should identify which specific wallet account is connected
-5. Once authenticated, an "Edit Profile" button appears in the navbar
-6. Clicking "Edit Profile" navigates to a separate edit page
-7. Changes made on the edit page are saved back to the profile view
-8. The profile must store user information specific to each wallet account
-9. Only the currently connected wallet account should be able to edit its own profile
-10. Disconnecting wallet hides the edit button and returns to read-only mode
+## Key Features
 
-### Component Structure
-- **UserProfileContainer**: Main container that manages all state
-- **ProfileView**: Displays the read-only profile page
-- **ProfileEditor**: Separate page for editing profile content
-- **NavbarContainer**: Handles wallet connection and edit/save buttons
+- **Leather Wallet Authentication**: Authenticate with Stacks blockchain wallet
+- **Read-only vs. Editing States**: Toggle between viewing and editing mode
+- **Section Editors**: Dedicated modals for editing different profile sections
+- **Persistent Storage**: Save data to localStorage, synced with wallet address
+- **Responsive Design**: Mobile-friendly interface
+- **Sticker Customization**: Add decorative stickers to profile
 
-### Current Issues
-1. The separation between view and edit pages creates navigation issues
-2. The navbar save button doesn't properly update all content
-3. Form components in the edit page need modernization
-4. Circular dependencies in authentication system
-5. Duplicate components causing conflicts
+## Application Structure
 
-## Working Components
-- Basic profile information display
-- Spotlight items (row of cards with images and links)
-- Media embeds section
-- Shop items section
-- Rotating sticker image
-- Wallet authentication
+### Routes
 
-## Project Goals
-We want to refactor the application to:
-1. Use an edit-in-place approach instead of separate pages
-2. Modernize form components with ShadCN
-3. Fix the save functionality
-4. Improve mobile responsiveness
-5. Simplify the component architecture
+- **/integrated**: The main entry point for the app, providing the full functionality with authentication and editing capabilities
 
-## Technology Stack
-- React
-- Next.js
-- TypeScript
-- Tailwind CSS
-- ShadCN UI components (which are built on Tailwind)
-- Stacks wallet for authentication
-- Supabase for data storage (profiles, metadata)
-- IPFS for decentralized content storage (images, media)
+### Components Structure
+
+- **IntegratedProfile**: The root component that handles authentication, data loading/saving, and state management
+- **ProfileView**: The main profile display component with read-only and editing modes
+- **Section Components**:
+  - **PersonalInfoSection**: Display and edit name, title, bio, and wallet info
+  - **SpotlightSection**: Display and manage spotlight items
+  - **MediaSection**: Display and manage embedded media content
+  - **ShopSection**: Display and manage shop items
+  - **StickerSection**: Display and customize stickers
+
+### Editor Modals
+
+- **PersonalInfoEditorModal**: Edit profile details
+- **SpotlightEditorModal**: Add, remove, and reorder spotlight items
+- **MediaEditorModal**: Add and manage media embeds
+- **ShopEditorModal**: Create and manage shop items
+- **StickerEditorModal**: Choose and position stickers
+
+## Authentication Flow
+
+1. User clicks "Connect Wallet" button
+2. Leather wallet popup appears for authorization
+3. On successful authentication, the user's wallet address is stored
+4. Edit mode becomes available, allowing profile customization
+5. Profile data is associated with the wallet address
+
+## Storage Implementation
+
+Data is stored in localStorage using the following keys:
+- `mixmi_profile_data`: Basic profile information
+- `mixmi_spotlight_items`: Spotlight section content
+- `mixmi_shop_items`: Shop section items
+- `mixmi_media_items`: Media embeds
+- `mixmi_sticker_data`: Sticker configuration
+- `mixmi_account_profile_map`: Maps wallet addresses to profile IDs
+
+## Technologies Used
+
+- **Next.js**: Framework for the React application
+- **Stacks Connect**: For Leather wallet integration
+- **TailwindCSS**: For styling components
+- **React Beautiful DND**: For drag-and-drop functionality
+- **Lucide & React Icons**: For icon components
+- **Shadcn/UI**: Component library for UI elements
+
+## Development and Testing
+
+In development mode:
+- Authentication can be toggled using the console command `window.toggleAuth()`
+- Current authentication state can be checked with `window.checkAuth()`
+- The app includes example content for testing and preview purposes 
