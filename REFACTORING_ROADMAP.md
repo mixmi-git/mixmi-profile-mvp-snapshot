@@ -252,4 +252,4 @@ To successfully implement these refactoring tasks, we recommend:
    - Use short-lived branches for subtasks
    - Regular merges back to the main branch
 
-By following this roadmap, the codebase will become more maintainable, with clearer architecture, better types, and more explicit dependencies - all while preserving the existing functionality. 
+By following this roadmap, the codebase will become more maintainable, with clearer architecture, better types, and more explicit dependencies - all while preserving the existing functionality.
