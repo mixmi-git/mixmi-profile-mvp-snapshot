@@ -2,29 +2,53 @@
 
 This document outlines the step-by-step approach for cleaning up and refactoring the codebase to improve maintainability, performance, and code quality. Each step should be tested thoroughly, backed up to a new branch, and pushed to GitHub before proceeding to the next step.
 
-## General Guidelines
+## ⚠️ CRITICAL GUIDELINES
 
-1. Make incremental changes - one small change at a time
-2. Test thoroughly after each change
-3. Commit and push to GitHub after each successful change
-4. Create a new branch for major cleanup phases
-5. Keep debug logs during initial cleanup, remove them later
-6. Focus on the `/integrated` route and its components, as this is the current production code
+1. **The `/integrated` route MUST be preserved** - This is the only working implementation
+2. Any component referenced by the `/integrated` route must not be removed or modified without careful testing
+3. Make incremental changes - one small change at a time
+4. Test thoroughly after each change
+5. Commit and push to GitHub after each successful change
+6. Create a new branch for major cleanup phases
+7. Keep debug logs during initial cleanup, remove them later
+
+## Testing Requirements After EVERY Change
+
+1. **Verify the application loads correctly** at `/integrated`
+2. **Test authentication** - connect wallet functionality works
+3. **Test edit mode** - can toggle between view and edit modes
+4. **Test each section editor** - all modals open and save correctly:
+   - Personal Info editor
+   - Spotlight editor
+   - Media editor
+   - Shop editor
+   - Sticker editor
+5. **Test data persistence** - refresh the page and verify data is preserved
+6. **Test responsive behavior** - verify layout on mobile and desktop sizes
+
+## Backup Strategy
+
+- Create a new branch for each cleanup task: `cleanup-task-1-remove-XYZ`, etc.
+- Create checkpoints with `git commit` after each significant change
+- Push to GitHub after each successful test with `git push`
+- Never proceed to the next task without verifying current changes work correctly
+- If something breaks, revert to the last working commit
 
 ## Phase 1: Identify and Remove Unused Files
 
 1. **Identify Unused Routes and Pages**
-   - Analyze routes other than `/integrated`
+   - **PRESERVE** the `/integrated` route and all its dependencies
+   - Analyze other routes and pages
    - List files that are not being used
    - Backup to a new branch
-   - Remove unused route files
+   - Remove unused route files one at a time, testing after each removal
 
 2. **Identify Unused Components**
    - Check for multiple implementations of similar components
-   - Determine which versions are currently in use
+   - Determine which versions are currently in use by the `/integrated` route
    - List components that are not being referenced
    - Backup to a new branch
-   - Remove unused component files
+   - Remove unused component files one at a time, testing after each removal
 
 3. **Identify Unused Utilities and Helpers**
    - Check for duplicate utility functions
@@ -43,10 +67,11 @@ This document outlines the step-by-step approach for cleaning up and refactoring
 
 2. **Refactor Data Management**
    - Review localStorage handling across components
+   - Ensure the app continues to use the separate storage keys defined in `IntegratedProfile`
    - Consolidate data loading/saving logic
    - Ensure consistent error handling
    - Backup to a new branch
-   - Implement improvements
+   - Implement improvements one small change at a time
 
 3. **Refactor Authentication Logic**
    - Review authentication implementation
@@ -99,24 +124,9 @@ This document outlines the step-by-step approach for cleaning up and refactoring
    - Backup to a new branch
    - Implement UI improvements
 
-## Testing After Each Change
-
-1. Test login and authentication
-2. Test creating and editing profile information
-3. Test all modal editors (Personal Info, Spotlight, Media, Shop, Sticker)
-4. Test saving and retrieving data
-5. Test UI on different screen sizes
-
 ## Final Phase: Documentation Update
 
 1. Update README.md with final architecture details
 2. Document any known issues or future improvements
 3. Update code comments for clarity
-4. Remove this CLEANUP.md file from the final version
-
-## Backup Strategy
-
-- Create a new branch for each major phase: `cleanup-phase-1`, `cleanup-phase-2`, etc.
-- Commit after each significant change
-- Push to GitHub after each successful test
-- Create merge requests or pull requests for major phases 
+4. Remove this CLEANUP.md file from the final version 

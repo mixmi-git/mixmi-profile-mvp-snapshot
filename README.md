@@ -4,6 +4,12 @@
 
 This application is a web3-enabled profile page that allows users to create and manage their digital presence with various sections including personal information, spotlight items, media embeds, shop items, and decorative stickers. The application leverages the Leather wallet for authentication and uses localStorage for data persistence.
 
+## ⚠️ IMPORTANT: Current Working Implementation
+
+**The `/integrated` route is the ONLY working implementation.** All other routes and similarly named components outside this path should be considered legacy code that will be removed during cleanup.
+
+This application contains significant amounts of duplicate code and similarly named components from earlier development iterations. Use the structure outlined below to understand the current working implementation.
+
 ## Key Features
 
 - **Leather Wallet Authentication**: Authenticate with Stacks blockchain wallet
@@ -48,13 +54,18 @@ This application is a web3-enabled profile page that allows users to create and 
 
 ## Storage Implementation
 
-Data is stored in localStorage using the following keys:
+Data is stored in localStorage using separate keys for different data types:
 - `mixmi_profile_data`: Basic profile information
 - `mixmi_spotlight_items`: Spotlight section content
 - `mixmi_shop_items`: Shop section items
 - `mixmi_media_items`: Media embeds
 - `mixmi_sticker_data`: Sticker configuration
-- `mixmi_account_profile_map`: Maps wallet addresses to profile IDs
+
+These keys are defined in the `STORAGE_KEYS` object in the `IntegratedProfile` component.
+
+## Example Content - "Fluffy Toy Collective"
+
+The application includes example content themed around the fictional "Fluffy Toy Collective" to demonstrate platform capabilities. This includes placeholder images, descriptions, and media embeds that show how each section can be used.
 
 ## Technologies Used
 
