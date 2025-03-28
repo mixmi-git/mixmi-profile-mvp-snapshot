@@ -54,14 +54,26 @@ This application contains significant amounts of duplicate code and similarly na
 
 ## Storage Implementation
 
-Data is stored in localStorage using separate keys for different data types:
-- `mixmi_profile_data`: Basic profile information
-- `mixmi_spotlight_items`: Spotlight section content
-- `mixmi_shop_items`: Shop section items
-- `mixmi_media_items`: Media embeds
-- `mixmi_sticker_data`: Sticker configuration
+Data is stored in localStorage using separate keys for different data types, defined in the `STORAGE_KEYS` object in the `IntegratedProfile` component:
 
-These keys are defined in the `STORAGE_KEYS` object in the `IntegratedProfile` component.
+```javascript
+const STORAGE_KEYS = {
+  PROFILE: 'mixmi_profile_data',
+  SPOTLIGHT: 'mixmi_spotlight_items',
+  SHOP: 'mixmi_shop_items',
+  MEDIA: 'mixmi_media_items',
+  STICKER: 'mixmi_sticker_data'
+};
+```
+
+Each data type has its own dedicated save function:
+- `saveProfileData()` - Saves basic profile information using `STORAGE_KEYS.PROFILE`
+- `saveSpotlightItems()` - Saves spotlight items using `STORAGE_KEYS.SPOTLIGHT`
+- `saveMediaItems()` - Saves media embeds using `STORAGE_KEYS.MEDIA`
+- `saveShopItems()` - Saves shop items using `STORAGE_KEYS.SHOP`
+- `saveStickerData()` - Saves sticker configuration using `STORAGE_KEYS.STICKER`
+
+This separation allows for targeted updates to specific sections without rewriting all profile data, improving performance and reducing the chance of data loss during saves.
 
 ## Example Content - "Fluffy Toy Collective"
 
