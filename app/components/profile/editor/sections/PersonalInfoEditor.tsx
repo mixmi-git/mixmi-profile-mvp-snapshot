@@ -168,7 +168,7 @@ export const PersonalInfoEditor: React.FC<PersonalInfoEditorProps> = ({
               onChange={(e) => handleInputChange('name', e.target.value)}
               placeholder="Your name"
               maxLength={MAX_LENGTHS.name}
-              className="bg-gray-800 border-gray-700 pr-16 h-8 mt-0.5"
+              className="bg-gray-800 border-gray-700 pr-16 h-8 mt-0.5 placeholder:text-gray-500"
             />
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">
               {formData.name.length}/{MAX_LENGTHS.name}
@@ -185,7 +185,7 @@ export const PersonalInfoEditor: React.FC<PersonalInfoEditorProps> = ({
               onChange={(e) => handleInputChange('title', e.target.value)}
               placeholder="What you do"
               maxLength={MAX_LENGTHS.title}
-              className="bg-gray-800 border-gray-700 pr-16 h-8 mt-0.5"
+              className="bg-gray-800 border-gray-700 pr-16 h-8 mt-0.5 placeholder:text-gray-500"
             />
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">
               {formData.title.length}/{MAX_LENGTHS.title}
@@ -202,7 +202,7 @@ export const PersonalInfoEditor: React.FC<PersonalInfoEditorProps> = ({
               onChange={(e) => handleInputChange('bio', e.target.value)}
               placeholder="Tell your story..."
               maxLength={MAX_LENGTHS.bio}
-              className="bg-gray-800 border-gray-700 min-h-[70px] pr-16 mt-0.5"
+              className="bg-gray-800 border-gray-700 min-h-[70px] pr-16 mt-0.5 placeholder:text-gray-500"
             />
             <span className="absolute right-3 top-3 text-xs text-gray-400">
               {formData.bio.length}/{MAX_LENGTHS.bio}
@@ -213,7 +213,7 @@ export const PersonalInfoEditor: React.FC<PersonalInfoEditorProps> = ({
 
       {/* Wallet Addresses Section */}
       <div className="space-y-3 p-3 bg-gray-800/50 rounded-lg border border-gray-700/50 mb-4">
-        <Label className="text-sm font-medium text-[#B8B8C0] mb-1 block">Wallet Addresses</Label>
+        <Label className="text-sm font-medium text-gray-200 mb-1 block">Wallet Addresses</Label>
         
         {/* STX Wallet Address */}
         {formData.walletAddress && (
@@ -255,14 +255,14 @@ export const PersonalInfoEditor: React.FC<PersonalInfoEditorProps> = ({
             value={formData.btcAddress || ''}
             onChange={(e) => handleInputChange('btcAddress', e.target.value)}
             placeholder="Add your Bitcoin address (optional)"
-            className="bg-gray-800 border-gray-700 text-gray-200 h-8"
+            className="bg-gray-800 border-gray-700 text-gray-200 h-8 placeholder:text-gray-500"
           />
         </div>
       </div>
 
       {/* Social Links Section */}
       <div className="space-y-3 p-3 bg-gray-800/50 rounded-lg border border-gray-700/50">
-        <Label className="text-sm font-medium text-[#B8B8C0] mb-1 block">Social Links</Label>
+        <Label className="text-sm font-medium text-gray-200 mb-1 block">Social Links</Label>
         <div className="space-y-2">
           {formData.socialLinks.map((link, index) => (
             <div key={index} className="flex items-center space-x-2 group">
@@ -283,7 +283,7 @@ export const PersonalInfoEditor: React.FC<PersonalInfoEditorProps> = ({
                 value={link.url}
                 onChange={(e) => handleSocialLinkChange(index, 'url', e.target.value)}
                 placeholder="https://"
-                className="bg-gray-800 border-gray-700 flex-1 text-gray-200 h-8"
+                className="bg-gray-800 border-gray-700 flex-1 text-gray-200 h-8 placeholder:text-gray-500"
               />
 
               {/* Only show delete button if it's not the last empty row */}
