@@ -73,10 +73,22 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
         onUpdateProfile('socialLinks', updates.socialLinks);
       }
       
-      // Send wallet visibility update if changed
+      // Send STX wallet visibility update if changed
       if (updates.showWalletAddress !== undefined) {
-        console.log('Updating wallet visibility:', updates.showWalletAddress);
+        console.log('Updating STX wallet visibility:', updates.showWalletAddress);
         onUpdateProfile('showWalletAddress', updates.showWalletAddress);
+      }
+      
+      // Send BTC address update if changed
+      if (updates.btcAddress !== undefined) {
+        console.log('Updating BTC address:', updates.btcAddress);
+        onUpdateProfile('btcAddress', updates.btcAddress);
+      }
+      
+      // Send BTC wallet visibility update if changed
+      if (updates.showBtcAddress !== undefined) {
+        console.log('Updating BTC wallet visibility:', updates.showBtcAddress);
+        onUpdateProfile('showBtcAddress', updates.showBtcAddress);
       }
     }
     setIsEditorOpen(false);
