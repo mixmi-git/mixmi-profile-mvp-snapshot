@@ -159,54 +159,54 @@ export const PersonalInfoEditor: React.FC<PersonalInfoEditorProps> = ({
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-4">
         <div>
-          <div className="flex justify-between items-baseline mb-2">
-            <Label htmlFor="name">Name</Label>
-            <span className="text-xs text-gray-400">
+          <Label htmlFor="name" className="block mb-1">Name</Label>
+          <div className="relative">
+            <Input
+              id="name"
+              value={formData.name}
+              onChange={(e) => handleInputChange('name', e.target.value)}
+              placeholder="Your name"
+              maxLength={MAX_LENGTHS.name}
+              className="bg-gray-800 border-gray-700 pr-16"
+            />
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">
               {formData.name.length}/{MAX_LENGTHS.name}
             </span>
           </div>
-          <Input
-            id="name"
-            value={formData.name}
-            onChange={(e) => handleInputChange('name', e.target.value)}
-            placeholder="Your name"
-            maxLength={MAX_LENGTHS.name}
-            className="bg-gray-800 border-gray-700"
-          />
         </div>
 
         <div>
-          <div className="flex justify-between items-baseline mb-2">
-            <Label htmlFor="title">Title</Label>
-            <span className="text-xs text-gray-400">
+          <Label htmlFor="title" className="block mb-1">Title</Label>
+          <div className="relative">
+            <Input
+              id="title"
+              value={formData.title}
+              onChange={(e) => handleInputChange('title', e.target.value)}
+              placeholder="What you do"
+              maxLength={MAX_LENGTHS.title}
+              className="bg-gray-800 border-gray-700 pr-16"
+            />
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">
               {formData.title.length}/{MAX_LENGTHS.title}
             </span>
           </div>
-          <Input
-            id="title"
-            value={formData.title}
-            onChange={(e) => handleInputChange('title', e.target.value)}
-            placeholder="What you do"
-            maxLength={MAX_LENGTHS.title}
-            className="bg-gray-800 border-gray-700"
-          />
         </div>
 
         <div>
-          <div className="flex justify-between items-baseline mb-2">
-            <Label htmlFor="bio">Bio</Label>
-            <span className="text-xs text-gray-400">
+          <Label htmlFor="bio" className="block mb-1">Bio</Label>
+          <div className="relative">
+            <Textarea
+              id="bio"
+              value={formData.bio}
+              onChange={(e) => handleInputChange('bio', e.target.value)}
+              placeholder="Tell your story..."
+              maxLength={MAX_LENGTHS.bio}
+              className="bg-gray-800 border-gray-700 min-h-[100px] pr-16"
+            />
+            <span className="absolute right-3 top-3 text-xs text-gray-400">
               {formData.bio.length}/{MAX_LENGTHS.bio}
             </span>
           </div>
-          <Textarea
-            id="bio"
-            value={formData.bio}
-            onChange={(e) => handleInputChange('bio', e.target.value)}
-            placeholder="Tell your story..."
-            maxLength={MAX_LENGTHS.bio}
-            className="bg-gray-800 border-gray-700 min-h-[100px]"
-          />
         </div>
 
         {/* Wallet Addresses Section */}
