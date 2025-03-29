@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Copy, ExternalLink, Instagram, Edit, Edit2 } from 'lucide-react';
 import { FaYoutube, FaSpotify, FaSoundcloud, FaLinkedinIn } from 'react-icons/fa';
@@ -28,6 +28,15 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [copiedStx, setCopiedStx] = useState(false);
   const [copiedBtc, setCopiedBtc] = useState(false);
+  
+  // Debug log for BTC address display
+  useEffect(() => {
+    console.log('PersonalInfoSection profile data:', { 
+      btcAddress: profile.btcAddress,
+      showBtcAddress: profile.showBtcAddress,
+      displayCondition: profile.btcAddress && (isAuthenticated || profile.showBtcAddress !== false)
+    });
+  }, [profile.btcAddress, profile.showBtcAddress, isAuthenticated]);
   
   const copyToClipboard = (text: string, type: 'stx' | 'btc') => {
     navigator.clipboard.writeText(text).then(() => {

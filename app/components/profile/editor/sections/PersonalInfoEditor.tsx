@@ -115,6 +115,13 @@ export const PersonalInfoEditor: React.FC<PersonalInfoEditorProps> = ({
       }
       
       // Handle BTC address and visibility
+      console.log('BTC form data:', {
+        currentBtc: profile.btcAddress,
+        newBtc: formData.btcAddress,
+        currentVisibility: profile.showBtcAddress,
+        newVisibility: formData.showBtcAddress
+      });
+      
       if (formData.btcAddress !== profile.btcAddress) {
         updates.btcAddress = formData.btcAddress;
       }
