@@ -736,19 +736,6 @@ const ProfileView: React.FC<ProfileViewProps> = ({
           
           {/* Sticker display */}
           <div className="relative group">
-            {/* Temporary debug button */}
-            {process.env.NODE_ENV === 'development' && (
-              <button
-                onClick={() => {
-                  localStorage.removeItem('mixmi_sticker_data');
-                  localStorage.removeItem('mixmi_sticker_data_default');
-                  window.location.reload();
-                }}
-                className="absolute top-0 left-0 px-2 py-1 text-xs bg-red-600 text-white rounded"
-              >
-                Clear Sticker Data
-              </button>
-            )}
             <StickerDisplay 
               sticker={profile.sticker} 
               sectionVisibility={profile.sectionVisibility}
