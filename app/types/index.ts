@@ -64,5 +64,7 @@ export interface ProfileData {
   };
   walletAddress?: string;
   showWalletAddress?: boolean;
+  btcAddress?: string;
+  showBtcAddress?: boolean;
   hasEditedProfile?: boolean;
 } 

@@ -11,7 +11,20 @@ export interface ProfileData {
   image?: string;
   walletAddress?: string;
   showWalletAddress?: boolean;
+  btcAddress?: string;
+  showBtcAddress?: boolean;
   socialLinks: SocialLinkType[];
+  sectionVisibility?: {
+    spotlight?: boolean;
+    media?: boolean;
+    shop?: boolean;
+    sticker?: boolean;
+  };
+  sticker?: {
+    image: string;
+    visible: boolean;
+  };
+  hasEditedProfile?: boolean;
 }
 
 export interface PersonalInfoEditorProps {

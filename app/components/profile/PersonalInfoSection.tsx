@@ -26,12 +26,18 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
   onUpdateProfile
 }) => {
   const [isEditorOpen, setIsEditorOpen] = useState(false);
-  const [copied, setCopied] = useState(false);
+  const [copiedStx, setCopiedStx] = useState(false);
+  const [copiedBtc, setCopiedBtc] = useState(false);
   
-  const copyToClipboard = (text: string) => {
+  const copyToClipboard = (text: string, type: 'stx' | 'btc') => {
     navigator.clipboard.writeText(text).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      if (type === 'stx') {
+        setCopiedStx(true);
+        setTimeout(() => setCopiedStx(false), 2000);
+      } else {
+        setCopiedBtc(true);
+        setTimeout(() => setCopiedBtc(false), 2000);
+      }
     });
   };
 
@@ -210,12 +216,16 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
             </div>
             
             {/* Wallet address display */}
-            <div className="flex justify-center w-full">
+            <div className="flex flex-col w-full space-y-2">
+              {/* STX Wallet address */}
               {profile.walletAddress && (isAuthenticated || profile.showWalletAddress !== false) && (
                 <div className="max-w-[280px] w-full px-3 py-2 bg-gray-800/50 rounded-lg flex items-center justify-between border border-gray-700/50 mt-4">
                   <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <div className="text-sm text-gray-300 truncate" title={profile.walletAddress}>
-                      {profile.walletAddress}
+                    <div className="flex items-center gap-1">
+                      <span className="text-xs text-gray-400">STX:</span>
+                      <div className="text-sm text-gray-300 truncate" title={profile.walletAddress}>
+                        {profile.walletAddress}
+                      </div>
                     </div>
                     {isAuthenticated && profile.showWalletAddress === false && (
                       <span className="text-xs bg-gray-700 text-gray-400 px-1.5 py-0.5 rounded shrink-0">Hidden</span>
@@ -223,11 +233,40 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
                   </div>
                   
                   <button
-                    onClick={() => copyToClipboard(profile.walletAddress || '')}
+                    onClick={() => copyToClipboard(profile.walletAddress || '', 'stx')}
                     className="text-gray-400 hover:text-gray-300 p-1 shrink-0 ml-2"
                     aria-label="Copy wallet address"
                   >
-                    {copied ? (
+                    {copiedStx ? (
+                      <span className="text-xs text-green-500">Copied!</span>
+                    ) : (
+                      <Copy size={14} />
+                    )}
+                  </button>
+                </div>
+              )}
+              
+              {/* BTC Wallet address */}
+              {profile.btcAddress && (isAuthenticated || profile.showBtcAddress !== false) && (
+                <div className="max-w-[280px] w-full px-3 py-2 bg-gray-800/50 rounded-lg flex items-center justify-between border border-gray-700/50">
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <div className="flex items-center gap-1">
+                      <span className="text-xs text-gray-400">BTC:</span>
+                      <div className="text-sm text-gray-300 truncate" title={profile.btcAddress}>
+                        {profile.btcAddress}
+                      </div>
+                    </div>
+                    {isAuthenticated && profile.showBtcAddress === false && (
+                      <span className="text-xs bg-gray-700 text-gray-400 px-1.5 py-0.5 rounded shrink-0">Hidden</span>
+                    )}
+                  </div>
+                  
+                  <button
+                    onClick={() => copyToClipboard(profile.btcAddress || '', 'btc')}
+                    className="text-gray-400 hover:text-gray-300 p-1 shrink-0 ml-2"
+                    aria-label="Copy BTC wallet address"
+                  >
+                    {copiedBtc ? ( 
                       <span className="text-xs text-green-500">Copied!</span>
                     ) : (
                       <Copy size={14} />

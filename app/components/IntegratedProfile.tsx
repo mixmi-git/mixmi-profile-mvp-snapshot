@@ -324,7 +324,27 @@ export function IntegratedProfile() {
             
             if (userSession.isUserSignedIn()) {
               const userData = userSession.loadUserData();
+              console.log('Wallet userData:', userData); // Log userData to inspect structure
               const address = userData.profile.stxAddress.mainnet;
+              
+              // Look for BTC address in userData (if available)
+              let btcAddress = '';
+              
+              // Use type assertion carefully since we don't know exact structure
+              const userDataAny = userData as any;
+              
+              // Check for BTC address using optional chaining for safety
+              if (userDataAny.profile?.btcAddress?.mainnet) {
+                btcAddress = userDataAny.profile.btcAddress.mainnet;
+              } else if (userDataAny.profile?.accounts && Array.isArray(userDataAny.profile.accounts)) {
+                // Try to find BTC address in accounts array
+                const btcAccount = userDataAny.profile.accounts.find(
+                  (account: any) => account.service === 'bitcoin' || account.blockchain === 'bitcoin'
+                );
+                if (btcAccount && btcAccount.address) {
+                  btcAddress = btcAccount.address;
+                }
+              }
               
               setIsAuthenticated(true);
               setUserAddress(address);
@@ -334,11 +354,13 @@ export function IntegratedProfile() {
               localStorage.setItem('simple-wallet-connected', 'true');
               localStorage.setItem('simple-wallet-address', address);
               
-              // Update the profile with the wallet address
+              // Update the profile with the wallet address and BTC address if available
               const updatedProfile = {
                 ...profile,
                 walletAddress: address,
-                showWalletAddress: profile.showWalletAddress ?? true // Preserve existing setting or default to true
+                showWalletAddress: profile.showWalletAddress ?? true, // Preserve existing setting or default to true
+                btcAddress: btcAddress || profile.btcAddress, // Keep existing BTC address if new one not found
+                showBtcAddress: profile.showBtcAddress ?? true // Preserve existing setting or default to true
               };
               
               // Save the updated profile

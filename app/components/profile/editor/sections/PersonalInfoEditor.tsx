@@ -114,6 +114,14 @@ export const PersonalInfoEditor: React.FC<PersonalInfoEditorProps> = ({
         updates.showWalletAddress = formData.showWalletAddress;
       }
       
+      // Handle BTC address and visibility
+      if (formData.btcAddress !== profile.btcAddress) {
+        updates.btcAddress = formData.btcAddress;
+      }
+      if (formData.showBtcAddress !== profile.showBtcAddress) {
+        updates.showBtcAddress = formData.showBtcAddress;
+      }
+      
       // Clean up social links before comparing (remove empty ones)
       const cleanedLinks = formData.socialLinks.filter(link => 
         link.platform !== '' && link.url !== ''
@@ -194,25 +202,55 @@ export const PersonalInfoEditor: React.FC<PersonalInfoEditorProps> = ({
           />
         </div>
 
-        {formData.walletAddress && (
-          <div className="flex items-center justify-between space-x-4 p-4 bg-gray-800/50 rounded-lg border border-gray-700/50">
-            <div className="flex flex-col space-y-1">
-              <Label>Wallet Address</Label>
-              <div className="text-sm text-gray-400">
-                {formData.walletAddress.slice(0, 6)}...{formData.walletAddress.slice(-4)}
+        {/* Wallet Addresses Section */}
+        <div className="space-y-4 p-4 bg-gray-800/50 rounded-lg border border-gray-700/50">
+          <Label className="text-lg font-medium text-gray-200">Wallet Addresses</Label>
+          
+          {/* STX Wallet Address */}
+          {formData.walletAddress && (
+            <div className="flex flex-col space-y-2">
+              <div className="flex items-center justify-between">
+                <Label className="text-sm text-gray-300">STX Address</Label>
+                <div className="flex items-center space-x-2">
+                  <Label htmlFor="show-stx-wallet" className="text-sm text-gray-300">Show publicly</Label>
+                  <Switch
+                    id="show-stx-wallet"
+                    checked={formData.showWalletAddress !== false}
+                    onCheckedChange={(checked) => handleInputChange('showWalletAddress', checked)}
+                    className="data-[state=checked]:bg-cyan-600 data-[state=unchecked]:bg-gray-600 border-2 border-gray-400"
+                  />
+                </div>
+              </div>
+              <div className="text-sm text-gray-400 bg-gray-800 p-2 rounded border border-gray-700">
+                {formData.walletAddress}
               </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <Label htmlFor="show-wallet" className="text-sm text-gray-300">Show publicly</Label>
-              <Switch
-                id="show-wallet"
-                checked={formData.showWalletAddress !== false}
-                onCheckedChange={(checked) => handleInputChange('showWalletAddress', checked)}
-                className="data-[state=checked]:bg-cyan-600 data-[state=unchecked]:bg-gray-600 border-2 border-gray-400"
-              />
+          )}
+          
+          {/* BTC Wallet Address */}
+          <div className="flex flex-col space-y-2 mt-4">
+            <div className="flex items-center justify-between">
+              <Label className="text-sm text-gray-300">BTC Address</Label>
+              <div className="flex items-center space-x-2">
+                <Label htmlFor="show-btc-wallet" className="text-sm text-gray-300">Show publicly</Label>
+                <Switch
+                  id="show-btc-wallet"
+                  checked={formData.showBtcAddress !== false}
+                  onCheckedChange={(checked) => handleInputChange('showBtcAddress', checked)}
+                  className="data-[state=checked]:bg-cyan-600 data-[state=unchecked]:bg-gray-600 border-2 border-gray-400"
+                />
+              </div>
             </div>
+            
+            <Input
+              value={formData.btcAddress || ''}
+              onChange={(e) => handleInputChange('btcAddress', e.target.value)}
+              placeholder="Add your Bitcoin address (optional)"
+              className="bg-gray-800 border-gray-700 text-gray-200"
+            />
+            <p className="text-xs text-gray-400">Enter your Bitcoin address if you want to display it on your profile</p>
           </div>
-        )}
+        </div>
 
         <div className="space-y-4">
           <Label>Social Links</Label>
