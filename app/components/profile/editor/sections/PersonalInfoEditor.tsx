@@ -230,9 +230,6 @@ export const PersonalInfoEditor: React.FC<PersonalInfoEditorProps> = ({
               </div>
               <div className="text-xs text-gray-400 bg-gray-800 p-2 rounded border border-gray-700 overflow-auto whitespace-nowrap">
                 {formData.walletAddress}
-                <div className="text-xs text-gray-500 mt-0.5">
-                  Displays as: {formData.walletAddress.slice(0, 6)}...{formData.walletAddress.slice(-4)}
-                </div>
               </div>
             </div>
           )}
@@ -258,7 +255,6 @@ export const PersonalInfoEditor: React.FC<PersonalInfoEditorProps> = ({
               placeholder="Add your Bitcoin address (optional)"
               className="bg-gray-800 border-gray-700 text-gray-200 h-9"
             />
-            <p className="text-xs text-gray-400 mt-0">Enter your Bitcoin address if you want to display it on your profile</p>
           </div>
         </div>
 
