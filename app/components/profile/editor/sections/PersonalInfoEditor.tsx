@@ -221,8 +221,11 @@ export const PersonalInfoEditor: React.FC<PersonalInfoEditorProps> = ({
                   />
                 </div>
               </div>
-              <div className="text-sm text-gray-400 bg-gray-800 p-2 rounded border border-gray-700">
+              <div className="text-sm text-gray-400 bg-gray-800 p-2 rounded border border-gray-700 overflow-auto whitespace-nowrap">
                 {formData.walletAddress}
+                <div className="text-xs text-gray-500 mt-1">
+                  Displays as: {formData.walletAddress.slice(0, 6)}...{formData.walletAddress.slice(-4)}
+                </div>
               </div>
             </div>
           )}

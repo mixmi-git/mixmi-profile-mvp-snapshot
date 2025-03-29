@@ -216,15 +216,15 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
             </div>
             
             {/* Wallet address display */}
-            <div className="flex flex-col w-full space-y-2">
+            <div className="flex flex-col w-full space-y-2 items-center justify-center">
               {/* STX Wallet address */}
               {profile.walletAddress && (isAuthenticated || profile.showWalletAddress !== false) && (
-                <div className="max-w-[280px] w-full px-3 py-2 bg-gray-800/50 rounded-lg flex items-center justify-between border border-gray-700/50 mt-4">
+                <div className="max-w-[250px] w-full px-3 py-2 bg-gray-800/50 rounded-lg flex items-center justify-between border border-gray-700/50 mt-4">
                   <div className="flex items-center gap-2 flex-1 min-w-0">
                     <div className="flex items-center gap-1">
                       <span className="text-xs text-gray-400">STX:</span>
                       <div className="text-sm text-gray-300 truncate" title={profile.walletAddress}>
-                        {profile.walletAddress}
+                        {profile.walletAddress.slice(0, 6)}...{profile.walletAddress.slice(-4)}
                       </div>
                     </div>
                     {isAuthenticated && profile.showWalletAddress === false && (
@@ -248,12 +248,12 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
               
               {/* BTC Wallet address */}
               {profile.btcAddress && (isAuthenticated || profile.showBtcAddress !== false) && (
-                <div className="max-w-[280px] w-full px-3 py-2 bg-gray-800/50 rounded-lg flex items-center justify-between border border-gray-700/50">
+                <div className="max-w-[250px] w-full px-3 py-2 bg-gray-800/50 rounded-lg flex items-center justify-between border border-gray-700/50">
                   <div className="flex items-center gap-2 flex-1 min-w-0">
                     <div className="flex items-center gap-1">
                       <span className="text-xs text-gray-400">BTC:</span>
                       <div className="text-sm text-gray-300 truncate" title={profile.btcAddress}>
-                        {profile.btcAddress}
+                        {profile.btcAddress.slice(0, 6)}...{profile.btcAddress.slice(-4)}
                       </div>
                     </div>
                     {isAuthenticated && profile.showBtcAddress === false && (

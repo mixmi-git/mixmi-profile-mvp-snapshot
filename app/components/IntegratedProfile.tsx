@@ -420,6 +420,7 @@ export function IntegratedProfile() {
           <div className="flex items-center space-x-4">
             {isAuthenticated && userAddress && (
               <div className="hidden md:flex items-center space-x-2 px-3 py-1.5 bg-gray-800/50 rounded-lg border border-gray-700">
+                <span className="text-xs text-gray-400">STX:</span>
                 <span className="text-sm text-gray-300">
                   {userAddress.slice(0, 6)}...{userAddress.slice(-4)}
                 </span>
