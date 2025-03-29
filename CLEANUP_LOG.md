@@ -176,6 +176,24 @@ This document tracks all cleanup tasks performed on the codebase, including what
   - Ensured BTC address can be manually entered if not detected from wallet
   - Created backup branches at key points for stability
 
+### Task 15: Fix BTC Wallet Address Display Issues
+- **Branch:** `wallet-functionality-working-03-29-2025`
+- **Files Modified:**
+  - `app/components/profile/PersonalInfoSection.tsx` (Added missing BTC address handlers in the save function)
+  - `app/components/IntegratedProfile.tsx` (Improved wallet address display in the header)
+  - `app/components/profile/editor/sections/PersonalInfoEditor.tsx` (Enhanced BTC address input field)
+- **Key Improvements:**
+  - Fixed issue where BTC address wasn't being saved properly 
+  - Added proper truncation for wallet addresses for better UI alignment
+  - Added "Displays as:" preview in the editor to show truncated format
+  - Improved visibility toggle handling for both STX and BTC addresses
+  - Added centered alignment for wallet address displays
+- **Verification:**
+  - Confirmed BTC address persists after saving in the editor
+  - Verified correct display of addresses with truncation
+  - Tested copy functionality for both address types
+  - Ensured visibility toggles work correctly for both wallet addresses
+
 ## Notes for Future Tasks
 
 - **Checkpoint Files:** Multiple attempts to remove checkpoint/backup files have confirmed they are critical to application functionality despite their names suggesting otherwise:
