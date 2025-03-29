@@ -213,15 +213,15 @@ export const PersonalInfoEditor: React.FC<PersonalInfoEditorProps> = ({
 
       {/* Wallet Addresses Section */}
       <div className="space-y-3 p-3 bg-gray-800/50 rounded-lg border border-gray-700/50 mb-4">
-        <Label className="text-sm font-medium text-cyan-300 mb-1 block">Wallet Addresses</Label>
+        <Label className="text-sm font-medium text-[#B8B8C0] mb-1 block">Wallet Addresses</Label>
         
         {/* STX Wallet Address */}
         {formData.walletAddress && (
           <div className="flex flex-col space-y-1">
             <div className="flex items-center justify-between">
-              <Label className="text-xs text-gray-300">STX Address</Label>
+              <Label className="text-xs text-[#808090]">STX Address</Label>
               <div className="flex items-center space-x-2">
-                <Label htmlFor="show-stx-wallet" className="text-xs text-gray-300">Show publicly</Label>
+                <Label htmlFor="show-stx-wallet" className="text-xs text-[#A0A0B0]">Show publicly</Label>
                 <Switch
                   id="show-stx-wallet"
                   checked={formData.showWalletAddress !== false}
@@ -239,9 +239,9 @@ export const PersonalInfoEditor: React.FC<PersonalInfoEditorProps> = ({
         {/* BTC Wallet Address */}
         <div className="flex flex-col space-y-1 mt-2">
           <div className="flex items-center justify-between">
-            <Label className="text-xs text-gray-300">BTC Address</Label>
+            <Label className="text-xs text-[#808090]">BTC Address</Label>
             <div className="flex items-center space-x-2">
-              <Label htmlFor="show-btc-wallet" className="text-xs text-gray-300">Show publicly</Label>
+              <Label htmlFor="show-btc-wallet" className="text-xs text-[#A0A0B0]">Show publicly</Label>
               <Switch
                 id="show-btc-wallet"
                 checked={formData.showBtcAddress !== false}
@@ -262,7 +262,7 @@ export const PersonalInfoEditor: React.FC<PersonalInfoEditorProps> = ({
 
       {/* Social Links Section */}
       <div className="space-y-3 p-3 bg-gray-800/50 rounded-lg border border-gray-700/50">
-        <Label className="text-sm font-medium text-cyan-300 mb-1 block">Social Links</Label>
+        <Label className="text-sm font-medium text-[#B8B8C0] mb-1 block">Social Links</Label>
         <div className="space-y-2">
           {formData.socialLinks.map((link, index) => (
             <div key={index} className="flex items-center space-x-2 group">
