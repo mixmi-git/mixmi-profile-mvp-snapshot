@@ -157,7 +157,8 @@ export const PersonalInfoEditor: React.FC<PersonalInfoEditorProps> = ({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
+      {/* Basic Profile Details Section */}
+      <div className="space-y-2 mb-4">
         <div>
           <Label htmlFor="name" className="block mb-0 text-xs text-gray-400">Name</Label>
           <div className="relative">
@@ -208,96 +209,97 @@ export const PersonalInfoEditor: React.FC<PersonalInfoEditorProps> = ({
             </span>
           </div>
         </div>
+      </div>
 
-        {/* Wallet Addresses Section */}
-        <div className="space-y-3 p-3 bg-gray-800/50 rounded-lg border border-gray-700/50 mt-3">
-          <Label className="text-sm font-medium text-gray-200">Wallet Addresses</Label>
-          
-          {/* STX Wallet Address */}
-          {formData.walletAddress && (
-            <div className="flex flex-col space-y-1">
-              <div className="flex items-center justify-between">
-                <Label className="text-xs text-gray-300">STX Address</Label>
-                <div className="flex items-center space-x-2">
-                  <Label htmlFor="show-stx-wallet" className="text-xs text-gray-300">Show publicly</Label>
-                  <Switch
-                    id="show-stx-wallet"
-                    checked={formData.showWalletAddress !== false}
-                    onCheckedChange={(checked) => handleInputChange('showWalletAddress', checked)}
-                    className="data-[state=checked]:bg-cyan-600 data-[state=unchecked]:bg-gray-600 border-2 border-gray-400"
-                  />
-                </div>
-              </div>
-              <div className="text-xs text-gray-400 bg-gray-800 p-2 rounded border border-gray-700 overflow-auto whitespace-nowrap">
-                {formData.walletAddress}
-              </div>
-            </div>
-          )}
-          
-          {/* BTC Wallet Address */}
-          <div className="flex flex-col space-y-1 mt-2">
+      {/* Wallet Addresses Section */}
+      <div className="space-y-3 p-3 bg-gray-800/50 rounded-lg border border-gray-700/50 mb-4">
+        <Label className="text-sm font-medium text-cyan-300 mb-1 block">Wallet Addresses</Label>
+        
+        {/* STX Wallet Address */}
+        {formData.walletAddress && (
+          <div className="flex flex-col space-y-1">
             <div className="flex items-center justify-between">
-              <Label className="text-xs text-gray-300">BTC Address</Label>
+              <Label className="text-xs text-gray-300">STX Address</Label>
               <div className="flex items-center space-x-2">
-                <Label htmlFor="show-btc-wallet" className="text-xs text-gray-300">Show publicly</Label>
+                <Label htmlFor="show-stx-wallet" className="text-xs text-gray-300">Show publicly</Label>
                 <Switch
-                  id="show-btc-wallet"
-                  checked={formData.showBtcAddress !== false}
-                  onCheckedChange={(checked) => handleInputChange('showBtcAddress', checked)}
+                  id="show-stx-wallet"
+                  checked={formData.showWalletAddress !== false}
+                  onCheckedChange={(checked) => handleInputChange('showWalletAddress', checked)}
                   className="data-[state=checked]:bg-cyan-600 data-[state=unchecked]:bg-gray-600 border-2 border-gray-400"
                 />
               </div>
             </div>
-            
-            <Input
-              value={formData.btcAddress || ''}
-              onChange={(e) => handleInputChange('btcAddress', e.target.value)}
-              placeholder="Add your Bitcoin address (optional)"
-              className="bg-gray-800 border-gray-700 text-gray-200 h-9"
-            />
+            <div className="text-xs text-gray-400 bg-gray-800 p-2 rounded border border-gray-700 overflow-auto whitespace-nowrap">
+              {formData.walletAddress}
+            </div>
           </div>
+        )}
+        
+        {/* BTC Wallet Address */}
+        <div className="flex flex-col space-y-1 mt-2">
+          <div className="flex items-center justify-between">
+            <Label className="text-xs text-gray-300">BTC Address</Label>
+            <div className="flex items-center space-x-2">
+              <Label htmlFor="show-btc-wallet" className="text-xs text-gray-300">Show publicly</Label>
+              <Switch
+                id="show-btc-wallet"
+                checked={formData.showBtcAddress !== false}
+                onCheckedChange={(checked) => handleInputChange('showBtcAddress', checked)}
+                className="data-[state=checked]:bg-cyan-600 data-[state=unchecked]:bg-gray-600 border-2 border-gray-400"
+              />
+            </div>
+          </div>
+          
+          <Input
+            value={formData.btcAddress || ''}
+            onChange={(e) => handleInputChange('btcAddress', e.target.value)}
+            placeholder="Add your Bitcoin address (optional)"
+            className="bg-gray-800 border-gray-700 text-gray-200 h-8"
+          />
         </div>
+      </div>
 
-        <div className="space-y-2 mt-2">
-          <Label className="text-sm">Social Links</Label>
-          <div className="space-y-2">
-            {formData.socialLinks.map((link, index) => (
-              <div key={index} className="flex items-center space-x-2 group">
-                <select
-                  value={link.platform}
-                  onChange={(e) => handleSocialLinkChange(index, 'platform', e.target.value)}
-                  className="bg-gray-800 border-gray-700 rounded-md text-xs p-1.5 flex-shrink-0 text-gray-200 h-9"
+      {/* Social Links Section */}
+      <div className="space-y-3 p-3 bg-gray-800/50 rounded-lg border border-gray-700/50">
+        <Label className="text-sm font-medium text-cyan-300 mb-1 block">Social Links</Label>
+        <div className="space-y-2">
+          {formData.socialLinks.map((link, index) => (
+            <div key={index} className="flex items-center space-x-2 group">
+              <select
+                value={link.platform}
+                onChange={(e) => handleSocialLinkChange(index, 'platform', e.target.value)}
+                className="bg-gray-800 border-gray-700 rounded-md text-xs p-1.5 flex-shrink-0 text-gray-200 h-8"
+              >
+                <option value="" className="text-gray-200 bg-gray-800">Select Platform</option>
+                {SOCIAL_PLATFORMS.map(platform => (
+                  <option key={platform.id} value={platform.id} className="text-gray-200 bg-gray-800">
+                    {platform.label}
+                  </option>
+                ))}
+              </select>
+
+              <Input
+                value={link.url}
+                onChange={(e) => handleSocialLinkChange(index, 'url', e.target.value)}
+                placeholder="https://"
+                className="bg-gray-800 border-gray-700 flex-1 text-gray-200 h-8"
+              />
+
+              {/* Only show delete button if it's not the last empty row */}
+              {(index < formData.socialLinks.length - 1 || link.platform !== '' || link.url !== '') && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => removeSocialLink(index)}
+                  className="text-gray-400 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0"
                 >
-                  <option value="" className="text-gray-200 bg-gray-800">Select Platform</option>
-                  {SOCIAL_PLATFORMS.map(platform => (
-                    <option key={platform.id} value={platform.id} className="text-gray-200 bg-gray-800">
-                      {platform.label}
-                    </option>
-                  ))}
-                </select>
-
-                <Input
-                  value={link.url}
-                  onChange={(e) => handleSocialLinkChange(index, 'url', e.target.value)}
-                  placeholder="https://"
-                  className="bg-gray-800 border-gray-700 flex-1 text-gray-200 h-9"
-                />
-
-                {/* Only show delete button if it's not the last empty row */}
-                {(index < formData.socialLinks.length - 1 || link.platform !== '' || link.url !== '') && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeSocialLink(index)}
-                    className="text-gray-400 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity h-9 w-9 p-0"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                )}
-              </div>
-            ))}
-          </div>
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              )}
+            </div>
+          ))}
         </div>
       </div>
 
