@@ -22,9 +22,6 @@ export const PersonalInfoEditorModal: React.FC<PersonalInfoEditorModalProps> = (
           <DialogTitle className="text-xl font-medium text-white">
             Edit Profile Details
           </DialogTitle>
-          <DialogDescription className="text-gray-400">
-            Make changes to your profile information below.
-          </DialogDescription>
         </DialogHeader>
         <PersonalInfoEditor
           profile={profile}
