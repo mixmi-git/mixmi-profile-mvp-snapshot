@@ -155,6 +155,27 @@ This document tracks all cleanup tasks performed on the codebase, including what
   - Reverted changes to restore functionality
   - Left the checkpoint file and directory in place
 
+### Task 14: Implement Wallet Address Display Functionality
+- **Branch:** `wallet-address-implementation`
+- **Files Modified:**
+  - `app/types/index.ts` (Added btcAddress and showBtcAddress fields to ProfileData interface)
+  - `app/types/profile.ts` (Updated ProfileData interface for type consistency)
+  - `app/components/IntegratedProfile.tsx` (Enhanced wallet connection logic to capture BTC address)
+  - `app/components/profile/PersonalInfoSection.tsx` (Updated to display both STX and BTC addresses)
+  - `app/components/profile/editor/sections/PersonalInfoEditor.tsx` (Added BTC address field and visibility toggle)
+- **Key Improvements:**
+  - Restored wallet address display functionality that was lost during refactoring
+  - Added support for both STX and BTC wallet addresses with independent visibility controls
+  - Enhanced the wallet connection logic to detect BTC address from the Leather wallet when available
+  - Created a dedicated "Wallet Addresses" section in the profile editor
+  - Implemented proper copy-to-clipboard functionality for both address types
+- **Verification:**
+  - Verified wallet connection works correctly with the Leather wallet
+  - Confirmed addresses display properly with appropriate labels
+  - Tested visibility toggles for both address types
+  - Ensured BTC address can be manually entered if not detected from wallet
+  - Created backup branches at key points for stability
+
 ## Notes for Future Tasks
 
 - **Checkpoint Files:** Multiple attempts to remove checkpoint/backup files have confirmed they are critical to application functionality despite their names suggesting otherwise:
