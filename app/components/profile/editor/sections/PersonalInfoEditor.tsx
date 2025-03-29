@@ -230,7 +230,7 @@ export const PersonalInfoEditor: React.FC<PersonalInfoEditorProps> = ({
                 />
               </div>
             </div>
-            <div className="text-xs text-gray-400 bg-gray-800 p-2 rounded border border-gray-700 overflow-auto whitespace-nowrap">
+            <div className="text-xs text-gray-200 bg-gray-800 p-2 rounded border border-gray-700 overflow-auto whitespace-nowrap">
               {formData.walletAddress}
             </div>
           </div>
