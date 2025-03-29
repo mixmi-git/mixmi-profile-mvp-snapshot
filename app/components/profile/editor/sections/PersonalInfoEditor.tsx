@@ -156,7 +156,7 @@ export const PersonalInfoEditor: React.FC<PersonalInfoEditorProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4 max-h-[80vh] overflow-y-auto pr-1 pb-4">
       {/* Basic Profile Details Section */}
       <div className="space-y-2 mb-4">
         <div>
@@ -303,7 +303,7 @@ export const PersonalInfoEditor: React.FC<PersonalInfoEditorProps> = ({
         </div>
       </div>
 
-      <div className="flex justify-end space-x-2 pt-3 mt-1">
+      <div className="flex justify-end space-x-2 pt-3 mt-1 sticky bottom-0 bg-gray-900/95 py-3 -mr-1 pr-2">
         <Button
           type="button"
           variant="ghost"
